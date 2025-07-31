@@ -13,6 +13,9 @@ import com.example.domain.User;
 import com.example.domain.UserFavoriteCurrency;
 import com.example.dto.FavoriteCurrencyRequest;
 import com.example.dto.FavoriteCurrencyResponse;
+import com.example.dto.ExchangeRateStats;
+import com.example.dto.FavoriteCurrencyTop5;
+import com.example.mapper.ExchangeRateMapper;
 import com.example.repository.UserFavoriteCurrencyRepository;
 import com.example.repository.UserRepository;
 
@@ -23,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class ExchangeRateService {
     private final UserFavoriteCurrencyRepository userFavoriteCurrencyRepository;
     private final UserRepository userRepository;
+    private final ExchangeRateMapper exchangeRateMapper;
 
     @Value("${exchange.api-key}")
     private String apiKey;
@@ -70,6 +74,20 @@ public class ExchangeRateService {
         } else if ("DEL".equals(type)) {
             userFavoriteCurrencyRepository.deleteByUserAndCurrencyCode(user, currencyCode);
         }
+    }
+    
+    /**
+     * 환율 통계 조회
+     */
+    public ExchangeRateStats getExchangeRateStats() {
+        return exchangeRateMapper.selectExchangeRateStats();
+    }
+    
+    /**
+     * 관심 환율 TOP5 조회
+     */
+    public List<FavoriteCurrencyTop5> getFavoriteCurrencyTop5() {
+        return exchangeRateMapper.selectFavoriteCurrencyTop5();
     }
 
 } 

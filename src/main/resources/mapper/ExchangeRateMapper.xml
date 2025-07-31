@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.ExchangeRateMapper">
+
+    <!-- 환율 통계 조회 -->
+    <select id="selectExchangeRateStats" resultType="com.example.dto.ExchangeRateStats">
+        SELECT 
+            (SELECT COUNT(*) FROM country) AS totalCountries,
+            (SELECT COUNT(DISTINCT currency_code) FROM bank WHERE currency_code != 'KRW') AS availableCountries,
+            (SELECT COUNT(DISTINCT currency_code) FROM user_favorite_currency) AS totalFavorites
+    </select>
+
+    <!-- 관심 환율 TOP5 조회 -->
+    <select id="selectFavoriteCurrencyTop5" resultType="com.example.dto.FavoriteCurrencyTop5">
+        SELECT 
+            CONCAT(c.country_name, ' - ', c.code_name, '(', c.code, ')') AS favoriteContents,
+            COUNT(ufc.currency_code) AS cnt
+        FROM user_favorite_currency ufc
+        LEFT JOIN country c ON ufc.currency_code = c.code
+        GROUP BY ufc.currency_code
+        ORDER BY cnt DESC
+        LIMIT 5
+    </select>
+
+</mapper> 

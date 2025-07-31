@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.domain.User;
 import com.example.dto.UserResponse;
 import com.example.dto.UserUpdateRequest;
+import com.example.dto.UserStats;
+import com.example.mapper.UserMapper;
 import com.example.repository.UserRepository;
 
 @Service
@@ -19,6 +21,9 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+    
+    @Autowired
+    private UserMapper userMapper;
 
     @Transactional
     public User saveOrUpdateUser(Map<String, Object> userAttributes) {
@@ -51,6 +56,7 @@ public class UserService {
                     .email(email)
                     .name(name)
                     .pictureUrl(picture)
+                    .status("ACTIVE") // 기본값 설정
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
                     .lastLoginAt(LocalDateTime.now())
@@ -82,6 +88,7 @@ public class UserService {
                     .email(email)
                     .name(name)
                     .pictureUrl(picture)
+                    .status("ACTIVE") // 기본값 설정
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
                     .lastLoginAt(LocalDateTime.now())
@@ -110,6 +117,17 @@ public class UserService {
         existingUser.setEmail(request.getEmail());
         existingUser.setName(request.getName());
         existingUser.setPictureUrl(request.getPictureUrl());
+        if (request.getStatus() != null) {
+            existingUser.setStatus(request.getStatus());
+        }
         userRepository.save(existingUser);
+    }
+    
+    /**
+     * 사용자 통계 조회 (캐싱 적용)
+     */
+    // @Cacheable("user-stats") // Spring Cache 사용시
+    public UserStats getUserStats() {
+        return userMapper.selectUserStats();
     }
 } 

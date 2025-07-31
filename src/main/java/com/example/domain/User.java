@@ -33,4 +33,7 @@ public class User {
 
     @Column(name = "last_login_at", columnDefinition = "TIMESTAMP")
     private LocalDateTime lastLoginAt;
+
+    @Column(length = 20)
+    private String status;
 } 

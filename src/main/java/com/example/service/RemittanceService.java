@@ -5,17 +5,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import com.example.domain.Remittance;
+import com.example.dto.RecentRemittanceCount;
 import com.example.dto.RemittanceHistoryDto;
 import com.example.dto.RemittanceHistoryResponse;
 import com.example.dto.RemittanceHistorySearchRequest;
+import com.example.dto.RemittanceStats;
+import com.example.mapper.RemittanceMapper;
 import com.example.repository.RemittanceRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -24,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class RemittanceService {
     private final RemittanceRepository remittanceRepository;
+    private final RemittanceMapper remittanceMapper;
 
     // 송금 신청
     @Transactional
@@ -117,5 +118,19 @@ public class RemittanceService {
         List<RemittanceHistoryDto> content = allContent.subList(startIndex, endIndex);
 
         return new RemittanceHistoryResponse(content, page, size, totalElements);
+    }
+    
+    /**
+     * 송금 통계 조회
+     */
+    public RemittanceStats getRemittanceStats() {
+        return remittanceMapper.selectRemittanceStats();
+    }
+    
+    /**
+     * 최근 7일 송금 건수 조회
+     */
+    public List<RecentRemittanceCount> getRecent7DaysRemittanceCount() {
+        return remittanceMapper.selectRecent7DaysRemittanceCount();
     }
 } 
