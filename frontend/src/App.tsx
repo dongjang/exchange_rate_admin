@@ -1,7 +1,8 @@
 import { Provider, useAtom, useSetAtom } from 'jotai';
 import { useEffect } from 'react';
-import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import { Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
 import './App.css';
+import AdminDashboard from './components/AdminDashboard';
 import AuthFailure from './components/AuthFailure';
 import AuthSuccess from './components/AuthSuccess';
 import { ExchangeRates } from './components/ExchangeRates';
@@ -19,6 +20,7 @@ function AppContent() {
   const [, setAuthState] = useAtom(setAuthAtom);
   const [userInfo, setUserInfo] = useAtom(userInfoAtom);
   const setCountryList = useSetAtom(countryAtom);
+  const location = useLocation();
 
   const getUserInfo = async (email?: string) => {
     const userEmail = email || userInfo?.email;
@@ -72,14 +74,19 @@ function AppContent() {
     return <Login />;
   }
 
+  const isAdminPage = location.pathname.startsWith('/admin');
+
   return (
     <div className="app">
-      <Header user={userInfo} onUserUpdated={getUserInfo} />
-      <div className="container">
+      {!isAdminPage && (
+        <Header user={userInfo} onUserUpdated={getUserInfo} />
+      )}
+      <div className={`container ${isAdminPage ? 'admin-container' : ''}`}>
         <Routes>
           <Route path="/" element={<ExchangeRates user={userInfo} />} />
           <Route path="/remit/apply" element={<RemittanceApplyPage />} />
           <Route path="/remit/history" element={<RemittanceHistoryPage />} />
+          <Route path="/admin" element={<AdminDashboard user={userInfo} />} />
           <Route path="/auth/success" element={<AuthSuccess />} />
           <Route path="/auth/failure" element={<AuthFailure />} />
         </Routes>

@@ -9,6 +9,14 @@
   padding: 1rem 1rem 1rem 1rem;
 }
 
+/* Admin container override */
+.container.admin-container {
+  max-width: none;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
 .title {
   font-size: 2rem;
   font-weight: bold;
