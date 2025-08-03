@@ -1,24 +1,24 @@
 import { useAtom } from 'jotai';
+import { useNavigate } from 'react-router-dom';
 import { authAtom, clearAuthAtom } from '../store/authStore';
 import { api } from '../services/api';
 
 const Login = () => {
   const [auth, setAuth] = useAtom(authAtom);
   const [, clearAuth] = useAtom(clearAuthAtom);
+  const navigate = useNavigate();
 
   const handleGoogleLogin = () => {
     // 구글 로그인 페이지로 리디렉션
     window.location.href = 'http://localhost:8080/oauth2/authorization/google';
   };
 
-
-
   const handleLogout = async () => {
     try {
       await api.logout();
       clearAuth();
       // 로그아웃 후 홈페이지로 리디렉션
-      window.location.href = 'http://localhost:8080/logout';
+      navigate('/');
     } catch (error) {
       console.error('Logout failed:', error);
     }
@@ -26,8 +26,14 @@ const Login = () => {
 
   if (auth.isLoading) {
     return (
-      <div className="login-container">
-        <div className="loading">로딩 중...</div>
+      <div className="loading-container">
+        <div className="loading-popup">
+          <div className="loading-spinner">
+            <div className="spinner-ring"></div>
+            <div className="spinner-ring"></div>
+            <div className="spinner-ring"></div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -69,8 +75,6 @@ const Login = () => {
             </svg>
             <span>Google로 로그인</span>
           </button>
-          
-
         </div>
         <p className='login-terms'>로그인함으로써 서비스 이용약관에 동의하게 됩니다.</p>
       </div>

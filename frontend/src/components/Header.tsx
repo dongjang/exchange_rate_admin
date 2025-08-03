@@ -1,5 +1,6 @@
 import { useAtom, useSetAtom } from 'jotai';
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { api } from '../services/api';
 import { authAtom, setAuthAtom } from '../store/authStore';
@@ -18,6 +19,7 @@ function Header({ user, onUserUpdated }: HeaderProps) {
   const [auth, setAuth] = useAtom(authAtom);
   const [, setAuthState] = useAtom(setAuthAtom);
   const setSelectedUser = useSetAtom(selectedUserAtom);
+  const navigate = useNavigate();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -45,7 +47,7 @@ function Header({ user, onUserUpdated }: HeaderProps) {
         isAuthenticated: false,
         isLoading: false,
       });
-      window.location.reload();
+      navigate('/');
     } catch (error) {
       console.error('Logout failed:', error);
     }

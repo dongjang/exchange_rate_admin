@@ -62,9 +62,13 @@ function AppContent() {
 
   if (auth.isLoading) {
     return (
-      <div className="app">
-        <div className="container">
-          <div className="loading">로딩 중...</div>
+      <div className="loading-container">
+        <div className="loading-popup">
+          <div className="loading-spinner">
+            <div className="spinner-ring"></div>
+            <div className="spinner-ring"></div>
+            <div className="spinner-ring"></div>
+          </div>
         </div>
       </div>
     );
