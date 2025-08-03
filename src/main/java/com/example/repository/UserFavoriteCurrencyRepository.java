@@ -24,6 +24,6 @@ public interface UserFavoriteCurrencyRepository extends JpaRepository<UserFavori
     boolean existsByUserAndCurrencyCode(User user, String currencyCode);
 
     // user로 해당 사용자의 모든 currencyCode 리스트 조회
-    @Query("SELECT u.currencyCode FROM user_favorite_currency u WHERE u.user = :user")
+    @Query("SELECT u.currencyCode FROM UserFavoriteCurrency u WHERE u.user = :user")
     List<String> findCurrencyCodesByUser(@Param("user") User user);
 } 

@@ -2,7 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.mapper.UserMapper">
 
-    <!-- 사용자 통계 조회 (최적화) -->
     <select id="selectUserStats" resultType="com.example.dto.UserStats">
         SELECT 
             COUNT(*) as totalUsers,
@@ -10,15 +9,6 @@
             SUM(CASE WHEN status = 'ACTIVE' THEN 1 ELSE 0 END) as activeUsers,
             SUM(CASE WHEN status = 'INACTIVE' THEN 1 ELSE 0 END) as inactiveUsers
         FROM user
-        <!-- 동적 쿼리 대비: <where> 태그 사용 -->
-        <!-- <where>
-            <if test="status != null">
-                AND status = #{status}
-            </if>
-            <if test="startDate != null">
-                AND created_at >= #{startDate}
-            </if>
-        </where> -->
     </select>
 
 </mapper> 

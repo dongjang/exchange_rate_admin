@@ -26,9 +26,9 @@ public interface RemittanceRepository extends JpaRepository<Remittance, Long>, J
            "r.amount, " +
            "r.status, " +
            "r.createdAt " +
-           "FROM remittance r " +
-           "LEFT JOIN bank sb ON r.senderBank = sb.bankCode " +
-           "LEFT JOIN bank rb ON r.receiverBank = rb.bankCode " +
+           "FROM Remittance r " +
+           "LEFT JOIN Bank sb ON r.senderBank = sb.bankCode " +
+           "LEFT JOIN Bank rb ON r.receiverBank = rb.bankCode " +
            "WHERE r.userId = :userId " +
            "AND (:recipient IS NULL OR r.receiverName LIKE %:recipient%) " +
            "AND (:currency IS NULL OR r.currency = :currency) " +
@@ -61,9 +61,9 @@ public interface RemittanceRepository extends JpaRepository<Remittance, Long>, J
            "r.amount, " +
            "r.status, " +
            "r.createdAt " +
-           "FROM remittance r " +
-           "LEFT JOIN bank sb ON r.senderBank = sb.bankCode " +
-           "LEFT JOIN bank rb ON r.receiverBank = rb.bankCode " +
+           "FROM Remittance r " +
+           "LEFT JOIN Bank sb ON r.senderBank = sb.bankCode " +
+           "LEFT JOIN Bank rb ON r.receiverBank = rb.bankCode " +
            "WHERE r.userId = :userId " +
            "AND (:recipient IS NULL OR r.receiverName LIKE %:recipient%) " +
            "AND (:currency IS NULL OR r.currency = :currency) " +
@@ -86,7 +86,7 @@ public interface RemittanceRepository extends JpaRepository<Remittance, Long>, J
     );
 
     @Query("SELECT COUNT(r) " +
-           "FROM remittance r " +
+           "FROM Remittance r " +
            "WHERE r.userId = :userId " +
            "AND (:recipient IS NULL OR r.receiverName LIKE %:recipient%) " +
            "AND (:currency IS NULL OR r.currency = :currency) " +
