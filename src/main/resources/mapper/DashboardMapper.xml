@@ -4,6 +4,7 @@
 
     <!-- 대시보드 통합 통계 조회 -->
     <select id="selectDashboardStats" resultType="com.example.dto.DashboardStatsResponse">
+        <![CDATA[
         SELECT 
             (SELECT COUNT(*) FROM remittance WHERE DATE(created_at) = CURDATE()) as dailyRemittanceCount,
             (SELECT COUNT(*) FROM remittance WHERE DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')) as monthlyRemittanceCount,
@@ -11,10 +12,12 @@
             (SELECT COUNT(*) FROM user) as totalUserCount,
             (SELECT COUNT(*) FROM user WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)) as newUserCount,
             (SELECT COUNT(*) FROM qna WHERE status = 'PENDING') as pendingQnaCount
+        ]]>
     </select>
 
     <!-- 송금 통계 조회 -->
     <select id="selectRemittanceStats" resultType="com.example.dto.RemittanceStats">
+        <![CDATA[
         SELECT 
             COUNT(*) as totalCount,
             AVG(amount) as averageAmount,
@@ -22,34 +25,41 @@
             SUM(amount) as totalAmount
         FROM remittance 
         WHERE DATE(created_at) = CURDATE()
+        ]]>
     </select>
 
     <!-- 사용자 통계 조회 -->
     <select id="selectUserStats" resultType="com.example.dto.UserStats">
+        <![CDATA[
         SELECT 
             COUNT(*) as totalUsers,
             COUNT(CASE WHEN created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) THEN 1 END) as newUsers,
             COUNT(CASE WHEN status = 'ACTIVE' THEN 1 END) as activeUsers,
             COUNT(CASE WHEN status = 'INACTIVE' THEN 1 END) as inactiveUsers
         FROM user
+        ]]>
     </select>
 
     <!-- 환율 통계 조회 -->
     <select id="selectExchangeRateStats" resultType="com.example.dto.ExchangeRateStats">
+        <![CDATA[
         SELECT 
             COUNT(*) as totalCountries,
             COUNT(CASE WHEN is_available = true THEN 1 END) as availableCountries,
             (SELECT COUNT(*) FROM user_favorite_currency) as totalFavorites
         FROM country
+        ]]>
     </select>
 
     <!-- Q&A 통계 조회 -->
     <select id="selectQnaStats" resultType="com.example.dto.QnaStats">
+        <![CDATA[
         SELECT 
             COUNT(*) as totalCount,
             COUNT(CASE WHEN status = 'PENDING' THEN 1 END) as pendingCount,
             COUNT(CASE WHEN status = 'ANSWERED' THEN 1 END) as answeredCount
         FROM qna
+        ]]>
     </select>
 
 </mapper> 

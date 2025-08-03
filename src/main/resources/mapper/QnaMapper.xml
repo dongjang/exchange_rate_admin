@@ -4,15 +4,18 @@
 
     <!-- Q&A 통계 조회 -->
     <select id="selectQnaStats" resultType="com.example.dto.QnaStats">
+        <![CDATA[
         SELECT 
             COUNT(*) as totalCount,
             SUM(CASE WHEN status = 'PENDING' THEN 1 ELSE 0 END) as pendingCount,
             SUM(CASE WHEN status = 'ANSWERED' THEN 1 ELSE 0 END) as answeredCount
         FROM qna
+        ]]>
     </select>
 
     <!-- 답변 대기 중인 Q&A 리스트 조회 (최대 5개) -->
     <select id="selectPendingQnaList" resultType="com.example.dto.QnaPendingItem">
+        <![CDATA[
         SELECT 
             q.id,
             q.title,
@@ -22,6 +25,7 @@
         WHERE q.status = 'PENDING'
         ORDER BY q.created_at DESC
         LIMIT 5
+        ]]>
     </select>
 
 </mapper> 

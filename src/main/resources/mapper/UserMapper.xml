@@ -3,12 +3,14 @@
 <mapper namespace="com.example.mapper.UserMapper">
 
     <select id="selectUserStats" resultType="com.example.dto.UserStats">
+        <![CDATA[
         SELECT 
             COUNT(*) as totalUsers,
             SUM(CASE WHEN created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 1 ELSE 0 END) as newUsers,
             SUM(CASE WHEN status = 'ACTIVE' THEN 1 ELSE 0 END) as activeUsers,
             SUM(CASE WHEN status = 'INACTIVE' THEN 1 ELSE 0 END) as inactiveUsers
         FROM user
+        ]]>
     </select>
 
 </mapper> 
