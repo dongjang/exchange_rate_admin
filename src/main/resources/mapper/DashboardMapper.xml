@@ -2,64 +2,92 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.mapper.DashboardMapper">
 
-    <!-- 대시보드 통합 통계 조회 -->
-    <select id="selectDashboardStats" resultType="com.example.dto.DashboardStatsResponse">
-        <![CDATA[
-        SELECT 
-            (SELECT COUNT(*) FROM remittance WHERE DATE(created_at) = CURDATE()) as dailyRemittanceCount,
-            (SELECT COUNT(*) FROM remittance WHERE DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m')) as monthlyRemittanceCount,
-            (SELECT COUNT(*) FROM remittance WHERE DATE_FORMAT(created_at, '%Y') = DATE_FORMAT(NOW(), '%Y')) as yearlyRemittanceCount,
-            (SELECT COUNT(*) FROM user) as totalUserCount,
-            (SELECT COUNT(*) FROM user WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)) as newUserCount,
-            (SELECT COUNT(*) FROM qna WHERE status = 'PENDING') as pendingQnaCount
-        ]]>
-    </select>
-
-    <!-- 송금 통계 조회 -->
     <select id="selectRemittanceStats" resultType="com.example.dto.RemittanceStats">
-        <![CDATA[
+    <!-- 송금 통계 조회 -->
+      
         SELECT 
-            COUNT(*) as totalCount,
-            AVG(amount) as averageAmount,
-            MAX(amount) as maxAmount,
-            SUM(amount) as totalAmount
-        FROM remittance 
-        WHERE DATE(created_at) = CURDATE()
-        ]]>
+            SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as dailyCount,
+            SUM(CASE WHEN DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m') THEN 1 ELSE 0 END) as monthlyCount,
+            SUM(CASE WHEN DATE_FORMAT(created_at, '%Y') = DATE_FORMAT(NOW(), '%Y') THEN 1 ELSE 0 END) as yearlyCount,
+            AVG(CASE WHEN DATE(created_at) = CURDATE() THEN amount END) as dailyAverageAmount,
+            AVG(CASE WHEN DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m') THEN amount END) as monthlyAverageAmount,
+            AVG(CASE WHEN DATE_FORMAT(created_at, '%Y') = DATE_FORMAT(NOW(), '%Y') THEN amount END) as yearlyAverageAmount,
+            MAX(CASE WHEN DATE(created_at) = CURDATE() THEN amount END) as dailyMaxAmount,
+            MAX(CASE WHEN DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m') THEN amount END) as monthlyMaxAmount,
+            MAX(CASE WHEN DATE_FORMAT(created_at, '%Y') = DATE_FORMAT(NOW(), '%Y') THEN amount END) as yearlyMaxAmount,
+            SUM(CASE WHEN DATE(created_at) = CURDATE() THEN amount ELSE 0 END) as dailyTotalAmount,
+            SUM(CASE WHEN DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m') THEN amount ELSE 0 END) as monthlyTotalAmount,
+            SUM(CASE WHEN DATE_FORMAT(created_at, '%Y') = DATE_FORMAT(NOW(), '%Y') THEN amount ELSE 0 END) as yearlyTotalAmount
+        FROM remittance
+        
     </select>
 
-    <!-- 사용자 통계 조회 -->
-    <select id="selectUserStats" resultType="com.example.dto.UserStats">
+    <select id="selectRecent7DaysRemittanceCount" resultType="com.example.dto.RecentRemittanceCount">
+        <!-- 최근 7일 송금 건수 조회 -->
         <![CDATA[
+        SELECT 
+            DATE(created_at) as date,
+            COUNT(*) as count
+        FROM remittance
+        WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+          AND created_at < DATE_ADD(CURDATE(), INTERVAL 1 DAY)
+        GROUP BY DATE(created_at)
+        ORDER BY date ASC
+        ]]>
+    </select>
+    
+    <select id="selectExchangeRateStats" resultType="com.example.dto.ExchangeRateStats">
+    <!-- 환율 통계 조회 -->
+        SELECT 
+            (SELECT COUNT(*) FROM country) AS totalCountries,
+            (SELECT COUNT(DISTINCT currency_code) FROM bank WHERE currency_code != 'KRW') AS availableCountries,
+            (SELECT COUNT(DISTINCT currency_code) FROM user_favorite_currency) AS totalFavorites
+    </select>
+
+
+    <select id="selectFavoriteCurrencyTop5" resultType="com.example.dto.FavoriteCurrencyTop5">
+        <!-- 관심 환율 TOP5 조회 -->
+        SELECT 
+            CONCAT(c.country_name, ' - ', c.code_name, '(', c.code, ')') AS favoriteContents,
+            COUNT(ufc.currency_code) AS cnt
+        FROM user_favorite_currency ufc
+        LEFT JOIN country c ON ufc.currency_code = c.code
+        GROUP BY ufc.currency_code
+        ORDER BY cnt DESC
+        LIMIT 5
+    </select>
+
+
+    <select id="selectUserStats" resultType="com.example.dto.UserStats">
+        <!-- 사용자 통계 조회 -->
         SELECT 
             COUNT(*) as totalUsers,
-            COUNT(CASE WHEN created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY) THEN 1 END) as newUsers,
-            COUNT(CASE WHEN status = 'ACTIVE' THEN 1 END) as activeUsers,
-            COUNT(CASE WHEN status = 'INACTIVE' THEN 1 END) as inactiveUsers
+            SUM(CASE WHEN created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY) THEN 1 ELSE 0 END) as newUsers,
+            SUM(CASE WHEN status = 'ACTIVE' THEN 1 ELSE 0 END) as activeUsers,
+            SUM(CASE WHEN status = 'INACTIVE' THEN 1 ELSE 0 END) as inactiveUsers
         FROM user
-        ]]>
     </select>
 
-    <!-- 환율 통계 조회 -->
-    <select id="selectExchangeRateStats" resultType="com.example.dto.ExchangeRateStats">
-        <![CDATA[
-        SELECT 
-            COUNT(*) as totalCountries,
-            COUNT(CASE WHEN is_available = true THEN 1 END) as availableCountries,
-            (SELECT COUNT(*) FROM user_favorite_currency) as totalFavorites
-        FROM country
-        ]]>
-    </select>
 
-    <!-- Q&A 통계 조회 -->
     <select id="selectQnaStats" resultType="com.example.dto.QnaStats">
-        <![CDATA[
+        <!-- Q&A 통계 조회 -->
         SELECT 
-            COUNT(*) as totalCount,
-            COUNT(CASE WHEN status = 'PENDING' THEN 1 END) as pendingCount,
-            COUNT(CASE WHEN status = 'ANSWERED' THEN 1 END) as answeredCount
-        FROM qna
-        ]]>
+        COUNT(*) as pendingCount
+        FROM qna 
+        WHERE status = 'PENDING'
+    </select>
+
+    <select id="selectPendingQnaList" resultType="com.example.dto.QnaPendingItem">
+    <!-- 답변 대기 중인 Q&A 리스트 조회 (최대 5개) -->
+        SELECT 
+            q.id,
+            q.title,
+            q.created_at as createdAt,
+            CASE WHEN q.file_id IS NOT NULL THEN 1 ELSE 0 END as hasFile
+        FROM qna q
+        WHERE q.status = 'PENDING'
+        ORDER BY q.created_at DESC
+        LIMIT 5
     </select>
 
 </mapper> 

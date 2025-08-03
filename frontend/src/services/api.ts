@@ -153,4 +153,10 @@ export const api = {
     });
     return response.data;
   },
+
+  // 대시보드 통계 조회
+  async getDashboardStats(): Promise<any> {
+    const response = await axios.get(`${API_BASE_URL}/admin/dashboard/stats`, { withCredentials: true });
+    return response.data;
+  },
 }; 

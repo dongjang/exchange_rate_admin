@@ -2,38 +2,4 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.mapper.RemittanceMapper">
 
-    <!-- 송금 통계 조회 -->
-    <select id="selectRemittanceStats" resultType="com.example.dto.RemittanceStats">
-        <![CDATA[
-        SELECT 
-            SUM(CASE WHEN DATE(created_at) = CURDATE() THEN 1 ELSE 0 END) as dailyCount,
-            SUM(CASE WHEN DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m') THEN 1 ELSE 0 END) as monthlyCount,
-            SUM(CASE WHEN DATE_FORMAT(created_at, '%Y') = DATE_FORMAT(NOW(), '%Y') THEN 1 ELSE 0 END) as yearlyCount,
-            AVG(CASE WHEN DATE(created_at) = CURDATE() THEN amount END) as dailyAverageAmount,
-            AVG(CASE WHEN DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m') THEN amount END) as monthlyAverageAmount,
-            AVG(CASE WHEN DATE_FORMAT(created_at, '%Y') = DATE_FORMAT(NOW(), '%Y') THEN amount END) as yearlyAverageAmount,
-            MAX(CASE WHEN DATE(created_at) = CURDATE() THEN amount END) as dailyMaxAmount,
-            MAX(CASE WHEN DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m') THEN amount END) as monthlyMaxAmount,
-            MAX(CASE WHEN DATE_FORMAT(created_at, '%Y') = DATE_FORMAT(NOW(), '%Y') THEN amount END) as yearlyMaxAmount,
-            SUM(CASE WHEN DATE(created_at) = CURDATE() THEN amount ELSE 0 END) as dailyTotalAmount,
-            SUM(CASE WHEN DATE_FORMAT(created_at, '%Y-%m') = DATE_FORMAT(NOW(), '%Y-%m') THEN amount ELSE 0 END) as monthlyTotalAmount,
-            SUM(CASE WHEN DATE_FORMAT(created_at, '%Y') = DATE_FORMAT(NOW(), '%Y') THEN amount ELSE 0 END) as yearlyTotalAmount
-        FROM remittance
-        ]]>
-    </select>
-
-    <!-- 최근 7일 송금 건수 조회 -->
-    <select id="selectRecent7DaysRemittanceCount" resultType="com.example.dto.RecentRemittanceCount">
-        <![CDATA[
-        SELECT 
-            DATE(created_at) as date,
-            COUNT(*) as count
-        FROM remittance
-        WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
-          AND created_at < DATE_ADD(CURDATE(), INTERVAL 1 DAY)
-        GROUP BY DATE(created_at)
-        ORDER BY date ASC
-        ]]>
-    </select>
-
 </mapper> 

@@ -3,6 +3,7 @@ import { useEffect } from 'react';
 import { Route, BrowserRouter as Router, Routes, useLocation } from 'react-router-dom';
 import './App.css';
 import AdminDashboard from './components/AdminDashboard';
+import AdminRemittanceManagement from './components/AdminRemittanceManagement';
 import AuthFailure from './components/AuthFailure';
 import AuthSuccess from './components/AuthSuccess';
 import { ExchangeRates } from './components/ExchangeRates';
