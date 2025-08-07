@@ -2,4 +2,131 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.mapper.RemittanceMapper">
 
+    <select id="selectRemittanceHistory" parameterType="RemittanceHistorySearchRequest" resultType="RemittanceHistoryResponse">
+        <!-- 송금 이력 조회 -->
+        SELECT 
+            sb.name as senderBank,
+            u.name as userName,
+            r.sender_account as senderAccount,
+            CONCAT(c.country_name, ' - ', c.code_name, ' (', c.code, ')') as currency,
+            r.receiver_bank as receiverBank,
+            r.receiver_account as receiverAccount,
+            rb.name as receiverBankName,
+            r.receiver_name as receiverName,
+            r.amount,
+            CASE
+                WHEN r.status = 'COMPLETED' THEN '완료'
+                WHEN r.status = 'WAITTING' THEN '대기'
+		    END AS status,
+            r.created_at as createdAt
+        FROM remittance r
+        LEFT JOIN bank sb ON r.sender_bank = sb.bank_code
+        LEFT JOIN bank rb ON r.receiver_bank = rb.bank_code
+        LEFT JOIN country c ON r.currency = c.code
+        LEFT JOIN user u ON r.user_id = u.id
+        <where>
+            <if test="search.userName != null and search.userName != ''">
+                AND u.name LIKE CONCAT('%', #{search.userName}, '%')
+            </if>
+            <if test="search.receiverName != null and search.receiverName != ''">
+                AND r.receiver_name LIKE CONCAT('%', #{search.receiverName}, '%')
+            </if>
+            <if test="search.currency != null and search.currency != ''">
+                AND r.currency = #{search.currency}
+            </if>
+            <if test="search.status != null and search.status != ''">
+                AND r.status = #{search.status}
+            </if>
+            <if test="search.minAmount != null">
+                AND r.amount &gt;= #{search.minAmount}
+            </if>
+            <if test="search.maxAmount != null">
+                AND r.amount &lt;= #{search.maxAmount}
+            </if>
+            <if test="search.startDate != null and search.startDate != ''">
+                AND DATE(r.created_at) &gt;= #{search.startDate}
+            </if>
+            <if test="search.endDate != null and search.endDate != ''">
+                AND DATE(r.created_at) &lt;= #{search.endDate}
+            </if>
+        </where>
+        ORDER BY 
+        <choose>
+            <when test="search.sortOrder == 'oldest'">
+                r.created_at ASC
+            </when>
+            <when test="search.sortOrder == 'amount_desc'">
+                r.amount DESC
+            </when>
+            <when test="search.sortOrder == 'amount_asc'">
+                r.amount ASC
+            </when>
+            <otherwise>
+                r.created_at DESC
+            </otherwise>
+        </choose>
+        LIMIT #{search.size} OFFSET #{search.page}
+    </select>
+
+
+    <select id="countRemittanceHistory" parameterType="RemittanceHistorySearchRequest" resultType="int">
+        <!-- 송금 이력 개수 조회 -->
+        SELECT COUNT(*)
+        FROM remittance r
+        LEFT JOIN bank sb ON r.sender_bank = sb.bank_code
+        LEFT JOIN bank rb ON r.receiver_bank = rb.bank_code
+        LEFT JOIN country c ON r.currency = c.code
+        LEFT JOIN user u ON r.user_id = u.id
+        <where>
+            <if test="search.userName != null and search.userName != ''">
+                AND u.name LIKE CONCAT('%', #{search.userName}, '%')
+            </if>
+            <if test="search.receiverName != null and search.receiverName != ''">
+                AND r.receiver_name LIKE CONCAT('%', #{search.receiverName}, '%')
+            </if>
+            <if test="search.currency != null and search.currency != ''">
+                AND r.currency = #{search.currency}
+            </if>
+            <if test="search.status != null and search.status != ''">
+                AND r.status = #{search.status}
+            </if>
+            <if test="search.minAmount != null">
+                AND r.amount &gt;= #{search.minAmount}
+            </if>
+            <if test="search.maxAmount != null">
+                AND r.amount &lt;= #{search.maxAmount}
+            </if>
+            <if test="search.startDate != null and search.startDate != ''">
+                AND DATE(r.created_at) &gt;= #{search.startDate}
+            </if>
+            <if test="search.endDate != null and search.endDate != ''">
+                AND DATE(r.created_at) &lt;= #{search.endDate}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectUserRemittanceLimit" resultType="UserRemittanceLimitResponse">
+        <!-- 사용자 송금 한도 조회 (없으면 기본 한도 사용) -->
+        SELECT 
+            IFNULL(ul.daily_limit, dl.daily_limit) as dailyLimit,
+            IFNULL(ul.monthly_limit, dl.monthly_limit) as monthlyLimit,
+            IFNULL(ul.single_limit, dl.single_limit) as singleLimit,
+            CASE 
+                WHEN ul.id IS NOT NULL THEN 'USER_LIMIT'
+                ELSE 'DEFAULT_LIMIT'
+            END as limitType
+        FROM user u
+        LEFT JOIN user_remittance_limit ul ON u.id = ul.user_id
+        LEFT JOIN default_remittance_limit dl ON dl.is_active = true
+        WHERE u.id = #{userId}
+    </select>
+
+    <select id="existsUserRemittanceLimit" resultType="boolean">
+        <!-- 사용자 송금 한도 존재 여부 확인 -->
+        SELECT EXISTS(
+            SELECT 1 FROM user_remittance_limit 
+            WHERE user_id = #{userId}
+        )
+    </select>
+
 </mapper> 

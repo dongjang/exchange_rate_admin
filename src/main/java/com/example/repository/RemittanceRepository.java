@@ -37,7 +37,11 @@ public interface RemittanceRepository extends JpaRepository<Remittance, Long>, J
            "AND (:maxAmount IS NULL OR r.amount <= :maxAmount) " +
            "AND (:startDate IS NULL OR r.createdAt >= :startDate) " +
            "AND (:endDate IS NULL OR r.createdAt <= :endDate) " +
-           "ORDER BY r.createdAt DESC")
+           "ORDER BY " +
+           "CASE WHEN :sortOrder = 'latest' THEN r.createdAt END DESC, " +
+           "CASE WHEN :sortOrder = 'oldest' THEN r.createdAt END ASC, " +
+           "CASE WHEN :sortOrder = 'amount_desc' THEN r.amount END DESC, " +
+           "CASE WHEN :sortOrder = 'amount_asc' THEN r.amount END ASC")
     List<Object[]> findRemittanceHistoryWithBankNames(
         @Param("userId") Long userId,
         @Param("recipient") String recipient,
@@ -46,7 +50,8 @@ public interface RemittanceRepository extends JpaRepository<Remittance, Long>, J
         @Param("minAmount") BigDecimal minAmount,
         @Param("maxAmount") BigDecimal maxAmount,
         @Param("startDate") LocalDateTime startDate,
-        @Param("endDate") LocalDateTime endDate
+        @Param("endDate") LocalDateTime endDate,
+        @Param("sortOrder") String sortOrder
     );
 
     @Query("SELECT " +
@@ -72,7 +77,11 @@ public interface RemittanceRepository extends JpaRepository<Remittance, Long>, J
            "AND (:maxAmount IS NULL OR r.amount <= :maxAmount) " +
            "AND (:startDate IS NULL OR r.createdAt >= :startDate) " +
            "AND (:endDate IS NULL OR r.createdAt <= :endDate) " +
-           "ORDER BY r.createdAt DESC")
+           "ORDER BY " +
+           "CASE WHEN :sortOrder = 'latest' THEN r.createdAt END DESC, " +
+           "CASE WHEN :sortOrder = 'oldest' THEN r.createdAt END ASC, " +
+           "CASE WHEN :sortOrder = 'amount_desc' THEN r.amount END DESC, " +
+           "CASE WHEN :sortOrder = 'amount_asc' THEN r.amount END ASC")
     Page<Object[]> findRemittanceHistoryWithBankNamesPaged(
         @Param("userId") Long userId,
         @Param("recipient") String recipient,
@@ -82,6 +91,7 @@ public interface RemittanceRepository extends JpaRepository<Remittance, Long>, J
         @Param("maxAmount") BigDecimal maxAmount,
         @Param("startDate") LocalDateTime startDate,
         @Param("endDate") LocalDateTime endDate,
+        @Param("sortOrder") String sortOrder,
         Pageable pageable
     );
 

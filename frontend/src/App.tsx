@@ -63,13 +63,9 @@ function AppContent() {
 
   if (auth.isLoading) {
     return (
-      <div className="loading-container">
-        <div className="loading-popup">
-          <div className="loading-spinner">
-            <div className="spinner-ring"></div>
-            <div className="spinner-ring"></div>
-            <div className="spinner-ring"></div>
-          </div>
+      <div className="app">
+        <div className="container">
+          <div className="loading">로딩 중...</div>
         </div>
       </div>
     );
@@ -92,6 +88,7 @@ function AppContent() {
           <Route path="/remit/apply" element={<RemittanceApplyPage />} />
           <Route path="/remit/history" element={<RemittanceHistoryPage />} />
           <Route path="/admin" element={<AdminDashboard user={userInfo} />} />
+          <Route path="/admin/remittance" element={<AdminRemittanceManagement user={userInfo} />} />
           <Route path="/auth/success" element={<AuthSuccess />} />
           <Route path="/auth/failure" element={<AuthFailure />} />
         </Routes>

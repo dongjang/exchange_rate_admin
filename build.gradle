@@ -21,6 +21,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation 'org.mybatis.spring.boot:mybatis-spring-boot-starter:3.0.3'
     implementation 'mysql:mysql-connector-java:8.0.33'
+    implementation 'commons-io:commons-io:2.11.0'
+    implementation 'commons-fileupload:commons-fileupload:1.5'
     runtimeOnly 'com.h2database:h2'
     compileOnly "org.projectlombok:lombok:${lombokVersion}"
     annotationProcessor "org.projectlombok:lombok:${lombokVersion}"

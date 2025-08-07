@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.RemittanceLimitRequestMapper">
+
+
+    <select id="selectRemittanceLimitRequests" resultType="RemittanceLimitRequestResponse">
+        SELECT 
+            rlr.id,
+            rlr.user_id,
+            rlr.daily_limit,
+            rlr.monthly_limit,
+            rlr.single_limit,
+            rlr.reason,
+            rlr.income_file_id,
+            rlr.bankbook_file_id,
+            rlr.business_file_id,
+            rlr.status,
+            rlr.admin_id,
+            rlr.admin_comment,
+            rlr.processed_at,
+            rlr.created_at,
+            rlr.updated_at,
+            u.name as user_name,
+            income_file.original_name as income_file_name,
+            income_file.file_size as income_file_size,
+            income_file.file_type as income_file_type,
+            bankbook_file.original_name as bankbook_file_name,
+            bankbook_file.file_size as bankbook_file_size,
+            bankbook_file.file_type as bankbook_file_type,
+            business_file.original_name as business_file_name,
+            business_file.file_size as business_file_size,
+            business_file.file_type as business_file_type
+        FROM remittance_limit_request rlr
+        LEFT JOIN user u ON rlr.user_id = u.id
+        LEFT JOIN file income_file ON rlr.income_file_id = income_file.id
+        LEFT JOIN file bankbook_file ON rlr.bankbook_file_id = bankbook_file.id
+        LEFT JOIN file business_file ON rlr.business_file_id = business_file.id
+        <where>
+            <if test="userId != null">
+                AND rlr.user_id = #{userId}
+            </if>
+            <if test="status != null and status != ''">
+                AND rlr.status = #{status}
+            </if>
+            <if test="searchTerm != null and searchTerm != ''">
+                AND u.name LIKE CONCAT('%', #{searchTerm}, '%')
+            </if>
+        </where>
+        ORDER BY rlr.created_at DESC
+        <if test="limit > 0">
+            LIMIT #{limit} OFFSET #{offset}
+        </if>
+    </select>
+
+    <select id="countRemittanceLimitRequests" resultType="int">
+        SELECT COUNT(*)
+        FROM remittance_limit_request rlr
+        LEFT JOIN user u ON rlr.user_id = u.id
+        <where>
+            <if test="userId != null">
+                AND rlr.user_id = #{userId}
+            </if>
+            <if test="status != null and status != ''">
+                AND rlr.status = #{status}
+            </if>
+            <if test="searchTerm != null and searchTerm != ''">
+                AND u.name LIKE CONCAT('%', #{searchTerm}, '%')
+            </if>
+        </where>
+    </select>
+
+    <select id="selectRemittanceLimitRequestById" resultType="RemittanceLimitRequestResponse">
+        SELECT 
+            rlr.id,
+            rlr.user_id,
+            rlr.daily_limit,
+            rlr.monthly_limit,
+            rlr.single_limit,
+            rlr.reason,
+            rlr.income_file_id,
+            rlr.bankbook_file_id,
+            rlr.business_file_id,
+            rlr.status,
+            rlr.admin_id,
+            rlr.admin_comment,
+            rlr.processed_at,
+            rlr.created_at,
+            rlr.updated_at,
+            u.name as user_name,
+            income_file.original_name as income_file_name,
+            income_file.file_size as income_file_size,
+            income_file.file_type as income_file_type,
+            bankbook_file.original_name as bankbook_file_name,
+            bankbook_file.file_size as bankbook_file_size,
+            bankbook_file.file_type as bankbook_file_type,
+            business_file.original_name as business_file_name,
+            business_file.file_size as business_file_size,
+            business_file.file_type as business_file_type
+        FROM remittance_limit_request rlr
+        LEFT JOIN user u ON rlr.user_id = u.id
+        LEFT JOIN file income_file ON rlr.income_file_id = income_file.id
+        LEFT JOIN file bankbook_file ON rlr.bankbook_file_id = bankbook_file.id
+        LEFT JOIN file business_file ON rlr.business_file_id = business_file.id
+        WHERE rlr.id = #{id}
+    </select>
+
+    <insert id="insertRemittanceLimitRequest" parameterType="RemittanceLimitRequest" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO remittance_limit_request (
+            user_id,
+            daily_limit,
+            monthly_limit,
+            single_limit,
+            reason,
+            income_file_id,
+            bankbook_file_id,
+            business_file_id,
+            status,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{userId},
+            #{dailyLimit},
+            #{monthlyLimit},
+            #{singleLimit},
+            #{reason},
+            #{incomeFileId},
+            #{bankbookFileId},
+            #{businessFileId},
+            #{status},
+            NOW(),
+            NOW()
+        )
+    </insert>
+
+    <update id="updateRemittanceLimitRequest" parameterType="RemittanceLimitRequest">
+        UPDATE remittance_limit_request
+        SET 
+            daily_limit = #{dailyLimit},
+            monthly_limit = #{monthlyLimit},
+            single_limit = #{singleLimit},
+            reason = #{reason},
+            income_file_id = #{incomeFileId},
+            bankbook_file_id = #{bankbookFileId},
+            business_file_id = #{businessFileId},
+            status = #{status},
+            admin_id = #{adminId},
+            admin_comment = #{adminComment},
+            processed_at = #{processedAt},
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateRemittanceLimitRequestStatus">
+        UPDATE remittance_limit_request
+        SET 
+            status = #{status},
+            admin_id = #{adminId},
+            admin_comment = #{adminComment},
+            processed_at = NOW(),
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <update id="clearFileIds">
+        UPDATE remittance_limit_request
+        SET 
+            income_file_id = NULL,
+            bankbook_file_id = NULL,
+            business_file_id = NULL,
+            updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+    <insert id="insertUserRemittanceLimit">
+        INSERT INTO user_remittance_limit (
+            user_id, 
+            daily_limit, 
+            monthly_limit, 
+            single_limit,
+            request_id,
+            created_at
+            )
+        VALUES(
+            #{userId},
+            #{dailyLimit},
+            #{monthlyLimit},
+            #{singleLimit},
+            #{requestId},
+            NOW()
+            )
+    </insert>
+
+    <delete id="deleteUserRemittanceLimit">
+        DELETE FROM user_remittance_limit
+        WHERE user_id = #{userId}
+    </delete>
+</mapper> 

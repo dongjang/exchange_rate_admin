@@ -1,24 +1,20 @@
 package com.example.dto;
 
 import lombok.Data;
-import lombok.Builder;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 
 @Data
-@Builder
-@AllArgsConstructor
-@NoArgsConstructor
 public class RemittanceHistorySearchRequest {
-    private Long userId; // 필수
-    private String recipient;
+    private String userName;
+    private String receiverName;
     private String currency;
     private String status;
-    private String minAmount;
-    private String maxAmount;
+    private BigDecimal minAmount;
+    private BigDecimal maxAmount;
     private String startDate;
     private String endDate;
-    private Integer page; // 페이징: 페이지 번호 (0부터 시작)
-    private Integer size; // 페이징: 페이지 크기
-    private String sortOrder; // 정렬 순서: "DESC" (최신순), "ASC" (과거순)
+    private String sortOrder;
+    private int page;
+    private int size;
 } 

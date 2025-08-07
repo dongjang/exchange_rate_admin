@@ -42,7 +42,7 @@ function RemittanceHistoryPage() {
     startDate: '',
     endDate: '',
     quickDateRange: '',
-    sortOrder: 'DESC' // 기본값: 최신순
+    sortOrder: 'latest' // 기본값: 최신순
   });
   const [selectedRemittance, setSelectedRemittance] = useState<RemittanceHistory | null>(null);
 
@@ -101,7 +101,7 @@ function RemittanceHistoryPage() {
     }
   }, [currentPage, pageSize, userInfo?.id]);
 
-  // 필터 변경 시 자동 검색 (currency, status만 즉시 검색)
+  // 필터 변경 시 자동 검색 (currency, status, sortOrder만 즉시 검색)
   useEffect(() => {
     const timeoutId = setTimeout(() => {
       if (userInfo?.id) {
@@ -111,16 +111,10 @@ function RemittanceHistoryPage() {
     }, 300); // 300ms debounce
 
     return () => clearTimeout(timeoutId);
-  }, [filters.currency, filters.status, userInfo?.id]);
+  }, [filters.currency, filters.status, filters.sortOrder, userInfo?.id]);
 
   const handleFilterChange = (newFilters: any) => {
     setFilters(newFilters);
-    
-    // sortOrder 또는 quickDateRange가 변경되면 즉시 검색 실행
-    if (newFilters.sortOrder !== filters.sortOrder || newFilters.quickDateRange !== filters.quickDateRange) {
-      setCurrentPage(1); // 정렬 변경 시 첫 페이지로 이동
-      setTimeout(() => fetchRemittances(), 0);
-    }
   };
 
   // 기간 설정 버튼 전용 핸들러
@@ -206,55 +200,7 @@ function RemittanceHistoryPage() {
     searchWithNewFilters();
   };
 
-  // 정렬 버튼 전용 핸들러
-  const handleSortChange = (sortOrder: string) => {
-    const newFilters = {
-      ...filters,
-      sortOrder: sortOrder
-    };
-    setFilters(newFilters);
-    setCurrentPage(1); // 정렬 변경 시 첫 페이지로 이동
-    
-    // 새로운 필터 값으로 즉시 검색 실행
-    const searchWithNewFilters = async () => {
-      try {
-        setLoading(true);
-        
-        if (!userInfo?.id) {
-          setError('사용자 정보를 가져올 수 없습니다.');
-          setRemittances([]);
-          return;
-        }
 
-        const response = await api.searchRemittanceHistory({
-          userId: userInfo.id,
-          recipient: newFilters.recipient,
-          currency: newFilters.currency,
-          status: newFilters.status,
-          minAmount: newFilters.minAmount,
-          maxAmount: newFilters.maxAmount,
-          startDate: newFilters.startDate,
-          endDate: newFilters.endDate,
-          sortOrder: newFilters.sortOrder,
-          page: 0, // 첫 페이지
-          size: pageSize
-        });
-        
-        setRemittances(response.content);
-        setTotalItems(response.totalElements);
-        setTotalPages(response.totalPages);
-        setError(null);
-      } catch (err) {
-        console.error('송금 이력 조회 실패:', err);
-        setError('송금 이력을 불러오는데 실패했습니다.');
-        setRemittances([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    searchWithNewFilters();
-  };
 
   const handleSearch = () => {
     setCurrentPage(1);
@@ -323,8 +269,8 @@ function RemittanceHistoryPage() {
             filters={filters}
             onFilterChange={handleFilterChange}
             onSearch={handleSearch}
-            onSortChange={handleSortChange}
             onQuickDateRangeChange={handleQuickDateRangeChange}
+            useSortSelect={true}
           />
           {error ? (
             <div style={{ textAlign: 'center', color: '#ef4444', padding: '2.5rem 0', fontSize: '1.1rem' }}>

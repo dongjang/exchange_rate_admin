@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FaChartLine, FaUsers, FaExchangeAlt, FaQuestionCircle, FaBars, FaTimes, FaSignOutAlt, FaBullhorn, FaComments } from 'react-icons/fa';
+import { FaChartLine, FaUsers, FaExchangeAlt, FaQuestionCircle, FaBullhorn, FaComments } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import './AdminDashboard.css';
 import { api } from '../services/api';
+import AdminLayout from './AdminLayout';
 
 interface AdminDashboardProps {
   user?: any;
@@ -13,6 +15,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
     try {
@@ -129,56 +132,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
   }
 
   return (
-    <div className="admin-layout">
-      {/* Header */}
-      <header className="admin-header">
-        <div className="header-left">
-          <button 
-            className="sidebar-toggle"
-            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          >
-            <FaBars />
-          </button>
-          <h1 className="admin-title">관리자 대시보드</h1>
-        </div>
-        <div className="header-right">
-          <span className="admin-user">관리자: {user?.name || 'Admin'}</span>
-          <button className="admin-logout-btn" onClick={handleLogout}>
-            <FaSignOutAlt />
-            <span>로그아웃</span>
-          </button>
-        </div>
-      </header>
-
-      <div className="admin-container">
-        {/* Sidebar */}
-        <aside className={`admin-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
-          <nav className="sidebar-nav">
-            <div className="nav-item active" title="대시보드">
-              <FaChartLine />
-              <span className="nav-text">대시보드</span>
-            </div>
-            <div className="nav-item" title="송금 관리">
-              <FaExchangeAlt />
-              <span className="nav-text">송금 관리</span>
-            </div>
-            <div className="nav-item" title="사용자 관리">
-              <FaUsers />
-              <span className="nav-text">사용자 관리</span>
-            </div>
-            <div className="nav-item" title="공지사항">
-              <FaBullhorn />
-              <span className="nav-text">공지사항</span>
-            </div>
-            <div className="nav-item" title="Q&A">
-              <FaComments />
-              <span className="nav-text">Q&A</span>
-            </div>
-          </nav>
-        </aside>
-
-        {/* Main Content */}
-        <main className="admin-main">
+    <AdminLayout user={user}>
           <div className="dashboard-grid">
             {/* 송금 통계 - 큰 카드 */}
             <div className="dashboard-card wide">
@@ -431,9 +385,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
               </div>
             </div>
           </div>
-        </main>
-      </div>
-    </div>
+    </AdminLayout>
   );
 };
 

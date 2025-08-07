@@ -159,4 +159,235 @@ export const api = {
     const response = await axios.get(`${API_BASE_URL}/admin/dashboard/stats`, { withCredentials: true });
     return response.data;
   },
+  
+  // 관리자용 송금 이력 조회
+  async getAdminRemittanceHistory(params: any): Promise<any[]> {
+    const response = await axios.post(`${API_BASE_URL}/remittances/admin/search`, params, { withCredentials: true });
+    return response.data;
+  },
+  
+  // 관리자용 송금 이력 개수 조회
+  async getAdminRemittanceHistoryCount(params: any): Promise<number> {
+    const response = await axios.post(`${API_BASE_URL}/remittances/admin/count`, params, { withCredentials: true });
+    return response.data;
+  },
+
+  // 기본 송금 한도 관련 API
+  async getDefaultRemittanceLimit(): Promise<any> {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/admin/default-remittance-limit`, { withCredentials: true });
+      return response.data;
+    } catch (error) {
+      console.error('기본 한도 조회 실패:', error);
+      throw error;
+    }
+  },
+
+  async updateDefaultRemittanceLimit(data: any): Promise<void> {
+    try {
+      await axios.put(`${API_BASE_URL}/admin/default-remittance-limit`, data, { withCredentials: true });
+    } catch (error) {
+      console.error('기본 한도 업데이트 실패:', error);
+      throw error;
+    }
+  },
+
+  async getUserRemittanceLimit(userId: number): Promise<any> {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/user/remittance-limit?userId=${userId}`, { withCredentials: true });
+      return response.data;
+    } catch (error) {
+      console.error('사용자 송금 한도 조회 실패:', error);
+      throw error;
+    }
+  },
+
+  // 한도 상향 신청 API
+  async createRemittanceLimitRequest(userId: number, data: FormData): Promise<any> {
+    const response = await axios.post(`${API_BASE_URL}/remittance-limit-requests/user/${userId}`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      withCredentials: true,
+    });
+    return response.data;
+  },
+
+  async updateRemittanceLimitRequest(userId: number, requestId: number, data: FormData): Promise<any> {
+    const response = await axios.put(`${API_BASE_URL}/remittance-limit-requests/user/${userId}/${requestId}`, data, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      withCredentials: true,
+    });
+    return response.data;
+  },
+
+  async getUserRemittanceLimitRequests(userId: number): Promise<any[]> {
+    const response = await axios.get(`${API_BASE_URL}/remittance-limit-requests/user/${userId}`, { withCredentials: true });
+    return response.data;
+  },
+
+
+
+  async getAdminRemittanceLimitRequests(params: {
+    userId?: number;
+    status?: string;
+    searchTerm?: string;
+    page?: number;
+    size?: number;
+  }): Promise<any[]> {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/remittance-limit-requests/admin`, {
+        params,
+        withCredentials: true
+      });
+      return response.data;
+    } catch (error) {
+      console.error('관리자 한도 상향 신청 조회 실패:', error);
+      throw error;
+    }
+  },
+
+  async countAdminRemittanceLimitRequests(params: {
+    userId?: number;
+    status?: string;
+    searchTerm?: string;
+  }): Promise<number> {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/remittance-limit-requests/admin/count`, {
+        params,
+        withCredentials: true
+      });
+      return response.data;
+    } catch (error) {
+      console.error('관리자 한도 상향 신청 개수 조회 실패:', error);
+      throw error;
+    }
+  },
+
+  async processRemittanceLimitRequest(requestId: number, data: {
+    status: string;
+    adminId: number;
+    adminComment?: string;
+    userId?: number;
+    dailyLimit?: number;
+    monthlyLimit?: number;
+    singleLimit?: number;
+  }): Promise<void> {
+    try {
+      console.log('API 호출 데이터:', { requestId, data });
+      
+      await axios.put(`${API_BASE_URL}/remittance-limit-requests/admin/${requestId}/process`, null, {
+        params: data,
+        withCredentials: true
+      });
+      
+      console.log('API 호출 성공');
+    } catch (error) {
+      console.error('한도 상향 신청 처리 실패:', error);
+      throw error;
+    }
+  },
+
+  // 신청 취소
+  async cancelRemittanceLimitRequest(userId: number, requestId: number): Promise<void> {
+    try {
+      await axios.delete(`${API_BASE_URL}/remittance-limit-requests/user/${userId}/${requestId}`, {
+        withCredentials: true
+      });
+    } catch (error) {
+      console.error('한도 상향 신청 취소 실패:', error);
+      throw error;
+    }
+  },
+
+  // 파일 다운로드
+  async downloadFile(fileId: number): Promise<void> {
+    try {
+      // 먼저 파일 정보를 가져와서 파일명을 확보
+      let filename = 'download';
+      try {
+        const fileInfoResponse = await axios.get(`${API_BASE_URL}/files/${fileId}/info`, {
+          withCredentials: true
+        });
+        if (fileInfoResponse.data && fileInfoResponse.data.originalName) {
+          filename = fileInfoResponse.data.originalName;
+          console.log('Filename from file info:', filename);
+        }
+      } catch (error) {
+        console.log('Could not get file info, will try from headers');
+      }
+      
+      const response = await axios.get(`${API_BASE_URL}/files/${fileId}/download`, {
+        responseType: 'blob',
+        withCredentials: true
+      });
+      
+      // 디버깅: 실제 헤더 확인
+      console.log('Response headers:', response.headers);
+      console.log('Content-Disposition:', response.headers['content-disposition']);
+      
+      // 파일 다운로드 처리
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Content-Disposition 헤더에서 파일명 추출 (이미 파일명이 있으면 덮어쓰지 않음)
+      const contentDisposition = response.headers['content-disposition'];
+      
+      if (contentDisposition && filename === 'download') {
+        console.log('Raw Content-Disposition:', contentDisposition);
+        
+        // 여러 패턴으로 파일명 추출 시도
+        const patterns = [
+          /filename\*="UTF-8''([^"]+)"/,  // UTF-8 인코딩된 파일명
+          /filename="([^"]+)"/,            // 일반 파일명
+          /filename=([^;]+)/               // 따옴표 없는 파일명
+        ];
+        
+        for (const pattern of patterns) {
+          const match = contentDisposition.match(pattern);
+          if (match && match[1]) {
+            console.log('Pattern matched:', pattern, 'Value:', match[1]);
+            try {
+              // URL 디코딩 시도
+              filename = decodeURIComponent(match[1]);
+              console.log('Decoded filename:', filename);
+              break;
+            } catch (e) {
+              // 디코딩 실패 시 원본 사용
+              filename = match[1];
+              console.log('Using original filename:', filename);
+              break;
+            }
+          }
+        }
+      }
+      
+      // 파일명이 여전히 'download'인 경우, 파일 확장자 추정
+      if (filename === 'download') {
+        console.log('Filename still "download", trying to extract from Content-Type');
+        const contentType = response.headers['content-type'];
+        if (contentType) {
+          if (contentType.includes('image/')) {
+            filename = 'image.' + contentType.split('/')[1];
+          } else if (contentType.includes('application/pdf')) {
+            filename = 'document.pdf';
+          } else if (contentType.includes('text/')) {
+            filename = 'document.txt';
+          } else {
+            filename = 'file.' + contentType.split('/')[1];
+          }
+        }
+      }
+      
+      console.log('Final filename:', filename);
+      
+      link.setAttribute('download', filename);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('파일 다운로드 실패:', error);
+      throw error;
+    }
+  },
 }; 

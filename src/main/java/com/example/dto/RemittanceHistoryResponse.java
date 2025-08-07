@@ -1,25 +1,27 @@
 package com.example.dto;
 
 import lombok.Data;
-import java.util.List;
+import lombok.Builder;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class RemittanceHistoryResponse {
-    private List<RemittanceHistoryDto> content;
-    private int page;
-    private int size;
-    private long totalElements;
-    private int totalPages;
-    private boolean hasNext;
-    private boolean hasPrevious;
-    
-    public RemittanceHistoryResponse(List<RemittanceHistoryDto> content, int page, int size, long totalElements) {
-        this.content = content;
-        this.page = page;
-        this.size = size;
-        this.totalElements = totalElements;
-        this.totalPages = (int) Math.ceil((double) totalElements / size);
-        this.hasNext = page < totalPages - 1;
-        this.hasPrevious = page > 0;
-    }
+    private String senderBank;
+    private String userName;
+    private String senderAccount;
+    private String currency;
+    private String receiverBank;
+    private String receiverAccount;
+    private String receiverBankName;
+    private String receiverName;
+    private BigDecimal amount;
+    private String status;
+    private LocalDateTime createdAt;
 } 

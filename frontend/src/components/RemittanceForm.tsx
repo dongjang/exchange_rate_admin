@@ -8,6 +8,7 @@ import { myBankAccountAtom, banksAtom, fetchBanksAtom } from '../store/myBankAcc
 import type { SenderBank } from '../store/myBankAccountStore';
 import { userInfoAtom } from '../store/userStore';
 import AccountModal from './AccountModal';
+import RemittanceLimitDisplay from './RemittanceLimitDisplay';
 
 export interface RemittanceFormData {
   senderBank?: string;
@@ -407,6 +408,9 @@ function RemittanceForm({ onSubmit }: RemittanceFormProps) {
 
   return (
     <>
+      {/* 송금 한도 표시 */}
+      <RemittanceLimitDisplay user={userInfo} />
+      
       {/* 내 은행/계좌 등록/수정 버튼 */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 8 }}>
         <button

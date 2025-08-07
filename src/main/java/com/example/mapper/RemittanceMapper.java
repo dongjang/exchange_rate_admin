@@ -1,8 +1,11 @@
 package com.example.mapper;
 
+import com.example.dto.RemittanceHistoryResponse;
+import com.example.dto.RemittanceHistorySearchRequest;
 import com.example.dto.RemittanceStats;
 import com.example.dto.RecentRemittanceCount;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -18,4 +21,14 @@ public interface RemittanceMapper {
      * 최근 7일 송금 건수 조회
      */
     List<RecentRemittanceCount> selectRecent7DaysRemittanceCount();
+    
+    /**
+     * 관리자용 송금 이력 조회
+     */
+    List<RemittanceHistoryResponse> selectRemittanceHistory(@Param("search") RemittanceHistorySearchRequest search);
+    
+    /**
+     * 관리자용 송금 이력 개수 조회
+     */
+    int countRemittanceHistory(@Param("search") RemittanceHistorySearchRequest search);
 } 

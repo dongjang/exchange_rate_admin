@@ -12,6 +12,7 @@ import './CustomCalendar.css';
 interface RemittanceHistoryFilterProps {
   filters: {
     recipient: string;
+    senderName?: string;
     minAmount: string;
     maxAmount: string;
     currency: string;
@@ -25,6 +26,8 @@ interface RemittanceHistoryFilterProps {
   onSearch: () => void;
   onSortChange?: (sortOrder: string) => void;
   onQuickDateRangeChange?: (range: string) => void;
+  showSenderFilter?: boolean;
+  useSortSelect?: boolean;
 }
 
 const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
@@ -32,7 +35,9 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
   onFilterChange,
   onSearch,
   onSortChange,
-  onQuickDateRangeChange
+  onQuickDateRangeChange,
+  showSenderFilter = false,
+  useSortSelect = false
 }) => {
   const [startDate, setStartDate] = useState<Date | null>(filters.startDate ? new Date(filters.startDate) : null);
   const [endDate, setEndDate] = useState<Date | null>(filters.endDate ? new Date(filters.endDate) : null);
@@ -195,6 +200,7 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
     setSelectedCurrency(null);
     onFilterChange({
       recipient: '',
+      senderName: '',
       minAmount: '',
       maxAmount: '',
       currency: '',
@@ -225,13 +231,45 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
       border: '1px solid #e2e8f0',
       boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
     }}>
-      {/* 첫 번째 행: 받는 사람, 수취 통화, 전체 상태 (라벨 제거, placeholder만) */}
+      {/* 첫 번째 행: 보내는 사람, 받는 사람, 수취 통화, 전체 상태 (라벨 제거, placeholder만) */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: '1fr 2.2fr 1fr',
+        gridTemplateColumns: showSenderFilter ? '1fr 1fr 1.5fr 1fr' : '1fr 2.2fr 1fr',
         gap: isMobile ? '0.5rem' : '1rem',
         marginBottom: isMobile ? '0.75rem' : '1.5rem'
       }}>
+        {showSenderFilter && (
+          <input
+            type="text"
+            value={filters.senderName || ''}
+            onChange={(e) => handleInputChange('senderName', e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="보내는 사람"
+            style={{
+              width: '100%',
+              padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 0.75rem',
+              border: '1px solid #d1d5db',
+              borderRadius: '0.375rem',
+              fontSize: isMobile ? '0.75rem' : '0.875rem',
+              backgroundColor: '#fff',
+              transition: 'border 0.18s, box-shadow 0.18s',
+            }}
+            onFocus={e => { e.currentTarget.style.border = '1.5px solid #3b82f6'; e.currentTarget.style.boxShadow = '0 2px 8px #3b82f633'; }}
+            onBlur={e => { e.currentTarget.style.border = '1px solid #d1d5db'; e.currentTarget.style.boxShadow = 'none'; }}
+            onMouseEnter={e => { 
+              if (e.currentTarget !== document.activeElement) {
+                e.currentTarget.style.border = '1px solid #9ca3af';
+                e.currentTarget.style.backgroundColor = '#f9fafb';
+              }
+            }}
+            onMouseLeave={e => { 
+              if (e.currentTarget !== document.activeElement) {
+                e.currentTarget.style.border = '1px solid #d1d5db';
+                e.currentTarget.style.backgroundColor = '#fff';
+              }
+            }}
+          />
+        )}
         <input
           type="text"
           value={filters.recipient}
@@ -661,112 +699,54 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: isMobile ? '0.4rem' : '0.7rem' }}>
         {/* 정렬 버튼 */}
         <div style={{ display: 'flex', gap: isMobile ? '0.3rem' : '0.4rem' }}>
-          <button
-            onClick={() => {
-              if (onSortChange) {
-                onSortChange('DESC');
-              } else {
-                onFilterChange({
-                  ...filters,
-                  sortOrder: 'DESC'
-                });
-              }
-            }}
-            style={{
-              padding: isMobile ? '0.4rem 0.8rem' : '0.6rem 1.2rem',
-              backgroundColor: filters.sortOrder === 'DESC' ? '#3b82f6' : '#f8fafc',
-              color: filters.sortOrder === 'DESC' ? '#fff' : '#64748b',
-              border: filters.sortOrder === 'DESC' ? '2px solid #3b82f6' : '2px solid #d1d5db',
-              borderRadius: '0.5rem',
-              fontSize: isMobile ? '0.75rem' : '0.875rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              display: 'flex',
-              alignItems: 'center',
-              gap: isMobile ? '0.3rem' : '0.4rem',
-              boxShadow: filters.sortOrder === 'DESC' ? '0 2px 8px rgba(59,130,246,0.3)' : '0 1px 3px rgba(0,0,0,0.1)',
-              height: isMobile ? '36px' : '44px'
-            }}
-            onMouseEnter={(e) => {
-              if (filters.sortOrder !== 'DESC') {
-                e.currentTarget.style.backgroundColor = '#e0e7ef';
-                e.currentTarget.style.color = '#3b82f6';
-                e.currentTarget.style.borderColor = '#3b82f6';
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(59,130,246,0.2)';
-              } else {
-                e.currentTarget.style.transform = 'translateY(-1px)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(59,130,246,0.4)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (filters.sortOrder !== 'DESC') {
-                e.currentTarget.style.backgroundColor = '#f8fafc';
-                e.currentTarget.style.color = '#64748b';
-                e.currentTarget.style.borderColor = '#d1d5db';
-                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
-              } else {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(59,130,246,0.3)';
-              }
-            }}
-          >
-            <span style={{ fontSize: '1rem', fontWeight: 700 }}>↓</span>
-            최신순
-          </button>
-          <button
-            onClick={() => {
-              if (onSortChange) {
-                onSortChange('ASC');
-              } else {
-                onFilterChange({
-                  ...filters,
-                  sortOrder: 'ASC'
-                });
-              }
-            }}
-            style={{
-              padding: isMobile ? '0.4rem 0.8rem' : '0.6rem 1.2rem',
-              backgroundColor: filters.sortOrder === 'ASC' ? '#3b82f6' : '#f8fafc',
-              color: filters.sortOrder === 'ASC' ? '#fff' : '#64748b',
-              border: filters.sortOrder === 'ASC' ? '2px solid #3b82f6' : '2px solid #d1d5db',
-              borderRadius: '0.5rem',
-              fontSize: isMobile ? '0.75rem' : '0.875rem',
-              fontWeight: 600,
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              display: 'flex',
-              alignItems: 'center',
-              gap: isMobile ? '0.3rem' : '0.4rem',
-              boxShadow: filters.sortOrder === 'ASC' ? '0 2px 8px rgba(59,130,246,0.3)' : '0 1px 3px rgba(0,0,0,0.1)',
-              height: isMobile ? '36px' : '44px'
-            }}
-            onMouseEnter={(e) => {
-              if (filters.sortOrder !== 'ASC') {
-                e.currentTarget.style.backgroundColor = '#e0e7ef';
-                e.currentTarget.style.color = '#3b82f6';
-                e.currentTarget.style.borderColor = '#3b82f6';
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(59,130,246,0.2)';
-              } else {
-                e.currentTarget.style.transform = 'translateY(-1px)';
-                e.currentTarget.style.boxShadow = '0 4px 12px rgba(59,130,246,0.4)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (filters.sortOrder !== 'ASC') {
-                e.currentTarget.style.backgroundColor = '#f8fafc';
-                e.currentTarget.style.color = '#64748b';
-                e.currentTarget.style.borderColor = '#d1d5db';
-                e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
-              } else {
-                e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 2px 8px rgba(59,130,246,0.3)';
-              }
-            }}
-          >
-            <span style={{ fontSize: '1rem', fontWeight: 700 }}>↑</span>
-            과거순
-          </button>
+          {useSortSelect ? (
+            <select
+              value={filters.sortOrder}
+              onChange={(e) => {
+                if (onSortChange) {
+                  onSortChange(e.target.value);
+                } else {
+                  onFilterChange({
+                    ...filters,
+                    sortOrder: e.target.value
+                  });
+                }
+              }}
+              style={{
+                padding: isMobile ? '0.4rem 0.8rem' : '0.6rem 1.2rem',
+                backgroundColor: '#fff',
+                color: '#1e293b',
+                border: '2px solid #d1d5db',
+                borderRadius: '0.5rem',
+                fontSize: isMobile ? '0.75rem' : '0.875rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                height: isMobile ? '36px' : '44px',
+                outline: 'none'
+              }}
+              onFocus={e => { e.currentTarget.style.border = '2px solid #3b82f6'; e.currentTarget.style.boxShadow = '0 2px 8px rgba(59,130,246,0.2)'; }}
+              onBlur={e => { e.currentTarget.style.border = '2px solid #d1d5db'; e.currentTarget.style.boxShadow = 'none'; }}
+              onMouseEnter={e => { 
+                if (e.currentTarget !== document.activeElement) {
+                  e.currentTarget.style.border = '2px solid #9ca3af';
+                }
+              }}
+              onMouseLeave={e => { 
+                if (e.currentTarget !== document.activeElement) {
+                  e.currentTarget.style.border = '2px solid #d1d5db';
+                }
+              }}
+            >
+              <option value="latest">최신순</option>
+              <option value="oldest">과거순</option>
+              <option value="amount_desc">송금액 많은 순</option>
+              <option value="amount_asc">송금액 적은 순</option>
+            </select>
+          ) : (
+            <>
+            </>
+          )}
         </div>
         
         {/* 기존 버튼들 */}

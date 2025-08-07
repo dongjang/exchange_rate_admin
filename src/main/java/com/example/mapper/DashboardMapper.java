@@ -26,6 +26,11 @@ public interface DashboardMapper {
     RemittanceStats selectRemittanceStats();
     
     /**
+     * 최근 7일 송금 건수 조회
+     */
+    List<RecentRemittanceCount> selectRecent7DaysRemittanceCount();
+    
+    /**
      * 사용자 통계 조회
      */
     UserStats selectUserStats();
@@ -36,19 +41,14 @@ public interface DashboardMapper {
     ExchangeRateStats selectExchangeRateStats();
     
     /**
-     * Q&A 통계 조회
-     */
-    QnaStats selectQnaStats();
-    
-    /**
-     * 최근 7일 송금 건수 조회
-     */
-    List<RecentRemittanceCount> selectRecent7DaysRemittanceCount();
-    
-    /**
      * 관심 환율 TOP5 조회
      */
     List<FavoriteCurrencyTop5> selectFavoriteCurrencyTop5();
+    
+    /**
+     * Q&A 통계 조회
+     */
+    QnaStats selectQnaStats();
     
     /**
      * 답변 대기 중인 Q&A 리스트 조회
