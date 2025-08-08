@@ -187,7 +187,6 @@ function RemittanceForm({ onSubmit }: RemittanceFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('form.senderBank:', form.senderBank);
 
     // Validation
     if (!form.senderBank) {
@@ -198,7 +197,7 @@ function RemittanceForm({ onSubmit }: RemittanceFormProps) {
       await Swal.fire({ icon: 'warning', title: '내 계좌번호를 입력해 주세요' });
       return;
     }
-    console.log('form.currency:', form.currency);
+
     if (!form.currency) {
       await Swal.fire({ icon: 'warning', title: '수취 통화를 선택해 주세요' });
       return;

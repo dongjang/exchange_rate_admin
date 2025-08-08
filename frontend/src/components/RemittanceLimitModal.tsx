@@ -299,9 +299,7 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
   // Validation 함수들
   const validateDailyLimit = (): boolean => {
     const dailyLimit = parseInt(formData.dailyLimit.replace(/[^0-9]/g, ''));
-    console.log('validateDailyLimit - dailyLimit:', dailyLimit, 'formData.dailyLimit:', formData.dailyLimit);
     if (!dailyLimit || dailyLimit <= 0) {
-      console.log('validateDailyLimit - validation failed');
       Swal.fire({
         icon: 'error',
         title: '일일 한도 입력 오류',
@@ -310,15 +308,12 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
       });
       return false;
     }
-    console.log('validateDailyLimit - validation passed');
     return true;
   };
 
   const validateMonthlyLimit = (): boolean => {
     const monthlyLimit = parseInt(formData.monthlyLimit.replace(/[^0-9]/g, ''));
-    console.log('validateMonthlyLimit - monthlyLimit:', monthlyLimit, 'formData.monthlyLimit:', formData.monthlyLimit);
     if (!monthlyLimit || monthlyLimit <= 0) {
-      console.log('validateMonthlyLimit - validation failed');
       Swal.fire({
         icon: 'error',
         title: '월 한도 입력 오류',
@@ -327,15 +322,12 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
       });
       return false;
     }
-    console.log('validateMonthlyLimit - validation passed');
     return true;
   };
 
   const validateSingleLimit = (): boolean => {
     const singleLimit = parseInt(formData.singleLimit.replace(/[^0-9]/g, ''));
-    console.log('validateSingleLimit - singleLimit:', singleLimit, 'formData.singleLimit:', formData.singleLimit);
     if (!singleLimit || singleLimit <= 0) {
-      console.log('validateSingleLimit - validation failed');
       Swal.fire({
         icon: 'error',
         title: '1회 한도 입력 오류',
@@ -344,7 +336,6 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
       });
       return false;
     }
-    console.log('validateSingleLimit - validation passed');
     return true;
   };
 
@@ -371,15 +362,8 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
   };
 
   const validateFiles = (): boolean => {
-    console.log('validateFiles - isFirstRequest:', isFirstRequest);
-    console.log('validateFiles - isEdit:', isEdit);
-    console.log('validateFiles - isRerequest:', isRerequest);
-    console.log('validateFiles - files:', formData.files);
-    console.log('validateFiles - existingFiles:', existingFiles);
-    
-    // 재신청 모드이거나 승인된 상태에서 재신청한 후 수정하는 경우 파일 validation 비활성화
-    if (isRerequest || (isEdit && currentLimit?.status === 'APPROVED')) {
-      console.log('validateFiles - rerequest mode or approved rerequest edit, skipping file validation');
+    // 재신청 모드일 때는 파일 validation 비활성화
+    if (isRerequest) {
       return true;
     }
     
@@ -387,11 +371,8 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
     const needsFileValidation = isFirstRequest || isEdit;
     
     if (needsFileValidation) {
-      console.log('validateFiles - checking files for validation');
-      
       // 소득 증빙 파일 검증 (기존 파일이 없고 새 파일도 없는 경우)
       if (!existingFiles.income && formData.files.income.length === 0) {
-        console.log('validateFiles - income file missing');
         Swal.fire({
           icon: 'error',
           title: '소득 증빙 파일 필수',
@@ -403,7 +384,6 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
       
       // 통장 사본 파일 검증 (기존 파일이 없고 새 파일도 없는 경우)
       if (!existingFiles.bankbook && formData.files.bankbook.length === 0) {
-        console.log('validateFiles - bankbook file missing');
         Swal.fire({
           icon: 'error',
           title: '통장 사본 파일 필수',
@@ -415,7 +395,6 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
       
       // 사업 관련 파일 검증 (기존 파일이 없고 새 파일도 없는 경우)
       if (!existingFiles.business && formData.files.business.length === 0) {
-        console.log('validateFiles - business file missing');
         Swal.fire({
           icon: 'error',
           title: '사업 관련 파일 필수',
@@ -425,30 +404,21 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
         return false;
       }
     }
-    console.log('validateFiles - validation passed');
     return true;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('handleSubmit - starting validation');
-    console.log('handleSubmit - formData:', formData);
-    
     // Validation 체크
-    console.log('handleSubmit - checking dailyLimit');
     if (!validateDailyLimit()) return;
     
-    console.log('handleSubmit - checking monthlyLimit');
     if (!validateMonthlyLimit()) return;
     
-    console.log('handleSubmit - checking singleLimit');
     if (!validateSingleLimit()) return;
     
-    console.log('handleSubmit - checking reason');
     if (!validateReason()) return;
     
-    console.log('handleSubmit - checking files');
     if (!validateFiles()) return;
 
     // Confirm Swal
@@ -1082,8 +1052,8 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
             />
           </div>
 
-          {/* 첨부 파일 섹션 - 재신청 모드가 아니고 승인된 상태에서 재신청한 후 수정하는 경우가 아닐 때만 표시 */}
-          {!isRerequest && !(isEdit && currentLimit?.status === 'APPROVED') && (
+          {/* 첨부 파일 섹션 - 재신청 모드가 아니고 DEFAULT_LIMIT가 아닐 때만 표시 */}
+          {!isRerequest && currentLimit?.limitType === 'DEFAULT_LIMIT' && (
             <>
               <label style={{
                 display: 'block',

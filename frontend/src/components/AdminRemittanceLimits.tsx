@@ -106,10 +106,7 @@ const AdminRemittanceLimits: React.FC = () => {
   };
 
   const handleRequestAction = async (action: 'approve' | 'reject',requestId: number,userId?: number, dailyLimit?: number, monthlyLimit?: number, singleLimit?: number) => {
-    console.log('userId : ',userId);
-    console.log('dailyLimit : ',dailyLimit);
-    console.log('monthlyLimit : ',monthlyLimit);
-    console.log('singleLimit : ',singleLimit);
+
     if (action === 'reject') {
       // 반려의 경우 코멘트 모달 열기
       setPendingRejectRequestId(requestId);
@@ -148,7 +145,6 @@ const AdminRemittanceLimits: React.FC = () => {
   const processRequest = async (requestId: number, status: 'APPROVED' | 'REJECTED', adminComment: string, userId?: number, dailyLimit?: number, monthlyLimit?: number, singleLimit?: number) => {
     setProcessingRequestId(requestId);
     try {
-      console.log('API 호출 시작:', { requestId, status, adminComment });
       
       // 사용자 정보 확인
       if (!userInfo || !userInfo.id) {
@@ -166,12 +162,7 @@ const AdminRemittanceLimits: React.FC = () => {
         adminId: userInfo.id,
         adminComment
       };
-      
-      console.log('userId : ',userId);
-      console.log('dailyLimit : ',dailyLimit);
-      console.log('monthlyLimit : ',monthlyLimit);
-      console.log('singleLimit : ',singleLimit);
-      
+            
       // 승인인 경우에만 한도 정보 포함, 반려할 때도 userId는 포함
       if (status === 'APPROVED') {
         requestData.userId = userId;
@@ -184,8 +175,6 @@ const AdminRemittanceLimits: React.FC = () => {
       }
       
       const response = await api.processRemittanceLimitRequest(requestId, requestData);
-
-      console.log('API 응답:', response);
 
       Swal.fire({
         icon: 'success',

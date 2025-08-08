@@ -37,7 +37,6 @@ const RemittanceLimitDisplay: React.FC = () => {
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
 
-  console.log(limit)
   const fetchData = async () => {
     if (!userInfo?.id) return;
     
