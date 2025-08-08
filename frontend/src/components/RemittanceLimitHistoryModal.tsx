@@ -476,6 +476,30 @@ const RemittanceLimitHistoryModal: React.FC<RemittanceLimitHistoryModalProps> = 
                     </div>
                   )}
                   
+                  {/* 반려 상태 안내 문구 */}
+                  {request.status === 'REJECTED' && (
+                    <div style={{
+                      padding: '0.75rem',
+                      backgroundColor: '#fef3c7',
+                      borderRadius: '6px',
+                      border: '1px solid #f59e0b',
+                      marginTop: '0.5rem'
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        fontSize: '0.8rem',
+                        color: '#92400e'
+                      }}>
+                        <span style={{ fontSize: '0.9rem' }}>💡</span>
+                        <span>
+                          반려된 신청은 <strong>신청 수정</strong> 버튼을 통해 재신청할 수 있습니다.
+                        </span>
+                      </div>
+                    </div>
+                  )}
+
                   {/* 액션 버튼 */}
                   <div style={{
                     display: 'flex',
@@ -483,64 +507,67 @@ const RemittanceLimitHistoryModal: React.FC<RemittanceLimitHistoryModalProps> = 
                     gap: '0.5rem',
                     marginTop: '1rem'
                   }}>
+                    {/* PENDING 상태일 때만 신청 취소 버튼 표시 */}
                     {request.status === 'PENDING' && (
-                      <>
-                        <button
-                          onClick={() => handleCancelRequest(request.id)}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            padding: '0.5rem 1rem',
-                            background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '6px',
-                            fontSize: '0.875rem',
-                            fontWeight: '500',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease'
-                          }}
-                          onMouseEnter={(e) => {
-                            (e.currentTarget as HTMLElement).style.background = 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)';
-                          }}
-                          onMouseLeave={(e) => {
-                            (e.currentTarget as HTMLElement).style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
-                          }}
-                        >
-                          <FaTrash style={{ fontSize: '0.75rem' }} />
-                          신청 취소
-                        </button>
-                        <button
-                          onClick={() => {
-                            setSelectedRequest(request);
-                            setShowEditModal(true);
-                          }}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            padding: '0.5rem 1rem',
-                            background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '6px',
-                            fontSize: '0.875rem',
-                            fontWeight: '500',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease'
-                          }}
-                          onMouseEnter={(e) => {
-                            (e.currentTarget as HTMLElement).style.background = 'linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)';
-                          }}
-                          onMouseLeave={(e) => {
-                            (e.currentTarget as HTMLElement).style.background = 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)';
-                          }}
-                        >
-                          <FaEdit style={{ fontSize: '0.75rem' }} />
-                          신청 수정
-                        </button>
-                      </>
+                      <button
+                        onClick={() => handleCancelRequest(request.id)}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          padding: '0.5rem 1rem',
+                          background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '0.875rem',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLElement).style.background = 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)';
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLElement).style.background = 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)';
+                        }}
+                      >
+                        <FaTrash style={{ fontSize: '0.75rem' }} />
+                        신청 취소
+                      </button>
+                    )}
+                    
+                    {/* PENDING 또는 REJECTED 상태일 때 신청 수정 버튼 표시 */}
+                    {(request.status === 'PENDING' || request.status === 'REJECTED') && (
+                      <button
+                        onClick={() => {
+                          setSelectedRequest(request);
+                          setShowEditModal(true);
+                        }}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.5rem',
+                          padding: '0.5rem 1rem',
+                          background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '0.875rem',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          (e.currentTarget as HTMLElement).style.background = 'linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)';
+                        }}
+                        onMouseLeave={(e) => {
+                          (e.currentTarget as HTMLElement).style.background = 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)';
+                        }}
+                      >
+                        <FaEdit style={{ fontSize: '0.75rem' }} />
+                        신청 수정
+                      </button>
                     )}
                   </div>
                 </div>

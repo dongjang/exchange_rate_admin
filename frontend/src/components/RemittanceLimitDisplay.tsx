@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useAtom } from 'jotai';
-import { FaInfoCircle, FaExclamationTriangle, FaArrowUp, FaChartLine, FaHistory, FaEye } from 'react-icons/fa';
+import { FaInfoCircle, FaExclamationTriangle, FaArrowUp, FaChartLine, FaHistory, FaEye, FaEdit } from 'react-icons/fa';
 import { api } from '../services/api';
 import { userInfoAtom } from '../store/userStore';
 import RemittanceLimitModal from './RemittanceLimitModal';
@@ -31,11 +31,13 @@ const RemittanceLimitDisplay: React.FC = () => {
   const [userInfo] = useAtom(userInfoAtom);
   const [limit, setLimit] = useState<RemittanceLimit | null>(null);
   const [pendingRequest, setPendingRequest] = useState<RemittanceLimitRequest | null>(null);
+  const [approvedRequestId, setApprovedRequestId] = useState<number | undefined>(undefined);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
 
+  console.log(limit)
   const fetchData = async () => {
     if (!userInfo?.id) return;
     
@@ -48,12 +50,16 @@ const RemittanceLimitDisplay: React.FC = () => {
       
       // 한도 상향 신청 데이터 조회 (파일 정보 포함)
       const requests = await api.getUserRemittanceLimitRequests(userInfo.id);
-      const latestPendingRequest = requests.find(request => request.status === 'PENDING');
+      const latestPendingRequest = requests.find(request => request.status === 'PENDING' || request.status === 'REJECTED');
       if (latestPendingRequest) {
         setPendingRequest(latestPendingRequest);
       } else {
         setPendingRequest(null);
       }
+      
+      // 승인된 요청 ID 찾기
+      const approvedRequest = requests.find(req => req.status === 'APPROVED');
+      setApprovedRequestId(approvedRequest?.id);
       
       setError(null);
     } catch (err) {
@@ -151,7 +157,6 @@ const RemittanceLimitDisplay: React.FC = () => {
                >
                  송금 한도 정보
                </h3>
-                  {limit.limitType === 'DEFAULT_LIMIT' && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span 
                         className="remittance-limit-badge"
@@ -167,9 +172,8 @@ const RemittanceLimitDisplay: React.FC = () => {
                           border: '1px solid #93c5fd'
                         }}
                       >
-                        기본 한도 적용
+                        {limit.limitType === 'DEFAULT_LIMIT' ? '기본 한도 적용' : '개인 요청 한도 적용'}
                       </span>
-                      {!pendingRequest && (
                         <div 
                           className="remittance-limit-tooltip"
                           style={{
@@ -202,6 +206,7 @@ const RemittanceLimitDisplay: React.FC = () => {
                           >
                             ?
                           </div>
+                          {pendingRequest?.status !== 'PENDING' && (
                           <div 
                             className="tooltip-text"
                             style={{
@@ -221,7 +226,7 @@ const RemittanceLimitDisplay: React.FC = () => {
                               boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
                             }}
                           >
-                            개인별 한도 상향이 필요하시면 "한도 상향 신청" 버튼을 클릭해주세요
+                            {limit.limitType === 'DEFAULT_LIMIT' ? '개인별 한도 상향이 필요하시면 "한도 상향 신청" 버튼을 클릭해 주세요' : '상향이 필요하시면 "한도 상향 재신청" 버튼을 클릭 후 신청해 주세요'}
                             <div 
                               style={{
                                 position: 'absolute',
@@ -233,14 +238,14 @@ const RemittanceLimitDisplay: React.FC = () => {
                               }}
                             ></div>
                           </div>
+                          )}
                         </div>
-                      )}
                     </div>
-                  )}
             </div>
           </div>
           
-                    {limit.limitType === 'DEFAULT_LIMIT' && !pendingRequest && (
+          {/* 기본 한도 사용자이고 대기중인 요청이 없을 때만 신청 버튼 표시 */}
+          {(limit.limitType === 'DEFAULT_LIMIT' && !pendingRequest) && (
             <button
               onClick={() => setShowLimitModal(true)}
               className="remittance-limit-upgrade-btn"
@@ -275,39 +280,78 @@ const RemittanceLimitDisplay: React.FC = () => {
             </button>
           )}
           
-          {limit.limitType === 'DEFAULT_LIMIT' && pendingRequest && (
-            <button
-              onClick={() => setShowHistoryModal(true)}
-              className="remittance-limit-status-btn"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                color: 'white',
-                padding: '10px 16px',
-                borderRadius: '8px',
-                fontWeight: '600',
-                border: 'none',
-                cursor: 'pointer',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                transition: 'all 0.2s ease',
-                fontSize: '13px'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, #d97706 0%, #b45309 100%)';
-                e.currentTarget.style.transform = 'scale(1.05)';
-                e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
-                e.currentTarget.style.transform = 'scale(1)';
-                e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
-              }}
-            >
-              <FaEye style={{ fontSize: '12px' }} />
-              한도 상향 신청 상세
-            </button>
+          {/* 개인 한도 사용자이거나 대기중인 요청이 있을 때 상세 버튼 표시 */}
+          {(limit.limitType === 'USER_LIMIT' || pendingRequest) && (
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button
+                onClick={() => setShowHistoryModal(true)}
+                className="remittance-limit-status-btn"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                  color: 'white',
+                  padding: '10px 16px',
+                  borderRadius: '8px',
+                  fontWeight: '600',
+                  border: 'none',
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                  transition: 'all 0.2s ease',
+                  fontSize: '13px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #d97706 0%, #b45309 100%)';
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                  e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)';
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+                }}
+              >
+                <FaEye style={{ fontSize: '12px' }} />
+                한도 상향 신청 상세
+              </button>
+                           
+              {/* 승인된 사용자에게만 재신청 버튼 표시 */}
+              {limit.limitType === 'USER_LIMIT' && !pendingRequest && (
+                <button
+                  onClick={() => setShowLimitModal(true)}
+                  className="remittance-limit-rerequest-btn"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    color: 'white',
+                    padding: '10px 16px',
+                    borderRadius: '8px',
+                    fontWeight: '600',
+                    border: 'none',
+                    cursor: 'pointer',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                    transition: 'all 0.2s ease',
+                    fontSize: '13px'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #059669 0%, #047857 100%)';
+                    e.currentTarget.style.transform = 'scale(1.05)';
+                    e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(0, 0, 0, 0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                    e.currentTarget.style.transform = 'scale(1)';
+                    e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+                  }}
+                >
+                  <FaArrowUp style={{ fontSize: '12px' }} />
+                  한도 상향 재신청
+                </button>
+              )}
+            </div>
           )}
         </div>
         
@@ -447,9 +491,17 @@ const RemittanceLimitDisplay: React.FC = () => {
         onClose={() => setShowLimitModal(false)}
         currentLimit={{
           ...limit,
-          status: 'APPROVED' // 기본값으로 APPROVED 설정
+          status: pendingRequest?.status || 'APPROVED', // 현재 상태 반영
+          id: pendingRequest?.status === 'REJECTED' ? pendingRequest.id : approvedRequestId,
+          reason: pendingRequest?.reason,
+          dailyLimit: pendingRequest?.dailyLimit || limit.dailyLimit,
+          monthlyLimit: pendingRequest?.monthlyLimit || limit.monthlyLimit,
+          singleLimit: pendingRequest?.singleLimit || limit.singleLimit
         }}
         user={userInfo}
+        isEdit={pendingRequest?.status === 'REJECTED'} // 반려 상태일 때 수정 모드
+        editRequestId={pendingRequest?.status === 'REJECTED' ? pendingRequest.id : undefined}
+        isRerequest={limit.limitType === 'USER_LIMIT' && !pendingRequest} // 승인된 사용자일 때 재신청 모드
         onSuccess={fetchData}
       />
 

@@ -43,4 +43,6 @@ public interface RemittanceLimitRequestMapper {
     );
 
     int deleteUserRemittanceLimit(@Param("userId") Long userId);
+    
+    int hasUserRemittanceLimit(@Param("userId") Long userId);
 } 

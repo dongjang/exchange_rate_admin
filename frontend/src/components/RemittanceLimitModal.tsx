@@ -6,6 +6,7 @@ import { useAtom } from 'jotai';
 import { userInfoAtom } from '../store/userStore';
 
 interface RemittanceLimit {
+  id?: number; // 재신청 모드에서 사용할 ID
   dailyLimit: number;
   monthlyLimit: number;
   singleLimit: number;
@@ -29,6 +30,7 @@ interface RemittanceLimit {
     fileSize: number;
     fileType: string;
   };
+  limitType: 'DEFAULT_LIMIT' | 'UPPER_LIMIT'; // 한도 타입
 }
 
 interface RemittanceLimitModalProps {
@@ -38,6 +40,7 @@ interface RemittanceLimitModalProps {
   user?: any;
   isEdit?: boolean;
   editRequestId?: number;
+  isRerequest?: boolean; // 재신청 모드 추가
   onSuccess?: () => void;
 }
 
@@ -48,6 +51,7 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
   user,
   isEdit = false,
   editRequestId,
+  isRerequest = false, // 재신청 모드 추가
   onSuccess
 }) => {
   const [formData, setFormData] = useState({
@@ -75,11 +79,11 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
   const [userInfo] = useAtom(userInfoAtom);
 
   // 기존 한도가 있는지 확인 (첫 번째 신청인지 여부)
-  const isFirstRequest = !currentLimit || currentLimit.status !== 'APPROVED';
+  const isFirstRequest = !currentLimit || currentLimit.limitType === 'DEFAULT_LIMIT';
 
-  // 수정 모드일 때 기존 데이터 로드
+  // 재신청 모드일 때 기존 데이터 로드
   useEffect(() => {
-    if (isEdit && currentLimit) {
+    if ((isEdit || isRerequest) && currentLimit) {
       setFormData({
         dailyLimit: formatNumberWithCommas(currentLimit.dailyLimit.toString()),
         monthlyLimit: formatNumberWithCommas(currentLimit.monthlyLimit.toString()),
@@ -103,7 +107,7 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
         setExistingFiles(prev => ({ ...prev, business: currentLimit.businessFile }));
       }
     }
-  }, [isEdit, currentLimit]);
+  }, [isEdit, isRerequest, currentLimit]);
 
   const formatCurrency = (amount: number) => {
     return amount.toLocaleString() + '원';
@@ -369,11 +373,24 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
   const validateFiles = (): boolean => {
     console.log('validateFiles - isFirstRequest:', isFirstRequest);
     console.log('validateFiles - isEdit:', isEdit);
+    console.log('validateFiles - isRerequest:', isRerequest);
     console.log('validateFiles - files:', formData.files);
+    console.log('validateFiles - existingFiles:', existingFiles);
     
-    // 수정 모드이거나 첫 번째 신청인 경우 파일 업로드가 필수
-    if (isFirstRequest && !isEdit) {
-      if (formData.files.income.length === 0) {
+    // 재신청 모드이거나 승인된 상태에서 재신청한 후 수정하는 경우 파일 validation 비활성화
+    if (isRerequest || (isEdit && currentLimit?.status === 'APPROVED')) {
+      console.log('validateFiles - rerequest mode or approved rerequest edit, skipping file validation');
+      return true;
+    }
+    
+    // 최초 신청이거나 수정 모드인 경우 파일 검증
+    const needsFileValidation = isFirstRequest || isEdit;
+    
+    if (needsFileValidation) {
+      console.log('validateFiles - checking files for validation');
+      
+      // 소득 증빙 파일 검증 (기존 파일이 없고 새 파일도 없는 경우)
+      if (!existingFiles.income && formData.files.income.length === 0) {
         console.log('validateFiles - income file missing');
         Swal.fire({
           icon: 'error',
@@ -383,7 +400,9 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
         });
         return false;
       }
-      if (formData.files.bankbook.length === 0) {
+      
+      // 통장 사본 파일 검증 (기존 파일이 없고 새 파일도 없는 경우)
+      if (!existingFiles.bankbook && formData.files.bankbook.length === 0) {
         console.log('validateFiles - bankbook file missing');
         Swal.fire({
           icon: 'error',
@@ -393,7 +412,9 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
         });
         return false;
       }
-      if (formData.files.business.length === 0) {
+      
+      // 사업 관련 파일 검증 (기존 파일이 없고 새 파일도 없는 경우)
+      if (!existingFiles.business && formData.files.business.length === 0) {
         console.log('validateFiles - business file missing');
         Swal.fire({
           icon: 'error',
@@ -433,10 +454,10 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
     // Confirm Swal
     const result = await Swal.fire({
       icon: 'question',
-              title: isEdit ? '한도 상향 신청 수정' : '한도 상향 신청',
-        text: isEdit ? '입력하신 내용으로 한도 상향 신청을 수정하시겠습니까?' : '입력하신 내용으로 한도 상향을 신청하시겠습니까?',
-        showCancelButton: true,
-        confirmButtonText: isEdit ? '수정하기' : '신청하기',
+      title: isRerequest ? '한도 상향 재신청' : (isEdit ? '한도 상향 신청 수정' : '한도 상향 신청'),
+      text: isRerequest ? '입력하신 내용으로 한도 상향을 재신청하시겠습니까?' : (isEdit ? '입력하신 내용으로 한도 상향 신청을 수정하시겠습니까?' : '입력하신 내용으로 한도 상향을 신청하시겠습니까?'),
+      showCancelButton: true,
+      confirmButtonText: isRerequest ? '재신청하기' : (isEdit ? '수정하기' : '신청하기'),
       cancelButtonText: '취소',
       confirmButtonColor: '#3085d6',
       cancelButtonColor: '#d33'
@@ -456,15 +477,17 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
       formDataToSend.append('singleLimit', formData.singleLimit.replace(/[^0-9]/g, ''));
       formDataToSend.append('reason', formData.reason);
 
-      // 파일 추가
-      if (formData.files.income.length > 0) {
-        formDataToSend.append('incomeFile', formData.files.income[0]);
-      }
-      if (formData.files.bankbook.length > 0) {
-        formDataToSend.append('bankbookFile', formData.files.bankbook[0]);
-      }
-      if (formData.files.business.length > 0) {
-        formDataToSend.append('businessFile', formData.files.business[0]);
+      // 파일 추가 (재신청 모드가 아닐 때만)
+      if (!isRerequest) {
+        if (formData.files.income.length > 0) {
+          formDataToSend.append('incomeFile', formData.files.income[0]);
+        }
+        if (formData.files.bankbook.length > 0) {
+          formDataToSend.append('bankbookFile', formData.files.bankbook[0]);
+        }
+        if (formData.files.business.length > 0) {
+          formDataToSend.append('businessFile', formData.files.business[0]);
+        }
       }
 
       // API 호출
@@ -472,7 +495,17 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
         throw new Error('사용자 정보를 찾을 수 없습니다.');
       }
 
-      if (isEdit && editRequestId) {
+      if (isRerequest && currentLimit && currentLimit.id) {
+        // 재신청 모드 - 기존 요청 UPDATE
+        await api.updateRemittanceLimitRequest(userInfo.id, currentLimit.id, formDataToSend, true);
+        
+        await Swal.fire({
+          icon: 'success',
+          title: '재신청이 완료되었습니다!',
+          text: '관리자 검토 후 결과를 알려드리겠습니다.',
+          confirmButtonText: '확인'
+        });
+      } else if (isEdit && editRequestId) {
         // 수정 모드
         await api.updateRemittanceLimitRequest(userInfo.id, editRequestId, formDataToSend);
         
@@ -677,8 +710,8 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
         )}
 
         <form onSubmit={handleSubmit}>
-          {/* 한도 입력 (첫 신청인 경우) */}
-          {isFirstRequest && (
+          {/* 한도 입력 (첫 신청이거나 수정 모드인 경우) */}
+          {(isFirstRequest || isEdit) && (
             <div style={{ marginBottom: '1.5rem' }}>
               <h3 style={{
                 margin: '0 0 1rem 0',
@@ -1049,42 +1082,43 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
             />
           </div>
 
-          {/* 파일 업로드 - 카테고리별 */}
-          <div style={{ marginBottom: '1.5rem' }}>
-            <label style={{
-              display: 'block',
-              marginBottom: '0.8rem',
-              fontSize: '0.9rem',
-              fontWeight: 500,
-              color: '#374151'
-            }}>
-              첨부 파일 {(isFirstRequest && !isEdit) && <span style={{ color: '#ef4444' }}>*</span>}
-            </label>
-            <div style={{
-              fontSize: '0.8rem',
-              color: '#6b7280',
-              marginBottom: '1rem',
-              padding: '0.5rem',
-              backgroundColor: '#f9fafb',
-              borderRadius: '6px',
-              border: '1px solid #e5e7eb'
-            }}>
-              <strong>📋 지원 파일 형식:</strong> jpg, png, gif, pdf, ppt, pptx (최대 10MB)
-            </div>
-            
-            {/* 소득 증빙 */}
-            <div style={{ marginBottom: '1rem' }}>
-              <h4 style={{
-                margin: '0 0 0.5rem 0',
-                fontSize: '0.85rem',
-                fontWeight: 600,
+          {/* 첨부 파일 섹션 - 재신청 모드가 아니고 승인된 상태에서 재신청한 후 수정하는 경우가 아닐 때만 표시 */}
+          {!isRerequest && !(isEdit && currentLimit?.status === 'APPROVED') && (
+            <>
+              <label style={{
+                display: 'block',
+                marginBottom: '0.5rem',
+                fontSize: '0.9rem',
+                fontWeight: 500,
                 color: '#374151'
               }}>
-                💰 소득 증빙 {(isFirstRequest && !isEdit) && <span style={{ color: '#ef4444' }}>*</span>} 
-                <span style={{ fontSize: '0.7rem', color: '#6b7280', fontWeight: 'normal' }}>
-                  ({formData.files.income.length}/1)
-                </span>
-              </h4>
+                첨부 파일 {(isFirstRequest && !isEdit) && <span style={{ color: '#ef4444' }}>*</span>}
+              </label>
+              <div style={{
+                fontSize: '0.8rem',
+                color: '#6b7280',
+                marginBottom: '1rem',
+                padding: '0.5rem',
+                backgroundColor: '#f9fafb',
+                borderRadius: '6px',
+                border: '1px solid #e5e7eb'
+              }}>
+                <strong>📋 지원 파일 형식:</strong> jpg, png, gif, pdf(최대 10MB)
+              </div>
+              
+              {/* 소득 증빙 */}
+              <div style={{ marginBottom: '1rem' }}>
+                <h4 style={{
+                  margin: '0 0 0.5rem 0',
+                  fontSize: '0.85rem',
+                  fontWeight: 600,
+                  color: '#374151'
+                }}>
+                  💰 소득 증빙 {(isFirstRequest && !isEdit) && <span style={{ color: '#ef4444' }}>*</span>} 
+                  <span style={{ fontSize: '0.7rem', color: '#6b7280', fontWeight: 'normal' }}>
+                    ({formData.files.income.length}/1)
+                  </span>
+                </h4>
                              <div style={{
                  border: dragStates.income ? '2px dashed #3b82f6' : (formData.files.income.length > 0 || existingFiles.income) ? '2px dashed #d1d5db' : '2px dashed #d1d5db',
                  borderRadius: '8px',
@@ -1142,7 +1176,7 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
               >
                 <input
                   type="file"
-                  accept=".jpg,.jpeg,.png,.gif,.pdf,.ppt,.pptx"
+                  accept=".jpg,.jpeg,.png,.gif,.pdf"
                   onChange={(e) => handleFileChange(e, 'income')}
                   style={{ display: 'none' }}
                   id="file-upload-income"
@@ -1317,7 +1351,7 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
               >
                 <input
                   type="file"
-                  accept=".jpg,.jpeg,.png,.gif,.pdf,.ppt,.pptx"
+                  accept=".jpg,.jpeg,.png,.gif,.pdf"
                   onChange={(e) => handleFileChange(e, 'bankbook')}
                   style={{ display: 'none' }}
                   id="file-upload-bankbook"
@@ -1492,7 +1526,7 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
               >
                 <input
                   type="file"
-                  accept=".jpg,.jpeg,.png,.gif,.pdf,.ppt,.pptx"
+                  accept=".jpg,.jpeg,.png,.gif,.pdf"
                   onChange={(e) => handleFileChange(e, 'business')}
                   style={{ display: 'none' }}
                   id="file-upload-business"
@@ -1596,40 +1630,43 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
                 </div>
               )}
             </div>
-          </div>
+          </>
+        )}
 
-          {/* 주의사항 */}
-          <div style={{
-            background: '#fef3c7',
-            border: '1px solid #f59e0b',
-            borderRadius: '8px',
-            padding: '1rem',
-            marginBottom: '1.5rem'
-          }}>
+          {/* 주의사항 - 재신청 모드가 아닐 때만 표시 */}
+          {!isRerequest && (
             <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              marginBottom: '0.5rem'
+              background: '#fef3c7',
+              border: '1px solid #f59e0b',
+              borderRadius: '8px',
+              padding: '1rem',
+              marginBottom: '1.5rem'
             }}>
-              <FaExclamationTriangle style={{ color: '#f59e0b' }} />
-              <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#92400e' }}>
-                주의사항
-              </span>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
+                marginBottom: '0.5rem'
+              }}>
+                <FaExclamationTriangle style={{ color: '#f59e0b' }} />
+                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: '#92400e' }}>
+                  주의사항
+                </span>
+              </div>
+              <ul style={{
+                margin: 0,
+                paddingLeft: '1.2rem',
+                fontSize: '0.8rem',
+                color: '#92400e',
+                lineHeight: 1.5
+              }}>
+                <li>소득 증빙, 통장 사본, 사업 관련 서류를 필수로 첨부해야 합니다.</li>
+                <li>지원 파일 형식: jpg, png, gif, pdf(최대 10MB)</li>
+                <li>신청 후 관리자 검토를 거쳐 승인/반려됩니다.</li>
+                <li>처리 결과는 이메일로 안내드립니다.</li>
+              </ul>
             </div>
-            <ul style={{
-              margin: 0,
-              paddingLeft: '1.2rem',
-              fontSize: '0.8rem',
-              color: '#92400e',
-              lineHeight: 1.5
-            }}>
-              <li>소득 증빙, 통장 사본, 사업 관련 서류를 필수로 첨부해야 합니다.</li>
-              <li>지원 파일 형식: jpg, png, gif, pdf, ppt, pptx (최대 10MB)</li>
-              <li>신청 후 관리자 검토를 거쳐 승인/반려됩니다.</li>
-              <li>처리 결과는 이메일로 안내드립니다.</li>
-            </ul>
-          </div>
+          )}
 
           {/* 버튼 */}
           <div style={{

@@ -65,10 +65,11 @@ public class RemittanceLimitRequestController {
                                                               @RequestParam("reason") String reason,
                                                               @RequestParam(value = "incomeFile", required = false) MultipartFile incomeFile,
                                                               @RequestParam(value = "bankbookFile", required = false) MultipartFile bankbookFile,
-                                                              @RequestParam(value = "businessFile", required = false) MultipartFile businessFile) {
+                                                              @RequestParam(value = "businessFile", required = false) MultipartFile businessFile,
+                                                              @RequestParam(value = "isRerequest", defaultValue = "false") boolean isRerequest) {
         try {
             RemittanceLimitRequest request = remittanceLimitRequestService.updateRequest(
-                requestId, userId, dailyLimit, monthlyLimit, singleLimit, reason, incomeFile, bankbookFile, businessFile);
+                requestId, userId, dailyLimit, monthlyLimit, singleLimit, reason, incomeFile, bankbookFile, businessFile, isRerequest);
             return ResponseEntity.ok(request);
         } catch (IOException e) {
             return ResponseEntity.badRequest().build();

@@ -55,6 +55,7 @@ const AdminRemittanceLimits: React.FC = () => {
   const [isDefaultLimitModalOpen, setIsDefaultLimitModalOpen] = useState(false);
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [pendingRejectRequestId, setPendingRejectRequestId] = useState<number | null>(null);
+  const [processingRequestId, setProcessingRequestId] = useState<number | null>(null);
 
   useEffect(() => {
     loadRequests();
@@ -145,6 +146,7 @@ const AdminRemittanceLimits: React.FC = () => {
   };
 
   const processRequest = async (requestId: number, status: 'APPROVED' | 'REJECTED', adminComment: string, userId?: number, dailyLimit?: number, monthlyLimit?: number, singleLimit?: number) => {
+    setProcessingRequestId(requestId);
     try {
       console.log('API 호출 시작:', { requestId, status, adminComment });
       
@@ -158,21 +160,27 @@ const AdminRemittanceLimits: React.FC = () => {
         return;
       }
       
-      // 승인인 경우에만 한도 정보 포함
+      // 요청 데이터 구성
       const requestData: any = {
         status,
         adminId: userInfo.id,
         adminComment
       };
+      
       console.log('userId : ',userId);
       console.log('dailyLimit : ',dailyLimit);
       console.log('monthlyLimit : ',monthlyLimit);
       console.log('singleLimit : ',singleLimit);
+      
+      // 승인인 경우에만 한도 정보 포함, 반려할 때도 userId는 포함
       if (status === 'APPROVED') {
         requestData.userId = userId;
         requestData.dailyLimit = dailyLimit;
         requestData.monthlyLimit = monthlyLimit;
         requestData.singleLimit = singleLimit;
+      } else if (status === 'REJECTED') {
+        // 반려할 때도 userId 포함
+        requestData.userId = userId;
       }
       
       const response = await api.processRemittanceLimitRequest(requestId, requestData);
@@ -201,9 +209,10 @@ const AdminRemittanceLimits: React.FC = () => {
       Swal.fire({
         icon: 'error',
         title: '오류',
-        text: errorMessage,
-        confirmButtonText: '확인'
+        text: errorMessage
       });
+    } finally {
+      setProcessingRequestId(null);
     }
   };
 
@@ -295,6 +304,26 @@ const AdminRemittanceLimits: React.FC = () => {
 
   return (
     <div className="admin-remittance-limits">
+      {/* 전체 페이지 로딩 오버레이 */}
+      {processingRequestId && (
+        <div className="loading-overlay">
+          <div className="loading-modal">
+            {/* 로딩 스피너 */}
+            <div className="loading-spinner-large" />
+            
+            {/* 로딩 텍스트 */}
+            <div className="loading-text">
+              요청을 처리하고 있습니다...
+            </div>
+            
+            {/* 진행 상태 텍스트 */}
+            <div className="loading-subtext">
+              잠시만 기다려주세요.
+            </div>
+          </div>
+        </div>
+      )}
+      
       {/* 통합 헤더 섹션 */}
       <div className="unified-header">
         <div className="header-left">
@@ -426,12 +455,14 @@ const AdminRemittanceLimits: React.FC = () => {
                   <button
                     onClick={() => handleRequestAction('approve',row.id, row.userId, row.dailyLimit,row.monthlyLimit, row.singleLimit)}
                     className="btn btn-success btn-sm"
+                    disabled={processingRequestId === row.id}
                   >
                     <FaCheck /> 승인
                   </button>
                   <button
                     onClick={() => handleRequestAction('reject',row.id)}
                     className="btn btn-danger btn-sm"
+                    disabled={processingRequestId === row.id}
                   >
                     <FaTimes /> 반려
                   </button>

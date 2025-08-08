@@ -211,7 +211,10 @@ export const api = {
     return response.data;
   },
 
-  async updateRemittanceLimitRequest(userId: number, requestId: number, data: FormData): Promise<any> {
+  async updateRemittanceLimitRequest(userId: number, requestId: number, data: FormData, isRerequest: boolean = false): Promise<any> {
+    // isRerequest 파라미터를 FormData에 추가
+    data.append('isRerequest', isRerequest.toString());
+    
     const response = await axios.put(`${API_BASE_URL}/remittance-limit-requests/user/${userId}/${requestId}`, data, {
       headers: { 'Content-Type': 'multipart/form-data' },
       withCredentials: true,

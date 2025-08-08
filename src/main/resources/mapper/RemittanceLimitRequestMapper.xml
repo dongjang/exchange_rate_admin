@@ -194,4 +194,10 @@
         DELETE FROM user_remittance_limit
         WHERE user_id = #{userId}
     </delete>
+
+    <select id="hasUserRemittanceLimit" resultType="int">
+        SELECT COUNT(*)
+        FROM user_remittance_limit
+        WHERE user_id = #{userId}
+    </select>
 </mapper> 
