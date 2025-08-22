@@ -25,47 +25,47 @@
         LEFT JOIN country c ON r.currency = c.code
         LEFT JOIN user u ON r.user_id = u.id
         <where>
-            <if test="search.userName != null and search.userName != ''">
-                AND u.name LIKE CONCAT('%', #{search.userName}, '%')
+            <if test="userName != null and userName != ''">
+                AND u.name LIKE CONCAT('%', #{userName}, '%')
             </if>
-            <if test="search.receiverName != null and search.receiverName != ''">
-                AND r.receiver_name LIKE CONCAT('%', #{search.receiverName}, '%')
+            <if test="receiverName != null and receiverName != ''">
+                AND r.receiver_name LIKE CONCAT('%', #{receiverName}, '%')
             </if>
-            <if test="search.currency != null and search.currency != ''">
-                AND r.currency = #{search.currency}
+            <if test="currency != null and currency != ''">
+                AND r.currency = #{currency}
             </if>
-            <if test="search.status != null and search.status != ''">
-                AND r.status = #{search.status}
+            <if test="status != null and status != ''">
+                AND r.status = #{status}
             </if>
-            <if test="search.minAmount != null">
-                AND r.amount &gt;= #{search.minAmount}
+            <if test="minAmount != null">
+                AND r.amount &gt;= #{minAmount}
             </if>
-            <if test="search.maxAmount != null">
-                AND r.amount &lt;= #{search.maxAmount}
+            <if test="maxAmount != null">
+                AND r.amount &lt;= #{maxAmount}
             </if>
-            <if test="search.startDate != null and search.startDate != ''">
-                AND DATE(r.created_at) &gt;= #{search.startDate}
+            <if test="startDate != null and startDate != ''">
+                AND DATE(r.created_at) &gt;= #{startDate}
             </if>
-            <if test="search.endDate != null and search.endDate != ''">
-                AND DATE(r.created_at) &lt;= #{search.endDate}
+            <if test="endDate != null and endDate != ''">
+                AND DATE(r.created_at) &lt;= #{endDate}
             </if>
         </where>
         ORDER BY 
         <choose>
-            <when test="search.sortOrder == 'oldest'">
+            <when test="sortOrder == 'oldest'">
                 r.created_at ASC
             </when>
-            <when test="search.sortOrder == 'amount_desc'">
+            <when test="sortOrder == 'amount_desc'">
                 r.amount DESC
             </when>
-            <when test="search.sortOrder == 'amount_asc'">
+            <when test="sortOrder == 'amount_asc'">
                 r.amount ASC
             </when>
             <otherwise>
                 r.created_at DESC
             </otherwise>
         </choose>
-        LIMIT #{search.size} OFFSET #{search.page}
+        LIMIT #{size} OFFSET #{page}
     </select>
 
 
@@ -78,29 +78,29 @@
         LEFT JOIN country c ON r.currency = c.code
         LEFT JOIN user u ON r.user_id = u.id
         <where>
-            <if test="search.userName != null and search.userName != ''">
-                AND u.name LIKE CONCAT('%', #{search.userName}, '%')
+            <if test="userName != null and userName != ''">
+                AND u.name LIKE CONCAT('%', #{userName}, '%')
             </if>
-            <if test="search.receiverName != null and search.receiverName != ''">
-                AND r.receiver_name LIKE CONCAT('%', #{search.receiverName}, '%')
+            <if test="receiverName != null and receiverName != ''">
+                AND r.receiver_name LIKE CONCAT('%', #{receiverName}, '%')
             </if>
-            <if test="search.currency != null and search.currency != ''">
-                AND r.currency = #{search.currency}
+            <if test="currency != null and currency != ''">
+                AND r.currency = #{currency}
             </if>
-            <if test="search.status != null and search.status != ''">
-                AND r.status = #{search.status}
+            <if test="status != null and status != ''">
+                AND r.status = #{status}
             </if>
-            <if test="search.minAmount != null">
-                AND r.amount &gt;= #{search.minAmount}
+            <if test="minAmount != null">
+                AND r.amount &gt;= #{minAmount}
             </if>
-            <if test="search.maxAmount != null">
-                AND r.amount &lt;= #{search.maxAmount}
+            <if test="maxAmount != null">
+                AND r.amount &lt;= #{maxAmount}
             </if>
-            <if test="search.startDate != null and search.startDate != ''">
-                AND DATE(r.created_at) &gt;= #{search.startDate}
+            <if test="startDate != null and startDate != ''">
+                AND DATE(r.created_at) &gt;= #{startDate}
             </if>
-            <if test="search.endDate != null and search.endDate != ''">
-                AND DATE(r.created_at) &lt;= #{search.endDate}
+            <if test="endDate != null and endDate != ''">
+                AND DATE(r.created_at) &lt;= #{endDate}
             </if>
         </where>
     </select>

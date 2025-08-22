@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaHistory, FaCog } from 'react-icons/fa';
+import { useLocation } from 'react-router-dom';
 import AdminRemittanceHistory from './AdminRemittanceHistory';
 import AdminRemittanceLimits from './AdminRemittanceLimits';
 import AdminLayout from './AdminLayout';
@@ -12,7 +13,15 @@ interface AdminRemittanceManagementProps {
 const AdminRemittanceManagement: React.FC<AdminRemittanceManagementProps> = ({ 
   user 
 }) => {
+  const location = useLocation();
   const [activeTab, setActiveTab] = useState<'history' | 'limits'>('history');
+
+  // URL state에서 activeTab을 확인하여 탭 설정
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+    }
+  }, [location.state]);
 
   return (
     <AdminLayout user={user}>
@@ -40,7 +49,7 @@ const AdminRemittanceManagement: React.FC<AdminRemittanceManagementProps> = ({
           <div className="tab-panel">
             <div className="panel-header">
               <h2>송금 이력 조회</h2>
-              <p>전체 송금 내역을 조회하고 관리할 수 있습니다.</p>
+              <p>전체 송금 내역을 조회할 수 있습니다.</p>
             </div>
             <div className="panel-content">
               <AdminRemittanceHistory />

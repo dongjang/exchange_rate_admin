@@ -158,6 +158,7 @@ function UserModal({ isOpen, onClose }: UserModalProps) {
               onChange={handleChange}
               required
               className="user-modal-input"
+              autoComplete="off"
             />
           </div>
           <div className="form-group">
@@ -169,6 +170,7 @@ function UserModal({ isOpen, onClose }: UserModalProps) {
               value={formData.pictureUrl}
               onChange={handleChange}
               className="user-modal-input"
+              autoComplete="off"
             />
           </div>
           <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>

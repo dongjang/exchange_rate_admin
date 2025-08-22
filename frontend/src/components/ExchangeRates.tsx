@@ -1,14 +1,21 @@
-import React, { useEffect, useState } from 'react';
 import { useAtom, useSetAtom } from 'jotai';
-import { countryAtom, remittanceCountriesAtom, getRemittanceCountries } from '../store/countryStore';
-import { userInfoAtom } from '../store/userStore';
-import { api } from '../services/api';
-import axios from 'axios';
+import { useEffect, useState } from 'react';
 import Select from 'react-select';
+import { api } from '../services/api';
+import {
+  countryAtom,
+  exchangeRatesAtom,
+  favoriteCurrenciesAtom,
+  getRemittanceCountries,
+  remittanceCountriesAtom,
+  updateExchangeRatesAtom,
+  updateFavoriteCurrenciesAtom
+} from '../store/countryStore';
+import CommonPageHeader from './CommonPageHeader';
 import ExchangeRatesFavorites from './ExchangeRatesFavorites';
+import ExchangeRatesKrwHighlight from './ExchangeRatesKrwHighlight';
 import ExchangeRatesList from './ExchangeRatesList';
 import ExchangeRatesPaging from './ExchangeRatesPaging';
-import ExchangeRatesKrwHighlight from './ExchangeRatesKrwHighlight';
 import { RemitSimulationModal } from './RemitSimulationModal';
 
 interface User {
@@ -33,16 +40,19 @@ export function ExchangeRates({ user }: { user: User | null }) {
   const [countries] = useAtom(countryAtom);
   const [remittanceCountries] = useAtom(remittanceCountriesAtom);
   const getRemitCountries = useSetAtom(getRemittanceCountries);
-  const [rates, setRates] = useState<{ [key: string]: number }>({});
+  const [rates] = useAtom(exchangeRatesAtom);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE_OPTIONS[0]);
   const [search, setSearch] = useState('');
-  const [favorites, setFavorites] = useState<string[]>([]);
+  const [favorites] = useAtom(favoriteCurrenciesAtom);
   const [isRemitModalOpen, setIsRemitModalOpen] = useState(false);
   const [countryFilter, setCountryFilter] = useState<'all' | 'remittance'>('all');
   const [isMobile, setIsMobile] = useState(false);
+  
+  const updateExchangeRates = useSetAtom(updateExchangeRatesAtom);
+  const updateFavoriteCurrencies = useSetAtom(updateFavoriteCurrenciesAtom);
 
   useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 600);
@@ -54,16 +64,15 @@ export function ExchangeRates({ user }: { user: User | null }) {
   // 관심 환율 목록 조회
   const getUserFavoriteCurrencyList = async () => {
     try {
-      const list = await api.getFavoriteCurrencyList(user?.id || 0);
-      setFavorites(list);
+      await updateFavoriteCurrencies(user?.id || 0);
     } catch {
-      setFavorites([]);
+      console.error('관심 환율 조회 실패');
     }
   };
 
   useEffect(() => {
     getUserFavoriteCurrencyList();
-  }, []);
+  }, [user?.id]);
 
   const handleFavoriteClick = async (currency: string, isFavorite: boolean) => {
     try {
@@ -73,14 +82,16 @@ export function ExchangeRates({ user }: { user: User | null }) {
           user_id: user?.id || 0,
           currency_code: currency,
         });
-        setFavorites(prev => prev.filter(f => f !== currency));
+        // atom 업데이트
+        await updateFavoriteCurrencies(user?.id || 0);
       } else {
         await api.saveFavoriteCurrency({
           type: 'ADD',
           user_id: user?.id || 0,
           currency_code: currency,
         });
-        setFavorites(prev => [...prev, currency]);
+        // atom 업데이트
+        await updateFavoriteCurrencies(user?.id || 0);
       }
     } catch (error) {
       console.error('관심 환율 처리 중 오류:', error);
@@ -94,8 +105,7 @@ export function ExchangeRates({ user }: { user: User | null }) {
 
   const getRates = async () => {
     try {
-      const res = await axios.get('http://localhost:8080/api/exchange/exchangeRates', { withCredentials: true });
-      setRates(res.data.conversion_rates);
+      await updateExchangeRates();
       setLoading(false);
     } catch (err: any) {
       setError(err.message);
@@ -104,8 +114,8 @@ export function ExchangeRates({ user }: { user: User | null }) {
   };
 
   useEffect(() => {
-   //환율 조회
-   //getRates();
+    // 환율 조회
+    getRates();
   }, []);
 
   // 송금 가능 국가 선택 시, atom이 비어 있으면 get
@@ -173,105 +183,96 @@ export function ExchangeRates({ user }: { user: User | null }) {
       boxSizing: 'border-box'
     }}>
       {/* 헤더 섹션 */}
+      <CommonPageHeader
+        title="💱 오늘의 환율"
+        subtitle="달러 (USD) 기준"
+        gradientColors={{ from: '#667eea', to: '#764ba2' }}
+      />
+      
+      {/* 검색 필터 */}
       <div style={{
+        display: 'flex',
+        gap: isMobile ? '0.5rem' : '1rem',
+        justifyContent: 'center',
+        alignItems: 'center',
+        flexWrap: 'nowrap',
+        flexDirection: 'row',
+        marginBottom: '1.5rem',
         background: 'linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%)',
-        borderRadius: '16px 16px 0 0',
-        padding: '2rem',
-        color: '#fff',
-        textAlign: 'center',
-        width: '100%',
-        boxSizing: 'border-box'
+        borderRadius: '12px',
+        padding: '1.5rem',
+        color: '#fff'
       }}>
-        <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>💱</div>
-        <h1 style={{ 
-          fontSize: '1.5rem', 
-          fontWeight: 700, 
-          margin: 0
-        }}>
-          오늘의 환율 <span style={{ fontWeight: 500, fontSize: '1.1rem', opacity: 0.8 }}>USD (달러) 기준</span>
-        </h1>
-        
-        {/* 검색 필터 */}
-        <div style={{
-          display: 'flex',
-          gap: isMobile ? '0.5rem' : '1rem',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexWrap: 'nowrap',
-          flexDirection: 'row',
-          marginTop: '1.5rem'
-        }}>
-          <div style={{ position: 'relative' }}>
-            <select
-              value={countryFilter}
-              onChange={e => setCountryFilter(e.target.value as 'all' | 'remittance')}
-              style={{
-                padding: isMobile ? '0.4rem 0.7rem' : '0.75rem 1rem',
-                border: 'none',
+        <div style={{ position: 'relative' }}>
+          <select
+            value={countryFilter}
+            onChange={e => setCountryFilter(e.target.value as 'all' | 'remittance')}
+            style={{
+              padding: isMobile ? '0.4rem 0.7rem' : '0.75rem 1rem',
+              border: 'none',
+              borderRadius: '8px',
+              background: '#fff',
+              color: '#1e293b',
+              fontWeight: 500,
+              fontSize: isMobile ? '0.75rem' : '0.875rem',
+              minWidth: isMobile ? 80 : 110,
+              height: isMobile ? 36 : 44,
+              outline: 'none'
+            }}
+          >
+            <option value="all">전체 국가</option>
+            <option value="remittance">송금 가능 국가</option>
+          </select>
+        </div>
+        <div style={{ minWidth: isMobile ? 290 : 300, maxWidth: isMobile ? 380 : 400, flex: 1 }}>
+          <Select
+            options={searchOptions}
+            value={selectedSearchOption}
+            onChange={(opt) => setSearch(opt?.value || '')}
+            isSearchable
+            placeholder="국가/통화명/통화로 검색"
+            isClearable
+            noOptionsMessage={() => '검색 결과가 없습니다.'}
+            styles={{
+              control: (base) => ({
+                ...base,
+                minHeight: isMobile ? 32 : 44,
                 borderRadius: '8px',
+                border: 'none',
                 background: '#fff',
-                color: '#1e293b',
+                fontSize: isMobile ? '0.75rem' : '1rem',
                 fontWeight: 500,
-                fontSize: isMobile ? '0.75rem' : '0.875rem',
-                minWidth: isMobile ? 80 : 110,
-                height: isMobile ? 36 : 44,
-                outline: 'none'
-              }}
-            >
-              <option value="all">전체</option>
-              <option value="remittance">송금 가능 국가</option>
-            </select>
-          </div>
-          <div style={{ minWidth: isMobile ? 290 : 300, maxWidth: isMobile ? 380 : 400, flex: 1 }}>
-            <Select
-              options={searchOptions}
-              value={selectedSearchOption}
-              onChange={(opt) => setSearch(opt?.value || '')}
-              isSearchable
-              placeholder="국가/통화명/통화로 검색"
-              isClearable
-              noOptionsMessage={() => '검색 결과가 없습니다.'}
-              styles={{
-                control: (base) => ({
-                  ...base,
-                  minHeight: isMobile ? 32 : 44,
-                  borderRadius: '8px',
-                  border: 'none',
-                  background: '#fff',
-                  fontSize: isMobile ? '0.75rem' : '1rem',
-                  fontWeight: 500,
-                  boxShadow: 'none',
-                  padding: isMobile ? '0 0.3rem' : undefined,
-                }),
-                menu: (base) => ({ ...base, zIndex: 10 }),
-                menuPortal: base => ({ ...base, zIndex: 9999 }),
-                option: (base, state) => ({
-                  ...base,
-                  color: state.isSelected ? '#2563eb' : '#222',
-                  background: state.isSelected ? '#e0e7ef' : '#fff',
-                  fontWeight: state.isSelected ? 700 : 500,
-                  fontSize: isMobile ? '0.75rem' : '1rem',
-                  padding: isMobile ? '6px 8px' : '8px 12px',
-                }),
-                singleValue: (base) => ({
-                  ...base,
-                  fontSize: isMobile ? '0.75rem' : '1rem',
-                  fontWeight: 500,
-                  color: '#1e293b'
-                }),
-                placeholder: (base) => ({
-                  ...base,
-                  fontSize: isMobile ? '0.75rem' : '1rem',
-                  color: '#94a3b8'
-                }),
-                input: (base) => ({
-                  ...base,
-                  fontSize: isMobile ? '0.75rem' : '1rem',
-                }),
-              }}
-              menuPortalTarget={typeof window !== 'undefined' ? document.body : undefined}
-            />
-          </div>
+                boxShadow: 'none',
+                padding: isMobile ? '0 0.3rem' : undefined,
+              }),
+              menu: (base) => ({ ...base, zIndex: 10 }),
+              menuPortal: base => ({ ...base, zIndex: 9999 }),
+              option: (base, state) => ({
+                ...base,
+                color: state.isSelected ? '#2563eb' : '#222',
+                background: state.isSelected ? '#e0e7ef' : '#fff',
+                fontWeight: state.isSelected ? 700 : 500,
+                fontSize: isMobile ? '0.75rem' : '1rem',
+                padding: isMobile ? '6px 8px' : '8px 12px',
+              }),
+              singleValue: (base) => ({
+                ...base,
+                fontSize: isMobile ? '0.75rem' : '1rem',
+                fontWeight: 500,
+                color: '#1e293b'
+              }),
+              placeholder: (base) => ({
+                ...base,
+                fontSize: isMobile ? '0.75rem' : '1rem',
+                color: '#94a3b8'
+              }),
+              input: (base) => ({
+                ...base,
+                fontSize: isMobile ? '0.75rem' : '1rem',
+              }),
+            }}
+            menuPortalTarget={typeof window !== 'undefined' ? document.body : undefined}
+          />
         </div>
       </div>
 

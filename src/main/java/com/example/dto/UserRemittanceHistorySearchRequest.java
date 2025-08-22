@@ -13,6 +13,6 @@ public class UserRemittanceHistorySearchRequest {
     private String startDate;
     private String endDate;
     private String sortOrder;
-    private Integer page;
-    private Integer size;
+    private int page;
+    private int size;
 } 

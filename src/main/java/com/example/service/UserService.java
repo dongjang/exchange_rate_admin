@@ -1,29 +1,63 @@
 package com.example.service;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
+import com.example.domain.User;
+import com.example.dto.UserResponse;
+import com.example.dto.UserSearchRequest;
+import com.example.mapper.UserMapper;
+import com.example.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.domain.User;
-import com.example.dto.UserResponse;
-import com.example.dto.UserUpdateRequest;
-import com.example.dto.UserStats;
-import com.example.mapper.UserMapper;
-import com.example.repository.UserRepository;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserService {
-
-    @Autowired
-    private UserRepository userRepository;
     
     @Autowired
     private UserMapper userMapper;
+    
+    @Autowired
+    private UserRepository userRepository;
+    
+    public List<UserResponse> searchUsers(UserSearchRequest searchRequest) {
+        return userMapper.searchUsers(searchRequest);
+    }
+    
+    public int getUserCount(UserSearchRequest searchRequest) {
+        return userMapper.getUserCount(searchRequest);
+    }
+    
+    public UserResponse getUserById(Long id) {
+        return userMapper.getUserById(id);
+    }
+    
+    public void updateUserStatus(Long id, String status) {
+        userMapper.updateUserStatus(id, status);
+    }
+
+    @Transactional
+    public void updateUser(Long id, Map<String, Object> userData) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        
+        // 업데이트 가능한 필드들만 수정
+        if (userData.containsKey("name")) {
+            user.setName((String) userData.get("name"));
+        }
+        if (userData.containsKey("pictureUrl")) {
+            user.setPictureUrl((String) userData.get("pictureUrl"));
+        }
+        
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+    }
+
+    public User findByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
 
     @Transactional
     public User saveOrUpdateUser(Map<String, Object> userAttributes) {
@@ -31,21 +65,13 @@ public class UserService {
         String name = (String) userAttributes.get("name");
         String picture = (String) userAttributes.get("picture");
 
-        // 디버깅을 위한 로그 추가
-        System.out.println("=== UserService saveOrUpdateUser ===");
-        System.out.println("Email: " + email);
-        System.out.println("Name: " + name);
-        System.out.println("Picture: " + picture);
-        System.out.println("All attributes: " + userAttributes);
-        System.out.println("=====================================");
-
         // 기존 사용자 확인
         User existingUser = userRepository.findByEmail(email);
         
         if (existingUser != null) {
             // 기존 사용자 정보 업데이트
-            existingUser.setName(name);
-            existingUser.setPictureUrl(picture);
+            //existingUser.setName(name);
+            //existingUser.setPictureUrl(picture);
             existingUser.setLastLoginAt(LocalDateTime.now());
             existingUser.setUpdatedAt(LocalDateTime.now());
             
@@ -56,7 +82,7 @@ public class UserService {
                     .email(email)
                     .name(name)
                     .pictureUrl(picture)
-                    .status("ACTIVE") // 기본값 설정
+                    .status("ACTIVE")
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
                     .lastLoginAt(LocalDateTime.now())
@@ -66,13 +92,12 @@ public class UserService {
         }
     }
 
-    public User findByEmail(String email) {
+    public User findByEmailFromRepository(String email) {
         return userRepository.findByEmail(email);
     }
 
     @Transactional
     public void saveUser(String email, String name, String picture, String provider) {
-   
         // 기존 사용자 확인
         User existingUser = userRepository.findByEmail(email);
         
@@ -88,7 +113,7 @@ public class UserService {
                     .email(email)
                     .name(name)
                     .pictureUrl(picture)
-                    .status("ACTIVE") // 기본값 설정
+                    .status("ACTIVE")
                     .createdAt(LocalDateTime.now())
                     .updatedAt(LocalDateTime.now())
                     .lastLoginAt(LocalDateTime.now())
@@ -96,38 +121,5 @@ public class UserService {
             
             userRepository.save(newUser);
         }
-    }
-
-    public List<UserResponse> getAllUsers() {
-        return userRepository.findAll().stream()
-                .map(UserResponse::new)
-                .collect(Collectors.toList());
-    }
-
-    public UserResponse getUserById(Long id) {
-        User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        return new UserResponse(user);
-    }
-
-    @Transactional
-    public void updateUser(Long id, UserUpdateRequest request) {
-        User existingUser = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-        existingUser.setEmail(request.getEmail());
-        existingUser.setName(request.getName());
-        existingUser.setPictureUrl(request.getPictureUrl());
-        if (request.getStatus() != null) {
-            existingUser.setStatus(request.getStatus());
-        }
-        userRepository.save(existingUser);
-    }
-    
-    /**
-     * 사용자 통계 조회 (캐싱 적용)
-     */
-    // @Cacheable("user-stats") // Spring Cache 사용시
-    public UserStats getUserStats() {
-        return userMapper.selectUserStats();
     }
 } 

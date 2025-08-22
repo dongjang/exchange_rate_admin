@@ -47,7 +47,7 @@ public class CustomOAuth2UserService implements OAuth2UserService<OAuth2UserRequ
                 email, name, picture);
         
         // 사용자 정보를 데이터베이스에 저장 또는 업데이트
-        userService.saveUser(email, name, picture, registrationId);
+       // userService.saveUser(email, name, picture, registrationId);
         
         return new DefaultOAuth2User(
                 Collections.singleton(new SimpleGrantedAuthority("ROLE_USER")),

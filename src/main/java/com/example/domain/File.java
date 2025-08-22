@@ -33,6 +33,9 @@ public class File {
     @Column(name = "file_type", nullable = false, length = 100)
     private String fileType;
     
+    @Column(name = "content_type", length = 100)
+    private String contentType;
+    
     @Column(name = "upload_user_id", nullable = false)
     private Long uploadUserId;
     

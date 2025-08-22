@@ -12,6 +12,8 @@ interface RemittanceLimit {
   singleLimit: number;
   status: 'APPROVED' | 'PENDING' | 'REJECTED';
   reason?: string;
+  originalDailyLimit?: number; // 원본 일일 한도
+  originalMonthlyLimit?: number; // 원본 월 한도
   incomeFile?: {
     id: number;
     originalName: string;
@@ -85,8 +87,8 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
   useEffect(() => {
     if ((isEdit || isRerequest) && currentLimit) {
       setFormData({
-        dailyLimit: formatNumberWithCommas(currentLimit.dailyLimit.toString()),
-        monthlyLimit: formatNumberWithCommas(currentLimit.monthlyLimit.toString()),
+        dailyLimit: formatNumberWithCommas((isRerequest && currentLimit.originalDailyLimit ? currentLimit.originalDailyLimit : currentLimit.dailyLimit).toString()),
+        monthlyLimit: formatNumberWithCommas((isRerequest && currentLimit.originalMonthlyLimit ? currentLimit.originalMonthlyLimit : currentLimit.monthlyLimit).toString()),
         singleLimit: formatNumberWithCommas(currentLimit.singleLimit.toString()),
         reason: currentLimit.reason || '',
         files: {
@@ -424,8 +426,8 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
     // Confirm Swal
     const result = await Swal.fire({
       icon: 'question',
-      title: isRerequest ? '한도 상향 재신청' : (isEdit ? '한도 상향 신청 수정' : '한도 상향 신청'),
-      text: isRerequest ? '입력하신 내용으로 한도 상향을 재신청하시겠습니까?' : (isEdit ? '입력하신 내용으로 한도 상향 신청을 수정하시겠습니까?' : '입력하신 내용으로 한도 상향을 신청하시겠습니까?'),
+      title: isRerequest ? '한도 변경 재신청' : (isEdit ? '한도 변경 신청 수정' : '한도 변경 신청'),
+      text: isRerequest ? '입력하신 내용으로 한도 변경을 재신청하시겠습니까?' : (isEdit ? '입력하신 내용으로 한도 변경 신청을 수정하시겠습니까?' : '입력하신 내용으로 한도 변경을 신청하시겠습니까?'),
       showCancelButton: true,
       confirmButtonText: isRerequest ? '재신청하기' : (isEdit ? '수정하기' : '신청하기'),
       cancelButtonText: '취소',
@@ -515,7 +517,7 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
         onSuccess();
       }
     } catch (error) {
-      console.error('한도 상향 신청 실패:', error);
+      console.error('한도 변경 신청 실패:', error);
       await Swal.fire({
         icon: 'error',
         title: '신청 실패',
@@ -527,8 +529,8 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
     }
   };
 
-  const hasExistingLimit = currentLimit && currentLimit.status === 'APPROVED';
-
+  const hasExistingLimit = currentLimit && (currentLimit?.limitType && currentLimit?.limitType !== "DEFAULT_LIMIT");
+  
   if (!open) return null;
 
   return (
@@ -568,7 +570,7 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
             fontWeight: 700,
             color: '#1f2937'
           }}>
-             {isEdit ? '한도 상향 신청 수정' : '한도 상향 신청'}
+             {isEdit ? '한도 변경 신청 수정' : '한도 변경 신청'}
           </h2>
           <button
             onClick={onClose}
@@ -647,7 +649,7 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
                 border: '1px solid #dbeafe'
               }}>
                 <div style={{ fontSize: '0.9rem', color: '#1d4ed8', fontWeight: '500' }}>일일 한도</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#1e3a8a' }}>{formatCurrency(currentLimit.dailyLimit)}</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#1e3a8a' }}>{formatCurrency(currentLimit.originalDailyLimit || currentLimit.dailyLimit)}</div>
               </div>
               <div style={{
                 display: 'flex',
@@ -660,7 +662,7 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
                 border: '1px solid #e0e7ff'
               }}>
                 <div style={{ fontSize: '0.9rem', color: '#3730a3', fontWeight: '500' }}>월 한도</div>
-                <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#312e81' }}>{formatCurrency(currentLimit.monthlyLimit)}</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: '600', color: '#312e81' }}>{formatCurrency(currentLimit.originalMonthlyLimit || currentLimit.monthlyLimit)}</div>
               </div>
               <div style={{
                 display: 'flex',
@@ -841,7 +843,7 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
             </div>
           )}
 
-          {/* 상향 신청 한도 (기존 한도가 있는 경우) - 각각 1줄씩 */}
+          {/* 변경 신청 한도 (기존 한도가 있는 경우) - 각각 1줄씩 */}
           {hasExistingLimit && (
             <div style={{ marginBottom: '1.5rem' }}>
               <h3 style={{
@@ -850,7 +852,7 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
                 fontWeight: 600,
                 color: '#1f2937'
               }}>
-                상향 신청 한도
+                변경 신청 한도
               </h3>
               <div style={{
                 display: 'flex',
@@ -1017,7 +1019,7 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
               name="reason"
               value={formData.reason}
               onChange={handleInputChange}
-              placeholder="한도 상향 신청 사유를 상세히 작성해주세요"
+              placeholder="한도 변경 신청 사유를 상세히 작성해주세요"
               rows={4}
               style={{
                 width: '100%',
@@ -1052,8 +1054,8 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
             />
           </div>
 
-          {/* 첨부 파일 섹션 - 재신청 모드가 아니고 DEFAULT_LIMIT가 아닐 때만 표시 */}
-          {!isRerequest && currentLimit?.limitType === 'DEFAULT_LIMIT' && (
+          {/* 첨부 파일 섹션 - 승인 후 재신청 아닐 때만 표시*/}
+          {!isRerequest && (!currentLimit?.limitType || currentLimit?.limitType === 'DEFAULT_LIMIT') && (
             <>
               <label style={{
                 display: 'block',
@@ -1637,6 +1639,39 @@ const RemittanceLimitModal: React.FC<RemittanceLimitModalProps> = ({
               </ul>
             </div>
           )}
+
+          {/* 한도 변경 안내 문구 */}
+          <div style={{
+            background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+            border: '1px solid #f59e0b',
+            borderRadius: '8px',
+            padding: '12px 16px',
+            marginBottom: '20px',
+            marginTop: '16px'
+          }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginBottom: '6px'
+            }}>
+              <FaExclamationTriangle style={{ color: '#d97706', fontSize: '14px' }} />
+              <span style={{
+                fontSize: '13px',
+                fontWeight: '600',
+                color: '#92400e'
+              }}>
+                한도 변경 안내
+              </span>
+            </div>
+            <div style={{
+              fontSize: '12px',
+              color: '#78350f',
+              lineHeight: '1.4'
+            }}>
+              한도가 변경되면 기존 송금 한도는 초기화되고, 승인 이후 새로운 송금 가능 한도가 적용됩니다.
+            </div>
+          </div>
 
           {/* 버튼 */}
           <div style={{

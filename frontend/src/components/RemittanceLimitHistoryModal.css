@@ -1,0 +1,81 @@
+/* 반응형 스타일 */
+@media (max-width: 768px) {
+  .attachment-section {
+    margin-bottom: 1rem;
+  }
+
+  .attachment-title {
+    font-size: 0.875rem;
+    color: #6b7280;
+  }
+
+  .attachment-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+
+  .attachment-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.75rem;
+    background-color: #f3f4f6;
+    border-radius: 8px;
+    font-size: 0.875rem;
+  }
+
+  .attachment-item-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.25rem;
+  }
+
+  .file-icon {
+    color: #6b7280;
+    flex-shrink: 0;
+  }
+
+  .file-label {
+    color: #374151;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  .file-name {
+    color: #3b82f6;
+    cursor: pointer;
+    text-decoration: underline;
+    font-weight: 500;
+    word-break: break-all;
+    line-height: 1.4;
+  }
+
+  .file-name:hover {
+    color: #1d4ed8;
+  }
+
+  .file-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+  }
+
+  .file-size {
+    color: #9ca3af;
+    font-size: 0.75rem;
+  }
+
+  .download-icon {
+    color: #6b7280;
+    font-size: 0.75rem;
+    cursor: pointer;
+  }
+
+  .download-icon:hover {
+    color: #374151;
+  }
+}

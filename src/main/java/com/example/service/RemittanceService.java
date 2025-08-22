@@ -14,11 +14,16 @@ import com.example.dto.RecentRemittanceCount;
 import com.example.dto.RemittanceHistoryDto;
 import com.example.dto.RemittanceHistoryResponse;
 import com.example.dto.RemittanceHistorySearchRequest;
+import com.example.dto.RemittanceLimitCheckResponse;
+import com.example.dto.RemittanceLimitRequestResponse;
 import com.example.dto.RemittanceStats;
 import com.example.dto.UserRemittanceHistoryResponse;
 import com.example.dto.UserRemittanceHistorySearchRequest;
 import com.example.mapper.RemittanceMapper;
 import com.example.repository.RemittanceRepository;
+import com.example.repository.RemittanceLimitRequestRepository;
+import com.example.domain.RemittanceLimitRequest;
+import com.example.domain.File;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,15 +32,164 @@ import lombok.RequiredArgsConstructor;
 public class RemittanceService {
     private final RemittanceRepository remittanceRepository;
     private final RemittanceMapper remittanceMapper;
+    private final UserRemittanceLimitService userRemittanceLimitService;
+    private final RemittanceLimitRequestRepository remittanceLimitRequestRepository;
+    private final FileService fileService;
 
     // 송금 신청
     @Transactional
     public Remittance create(Remittance remittance) {
+        // 한도 체크
+        var limitCheck = checkRemittanceLimit(remittance.getUserId(), remittance.getAmount());
+        if (!limitCheck.isSuccess()) {
+            throw new RuntimeException("LIMIT_EXCEEDED:" + limitCheck.getExceededType() + ":" + limitCheck.getMessage());
+        }
 
         remittance.setCreatedAt(LocalDateTime.now());
         return remittanceRepository.save(remittance);
     }
 
+    // 송금 한도 체크
+    public RemittanceLimitCheckResponse checkRemittanceLimit(Long userId, BigDecimal amount) {
+        var userLimit = userRemittanceLimitService.getUserRemittanceLimit(userId);
+        
+        // 이미 계산된 사용 가능 한도를 사용
+        BigDecimal availableDailyLimit = userLimit.getDailyLimit();
+        BigDecimal availableMonthlyLimit = userLimit.getMonthlyLimit();
+        BigDecimal originalDailyLimit = userLimit.getOriginalDailyLimit();
+        BigDecimal originalMonthlyLimit = userLimit.getOriginalMonthlyLimit();
+        BigDecimal todayAmount = userLimit.getTodayAmount();
+        BigDecimal monthAmount = userLimit.getMonthAmount();
+        
+        boolean dailyExceeded = amount.compareTo(availableDailyLimit) > 0;
+        boolean monthlyExceeded = amount.compareTo(availableMonthlyLimit) > 0;
+        
+        if (dailyExceeded && monthlyExceeded) {
+            return RemittanceLimitCheckResponse.builder()
+                .success(false)
+                .message("일일 한도와 월 한도를 모두 초과했습니다.")
+                .errorType("LIMIT_EXCEEDED")
+                .exceededType("BOTH")
+                .requestedAmount(amount)
+                .dailyLimit(availableDailyLimit)
+                .monthlyLimit(availableMonthlyLimit)
+                .dailyExceededAmount(amount.subtract(availableDailyLimit))
+                .monthlyExceededAmount(amount.subtract(availableMonthlyLimit))
+                .todayAmount(todayAmount)
+                .monthAmount(monthAmount)
+                .build();
+        } else if (dailyExceeded) {
+            return RemittanceLimitCheckResponse.builder()
+                .success(false)
+                .message("일일 한도를 초과했습니다.")
+                .errorType("LIMIT_EXCEEDED")
+                .exceededType("DAILY")
+                .requestedAmount(amount)
+                .dailyLimit(availableDailyLimit)
+                .monthlyLimit(availableMonthlyLimit)
+                .dailyExceededAmount(amount.subtract(availableDailyLimit))
+                .monthlyExceededAmount(BigDecimal.ZERO)
+                .todayAmount(todayAmount)
+                .monthAmount(monthAmount)
+                .build();
+        } else if (monthlyExceeded) {
+            return RemittanceLimitCheckResponse.builder()
+                .success(false)
+                .message("월 한도를 초과했습니다.")
+                .errorType("LIMIT_EXCEEDED")
+                .exceededType("MONTHLY")
+                .requestedAmount(amount)
+                .dailyLimit(availableDailyLimit)
+                .monthlyLimit(availableMonthlyLimit)
+                .dailyExceededAmount(BigDecimal.ZERO)
+                .monthlyExceededAmount(amount.subtract(availableMonthlyLimit))
+                .todayAmount(todayAmount)
+                .monthAmount(monthAmount)
+                .build();
+        } else {
+            return RemittanceLimitCheckResponse.builder()
+                .success(true)
+                .message("한도 내에서 송금 가능합니다.")
+                .requestedAmount(amount)
+                .dailyLimit(availableDailyLimit)
+                .monthlyLimit(availableMonthlyLimit)
+                .todayAmount(todayAmount)
+                .monthAmount(monthAmount)
+                .build();
+        }
+    }
+
+    // 한도 변경 신청 목록 조회 (관리자용)
+    @Transactional(readOnly = true)
+    public List<RemittanceLimitRequestResponse> getLimitRequests() {
+        List<RemittanceLimitRequest> requests = remittanceLimitRequestRepository.findAllByOrderByCreatedAtDesc();
+        return requests.stream()
+                .map(this::convertToLimitRequestResponse)
+                .collect(Collectors.toList());
+    }
+
+    private RemittanceLimitRequestResponse convertToLimitRequestResponse(RemittanceLimitRequest request) {
+        RemittanceLimitRequestResponse.RemittanceLimitRequestResponseBuilder builder = RemittanceLimitRequestResponse.builder()
+                .id(request.getId())
+                .userId(request.getUserId())
+                .newDailyLimit(request.getDailyLimit().longValue())
+                .newMonthlyLimit(request.getMonthlyLimit().longValue())
+                .dailyLimit(request.getDailyLimit())
+                .monthlyLimit(request.getMonthlyLimit())
+                .singleLimit(request.getSingleLimit())
+                .reason(request.getReason())
+                .status(request.getStatus().name())
+                .incomeFileId(request.getIncomeFileId())
+                .bankbookFileId(request.getBankbookFileId())
+                .businessFileId(request.getBusinessFileId())
+                .adminId(request.getAdminId())
+                .adminComment(request.getAdminComment())
+                .processedAt(request.getProcessedAt())
+                .createdAt(request.getCreatedAt())
+                .updatedAt(request.getUpdatedAt());
+
+        // 파일 정보 추가
+        if (request.getIncomeFileId() != null) {
+            System.out.println("=== Income File ID: " + request.getIncomeFileId() + " ===");
+            File incomeFile = fileService.getFileById(request.getIncomeFileId());
+            if (incomeFile != null) {
+                System.out.println("Income File Found: " + incomeFile.getOriginalName());
+                builder.incomeFileName(incomeFile.getOriginalName())
+                       .incomeFileSize(incomeFile.getFileSize().intValue())
+                       .incomeFileType(incomeFile.getFileType());
+            } else {
+                System.out.println("Income File Not Found for ID: " + request.getIncomeFileId());
+            }
+        }
+
+        if (request.getBankbookFileId() != null) {
+            System.out.println("=== Bankbook File ID: " + request.getBankbookFileId() + " ===");
+            File bankbookFile = fileService.getFileById(request.getBankbookFileId());
+            if (bankbookFile != null) {
+                System.out.println("Bankbook File Found: " + bankbookFile.getOriginalName());
+                builder.bankbookFileName(bankbookFile.getOriginalName())
+                       .bankbookFileSize(bankbookFile.getFileSize().intValue())
+                       .bankbookFileType(bankbookFile.getFileType());
+            } else {
+                System.out.println("Bankbook File Not Found for ID: " + request.getBankbookFileId());
+            }
+        }
+
+        if (request.getBusinessFileId() != null) {
+            System.out.println("=== Business File ID: " + request.getBusinessFileId() + " ===");
+            File businessFile = fileService.getFileById(request.getBusinessFileId());
+            if (businessFile != null) {
+                System.out.println("Business File Found: " + businessFile.getOriginalName());
+                builder.businessFileName(businessFile.getOriginalName())
+                       .businessFileSize(businessFile.getFileSize().intValue())
+                       .businessFileType(businessFile.getFileType());
+            } else {
+                System.out.println("Business File Not Found for ID: " + request.getBusinessFileId());
+            }
+        }
+
+        return builder.build();
+    }
 
 
         // 동적 검색 조건으로 송금 이력 조회 (페이징 포함) - 기존 사용자용
@@ -66,9 +220,9 @@ public class RemittanceService {
         String status = StringUtils.hasText(params.getStatus()) ? params.getStatus() : null;
 
         // 페이징 파라미터 설정
-        int page = params.getPage() != null ? params.getPage() : 0;
-        int size = params.getSize() != null ? params.getSize() : 5;
-        int offset = page * size;
+        int page = params.getPage() != 0 ? params.getPage() : 0;
+        int size = params.getSize() != 0 ? params.getSize() : 5;
+        //int offset = page * size;
 
         // 정렬 순서 설정 (기본값: 최신순)
         String sortOrder = StringUtils.hasText(params.getSortOrder()) ? params.getSortOrder() : "latest";
@@ -157,7 +311,7 @@ public class RemittanceService {
     /**
      * 기존 사용자용 송금 이력 조회 (기존 API 호환성 유지)
      */
-    public com.example.dto.RemittanceHistoryResponse getUserRemittanceHistory(com.example.dto.RemittanceHistorySearchRequest params) {
+    public RemittanceHistoryResponse getUserRemittanceHistory(RemittanceHistorySearchRequest params) {
         // 기존 로직을 그대로 유지
         // 파라미터 준비
         BigDecimal minAmount = null;

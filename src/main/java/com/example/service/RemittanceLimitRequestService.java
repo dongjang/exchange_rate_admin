@@ -15,6 +15,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class RemittanceLimitRequestService {
@@ -108,19 +109,19 @@ public class RemittanceLimitRequestService {
     }
     
     // 관리자 페이지용 (MyBatis)
-    public List<RemittanceLimitRequestResponse> getAdminRequests(Long userId, String status, String searchTerm, int offset, int limit) {
-        return remittanceLimitRequestMapper.selectRemittanceLimitRequests(userId, status, searchTerm, offset, limit);
+    public List<RemittanceLimitRequestResponse> getAdminRequests(Map<String, Object> searchRequest) {
+        return remittanceLimitRequestMapper.selectRemittanceLimitRequests(searchRequest);
     }
     
-    public int countAdminRequests(Long userId, String status, String searchTerm) {
-        return remittanceLimitRequestMapper.countRemittanceLimitRequests(userId, status, searchTerm);
+    public int countAdminRequests(Map<String, Object> searchRequest) {
+        return remittanceLimitRequestMapper.countRemittanceLimitRequests(searchRequest);
     }
     
     public RemittanceLimitRequestResponse getAdminRequestById(Long requestId) {
         return remittanceLimitRequestMapper.selectRemittanceLimitRequestById(requestId);
     }
     
-    // 한도 상향 신청 생성 (MyBatis 사용)
+    // 한도 변경 신청 생성 (MyBatis 사용)
     @Transactional
     public RemittanceLimitRequest createRequest(Long userId, 
                                              BigDecimal dailyLimit, 
@@ -161,7 +162,7 @@ public class RemittanceLimitRequestService {
         return request;
     }
     
-    // 한도 상향 신청 수정 (MyBatis 사용)
+    // 한도 변경 신청 수정 (MyBatis 사용)
     @Transactional
     public RemittanceLimitRequest updateRequest(Long requestId,
                                              Long userId,
@@ -195,7 +196,7 @@ public class RemittanceLimitRequestService {
         existingRequest.setMonthlyLimit(existingRequestDto.getMonthlyLimit());
         existingRequest.setSingleLimit(existingRequestDto.getSingleLimit());
         existingRequest.setReason(existingRequestDto.getReason());
-        existingRequest.setStatus(existingRequestDto.getStatus());
+        existingRequest.setStatus(RemittanceLimitRequest.RequestStatus.valueOf(existingRequestDto.getStatus()));
         existingRequest.setIncomeFileId(existingRequestDto.getIncomeFileId());
         existingRequest.setBankbookFileId(existingRequestDto.getBankbookFileId());
         existingRequest.setBusinessFileId(existingRequestDto.getBusinessFileId());
@@ -219,7 +220,7 @@ public class RemittanceLimitRequestService {
             existingRequest.setAdminId(null);
             existingRequest.setAdminComment(null);
             existingRequest.setProcessedAt(null);
-        } else if (existingRequestDto.getStatus() == RemittanceLimitRequest.RequestStatus.REJECTED) {
+        } else if (RemittanceLimitRequest.RequestStatus.valueOf(existingRequestDto.getStatus()) == RemittanceLimitRequest.RequestStatus.REJECTED) {
             // 반려 상태일 때도 수정 시 PENDING으로 변경
             existingRequest.setStatus(RemittanceLimitRequest.RequestStatus.PENDING);
             existingRequest.setAdminId(null);
@@ -236,7 +237,6 @@ public class RemittanceLimitRequestService {
             var uploadedFile = fileService.uploadFile(incomeFile, userId);
             existingRequest.setIncomeFileId(uploadedFile.getId());
         }
-        // else 부분 제거 - 기존 파일 유지
         
         if (bankbookFile != null && !bankbookFile.isEmpty()) {
             // 새 파일이 업로드된 경우에만 기존 파일 삭제
@@ -246,7 +246,6 @@ public class RemittanceLimitRequestService {
             var uploadedFile = fileService.uploadFile(bankbookFile, userId);
             existingRequest.setBankbookFileId(uploadedFile.getId());
         }
-        // else 부분 제거 - 기존 파일 유지
         
         if (businessFile != null && !businessFile.isEmpty()) {
             // 새 파일이 업로드된 경우에만 기존 파일 삭제
@@ -256,7 +255,6 @@ public class RemittanceLimitRequestService {
             var uploadedFile = fileService.uploadFile(businessFile, userId);
             existingRequest.setBusinessFileId(uploadedFile.getId());
         }
-        // else 부분 제거 - 기존 파일 유지
         
         remittanceLimitRequestMapper.updateRemittanceLimitRequest(existingRequest);
         return existingRequest;
@@ -273,7 +271,9 @@ public class RemittanceLimitRequestService {
                              BigDecimal monthlyLimit,   
                              BigDecimal singleLimit) {
         remittanceLimitRequestMapper.updateRemittanceLimitRequestStatus(requestId, status.name(), adminId, adminComment);
-
+        System.out.println("dailyLimit: " + dailyLimit);
+        System.out.println("monthlyLimit: " + monthlyLimit);
+        System.out.println("singleLimit: " + singleLimit);
         //승인일 때만 추가
         if(RemittanceLimitRequest.RequestStatus.APPROVED.equals(status)){
         //사용자 별로 한 개만 존재하도록 삭제 후 추가
@@ -298,9 +298,10 @@ public class RemittanceLimitRequestService {
                 if (user.isPresent()) {
                     String userEmail = user.get().getEmail();
                     String userName = user.get().getName();
-                    
-                    // 이메일 발송
-                    emailService.sendRemittanceLimitNotification(userEmail, userName, status.name(), adminComment);
+                
+                    // 이메일 발송 - 한도 정보 포함
+                    emailService.sendRemittanceLimitNotification(userEmail, userName, status.name(), adminComment,dailyLimit, monthlyLimit, singleLimit);
+
                 }
             }
         } catch (Exception e) {
@@ -326,30 +327,8 @@ public class RemittanceLimitRequestService {
         boolean hasUserLimit = userLimitCount > 0;
         
         if (hasUserLimit) {
-            // user_remittance_limit에 데이터가 있으면 신청만 삭제하고 기존 데이터 유지
-            // 파일 ID들을 임시로 저장
-            Long incomeFileId = request.getIncomeFileId();
-            Long bankbookFileId = request.getBankbookFileId();
-            Long businessFileId = request.getBusinessFileId();
+            remittanceLimitRequestMapper.updateRemittanceLimitRequestStatus(requestId, "APPROVED",  null,null);
             
-            // 먼저 요청에서 파일 ID들을 null로 설정 (외래키 제약조건 해결) - MyBatis 사용
-            remittanceLimitRequestMapper.clearFileIds(requestId);
-            
-            // 첨부된 파일들 삭제
-            if (incomeFileId != null) {
-                fileService.deleteFile(incomeFileId);
-            }
-            if (bankbookFileId != null) {
-                fileService.deleteFile(bankbookFileId);
-            }
-            if (businessFileId != null) {
-                fileService.deleteFile(businessFileId);
-            }
-            
-            // 요청 삭제
-            remittanceLimitRequestRepository.delete(request);
-            
-            System.out.println("신청 취소: user_remittance_limit에 기존 데이터가 있어서 신청만 삭제하고 기존 한도는 유지했습니다.");
         } else {
             // user_remittance_limit에 데이터가 없으면 기존 로직대로 삭제
             // 파일 ID들을 임시로 저장

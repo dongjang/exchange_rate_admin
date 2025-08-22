@@ -5,9 +5,7 @@ export interface User {
   email: string;
   name?: string;
   pictureUrl?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  lastLoginAt?: string;
+  status?: string;
 }
 
 // 로그인 사용자 정보

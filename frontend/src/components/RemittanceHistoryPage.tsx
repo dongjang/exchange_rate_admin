@@ -7,6 +7,7 @@ import RemittancePaging from './RemittancePaging';
 import RemittanceDetailModal from './RemittanceDetailModal';
 import { userInfoAtom } from '../store/userStore';
 import { authAtom } from '../store/authStore';
+import CommonPageHeader from './CommonPageHeader';
 
 interface RemittanceHistory {
   id: number;
@@ -220,50 +221,53 @@ function RemittanceHistoryPage() {
     setSelectedRemittance(remittance);
   };
 
-  // 사용자 정보가 로드되지 않았을 때
-  if (!userInfo?.id) {
-    return (
-      <div style={{ maxWidth: 650, margin: '2rem auto 2.5rem auto' }}>
-        <div style={{ boxShadow: '0 4px 24px rgba(30,41,59,0.13), 0 1.5px 6px rgba(59,130,246,0.07)', borderRadius: 18, background: 'linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%)', border: '1.5px solid #e0e7ef', padding: '0 0 2.2rem 0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', background: 'linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%)', color: '#fff', padding: '1.2rem 2rem 1.1rem 2rem', fontSize: '1.25rem', fontWeight: 700, letterSpacing: '0.01em', borderTopLeftRadius: 18, borderTopRightRadius: 18 }}>
-            <span style={{ fontSize: '1.7rem', filter: 'drop-shadow(0 1px 2px rgba(59,130,246,0.13))' }}>📋</span>
-            <span>송금 이력</span>
-          </div>
-          <div style={{ padding: '2.5rem 2.5rem 0 2.5rem' }}>
-            <div style={{ textAlign: 'center', color: '#64748b', padding: '2.5rem 0', fontSize: '1.1rem' }}>
-              사용자 정보를 불러오는 중...
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // // 사용자 정보가 로드되지 않았을 때
+  // if (!userInfo?.id) {
+  //   return (
+  //     <div style={{ maxWidth: 1200, margin: '1.5rem auto 2.5rem auto', padding: '0 1rem' }}>
+  //       <CommonPageHeader
+  //         title="📋 송금 이력"
+  //         subtitle="송금 내역을 확인하실 수 있습니다"
+  //         gradientColors={{ from: '#3b82f6', to: '#60a5fa' }}
+  //       />
+  //       <div style={{ boxShadow: '0 4px 24px rgba(30,41,59,0.13), 0 1.5px 6px rgba(59,130,246,0.07)', borderRadius: 18, background: 'linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%)', border: '1.5px solid #e0e7ef', padding: '0 0 2.2rem 0' }}>
+  //         <div style={{ padding: '2.5rem 2.5rem 0 2.5rem' }}>
+  //           <div style={{ textAlign: 'center', color: '#64748b', padding: '2.5rem 0', fontSize: '1.1rem' }}>
+  //             사용자 정보를 불러오는 중...
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
-  if (loading) {
-  return (
-    <div style={{ maxWidth: 650, margin: '2rem auto 2.5rem auto' }}>
-      <div style={{ boxShadow: '0 4px 24px rgba(30,41,59,0.13), 0 1.5px 6px rgba(59,130,246,0.07)', borderRadius: 18, background: 'linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%)', border: '1.5px solid #e0e7ef', padding: '0 0 2.2rem 0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', background: 'linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%)', color: '#fff', padding: '1.2rem 2rem 1.1rem 2rem', fontSize: '1.25rem', fontWeight: 700, letterSpacing: '0.01em', borderTopLeftRadius: 18, borderTopRightRadius: 18 }}>
-            <span style={{ fontSize: '1.7rem', filter: 'drop-shadow(0 1px 2px rgba(59,130,246,0.13))' }}>📋</span>
-            <span>송금 이력</span>
-          </div>
-          <div style={{ padding: '2.5rem 2.5rem 0 2.5rem' }}>
-            <div style={{ textAlign: 'center', color: '#64748b', padding: '2.5rem 0', fontSize: '1.1rem' }}>
-              송금 이력을 불러오는 중...
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // if (loading) {
+  // return (
+  //   <div style={{ maxWidth: 1200, margin: '1.5rem auto 2.5rem auto', padding: '0 1rem' }}>
+  //     <CommonPageHeader
+  //       title="📋 송금 이력"
+  //       subtitle="송금 내역을 확인하실 수 있습니다"
+  //       gradientColors={{ from: '#3b82f6', to: '#60a5fa' }}
+  //     />
+  //     <div style={{ boxShadow: '0 4px 24px rgba(30,41,59,0.13), 0 1.5px 6px rgba(59,130,246,0.07)', borderRadius: 18, background: 'linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%)', border: '1.5px solid #e0e7ef', padding: '0 0 2.2rem 0' }}>
+  //       <div style={{ padding: '2.5rem 2.5rem 0 2.5rem' }}>
+  //         <div style={{ textAlign: 'center', color: '#64748b', padding: '2.5rem 0', fontSize: '1.1rem' }}>
+  //           송금 이력을 불러오는 중...
+  //         </div>
+  //       </div>
+  //     </div>
+  //   </div>
+  // );
+  // }
 
   return (
     <div style={{ maxWidth: 1200, margin: '1.5rem auto 2.5rem auto', padding: '0 1rem' }}>
+      <CommonPageHeader
+        title="📋 송금 이력"
+        subtitle="송금 내역을 확인하실 수 있습니다"
+        gradientColors={{ from: '#667eea', to: '#764ba2' }}
+      />
       <div style={{ boxShadow: '0 4px 24px rgba(30,41,59,0.13), 0 1.5px 6px rgba(59,130,246,0.07)', borderRadius: 18, background: 'linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%)', border: '1.5px solid #e0e7ef', padding: '0 0 0 0', overflow: 'hidden' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.7rem', background: 'linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%)', color: '#fff', padding: '1.2rem 2rem 1.1rem 2rem', fontSize: '1.25rem', fontWeight: 700, letterSpacing: '0.01em', borderTopLeftRadius: 18, borderTopRightRadius: 18 }}>
-          <span style={{ fontSize: '1.7rem', filter: 'drop-shadow(0 1px 2px rgba(59,130,246,0.13))' }}>📋</span>
-          <span>송금 이력</span>
-        </div>
         <div style={{ padding: '0', overflow: 'hidden' }}>
           <RemittanceHistoryFilter 
             filters={filters}

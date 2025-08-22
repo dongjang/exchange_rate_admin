@@ -18,7 +18,9 @@ public interface RemittanceLimitRequestRepository extends JpaRepository<Remittan
     
     List<RemittanceLimitRequest> findByUserIdAndStatus(Long userId, RemittanceLimitRequest.RequestStatus status);
     
-    // 사용자의 최신 한도 상향 신청 조회
+    // 사용자의 최신 한도 변경 신청 조회
     @Query("SELECT r FROM RemittanceLimitRequest r WHERE r.userId = :userId ORDER BY r.createdAt DESC")
     List<RemittanceLimitRequest> findByUserIdOrderByCreatedAtDesc(@Param("userId") Long userId);
+
+    List<RemittanceLimitRequest> findAllByOrderByCreatedAtDesc();
 } 

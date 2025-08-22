@@ -7,19 +7,14 @@ import org.apache.ibatis.annotations.Param;
 
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 
 @Mapper
 public interface RemittanceLimitRequestMapper {
     
-    List<RemittanceLimitRequestResponse> selectRemittanceLimitRequests(@Param("userId") Long userId,
-                                                             @Param("status") String status,
-                                                             @Param("searchTerm") String searchTerm,
-                                                             @Param("offset") int offset,
-                                                             @Param("limit") int limit);
+    List<RemittanceLimitRequestResponse> selectRemittanceLimitRequests(Map<String, Object> search);
     
-    int countRemittanceLimitRequests(@Param("userId") Long userId,
-                                   @Param("status") String status,
-                                   @Param("searchTerm") String searchTerm);
+    int countRemittanceLimitRequests(Map<String, Object> search);
     
     RemittanceLimitRequestResponse selectRemittanceLimitRequestById(@Param("id") Long id);
     

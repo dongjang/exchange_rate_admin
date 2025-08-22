@@ -1,319 +1,452 @@
+/* Header Styles */
 .header {
-  background: #fff;
-  color: #222;
-  padding: 1rem 0;
-  box-shadow: none;
-  border-bottom: 1px solid #e5e7eb;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   position: sticky;
   top: 0;
   z-index: 100;
 }
 
 .header-content {
-  max-width: 710px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 0 2rem;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
-}
-
-.header-title {
-  margin: 0;
-  font-size: 1.8rem;
-  font-weight: 600;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-}
-
-.header-user {
-  display: flex;
-  align-items: center;
+  height: 70px;
   gap: 1rem;
 }
 
-.user-info {
+/* 데스크톱 레이아웃 */
+.header-left {
+  display: flex;
+  align-items: center;
+  min-width: 200px;
+}
+
+.home-button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  text-decoration: none;
+  color: white;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.home-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.home-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.home-text {
+  font-weight: 600;
+}
+
+/* 네비게이션 메뉴 */
+.header-nav {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex: 1;
+  justify-content: center;
+  margin: 0 1rem;
+}
+
+.nav-link {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-}
-
-.user-avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1.5px solid #e5e7eb;
-  object-fit: cover;
-  background: #f3f4f6;
-}
-
-.user-name {
+  color: rgba(255, 255, 255, 0.9);
   font-weight: 500;
-  font-size: 1rem;
-  color: #222;
-  cursor: pointer;
-  transition: text-decoration 0.15s;
-}
-.user-name:hover, .user-name:focus {
-  text-decoration: underline;
-}
-
-.logout-button {
-  background: linear-gradient(135deg, #64748b 0%, #475569 100%);
-  color: white;
-  border: none;
-  padding: 0.6rem 1.2rem;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-  margin-left: 1rem;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 4px rgba(100, 116, 139, 0.2);
+  font-size: 0.95rem;
+  text-decoration: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  white-space: nowrap;
   position: relative;
   overflow: hidden;
 }
 
-.logout-button::before {
+.nav-link::before {
   content: '';
   position: absolute;
   top: 0;
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
   transition: left 0.5s;
 }
 
-.logout-button:hover {
-  background: linear-gradient(135deg, #475569 0%, #334155 100%);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 8px rgba(100, 116, 139, 0.3);
+.nav-link:hover {
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
-.logout-button:hover::before {
+.nav-link:hover::before {
   left: 100%;
 }
 
-.logout-button:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(100, 116, 139, 0.2);
-}
-
-.home-button {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-  color: #222;
-  font-size: 1.5rem;
-  margin-right: 1.5rem;
-  padding: 0.35rem 0.7rem;
-  border-radius: 8px;
-  background: #f8fafc;
-  box-shadow: 0 1px 4px rgba(30, 41, 59, 0.06);
-  transition: background 0.18s, box-shadow 0.18s, transform 0.13s;
-  border: 1.5px solid #e5e7eb;
-}
-
-.home-button svg {
-  display: block;
-  stroke: #3b82f6;
-  filter: drop-shadow(0 1px 2px rgba(59,130,246,0.08));
-}
-
-.home-button:hover, .home-button:focus {
-  background: #e0e7ef;
-  box-shadow: 0 2px 8px rgba(30, 41, 59, 0.13);
-  outline: none;
-  transform: scale(1.04);
-  border-color: #a5b4fc;
-}
-
-/* 네비게이션 메뉴 디자인 - 텍스트 중심, 밑줄 강조 */
-.header-nav {
-  display: flex;
-  gap: 2.2rem;
-  align-items: center;
-}
-
-.nav-link {
-  color: #2563eb;
-  font-weight: 500;
-  font-size: 1.08rem;
-  text-decoration: none;
-  padding: 0.2rem 0;
-  background: none;
-  border: none;
-  border-bottom: 2.5px solid transparent;
-  border-radius: 0;
-  box-shadow: none;
-  transition: color 0.18s, border-bottom 0.18s;
-}
-
-.nav-link:hover, .nav-link:focus {
-  color: #1d4ed8;
-  border-bottom: 2.5px solid #a5b4fc;
-  background: none;
-}
-
 .nav-link.active {
-  color: #1d4ed8;
-  border-bottom: 2.5px solid #3b82f6;
-  font-weight: 700;
-  background: none;
+  color: white;
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.3);
+  font-weight: 600;
 }
 
-/* 햄버거 버튼 (모바일) */
-.hamburger-btn {
+/* 사용자 섹션 */
+.header-right {
   display: flex;
-  flex-direction: column;
-  justify-content: center;
-  width: 38px;
-  height: 38px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  margin-left: 0.2rem;
-  z-index: 12001;
-}
-
-.hamburger-icon {
-  display: block;
-  width: 28px;
-  height: 3.5px;
-  background: #2563eb;
-  border-radius: 2px;
-  position: relative;
-  transition: background 0.2s;
-}
-.hamburger-icon::before,
-.hamburger-icon::after {
-  content: '';
-  display: block;
-  width: 28px;
-  height: 3.5px;
-  background: #2563eb;
-  border-radius: 2px;
-  position: absolute;
-  left: 0;
-  transition: transform 0.2s;
-}
-.hamburger-icon::before {
-  top: -9px;
-}
-.hamburger-icon::after {
-  top: 9px;
-}
-
-/* 모바일 메뉴 오버레이 */
-.mobile-menu-overlay {
-  position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(30,41,59,0.18);
-  z-index: 12000;
-  display: flex;
+  align-items: center;
+  gap: 1rem;
+  min-width: 350px;
   justify-content: flex-end;
 }
 
-/* 모바일 메뉴(드로어) */
-.mobile-menu {
-  background: #fff;
-  width: 80vw;
-  max-width: 320px;
-  height: 100%;
-  box-shadow: -2px 0 16px rgba(30,41,59,0.13);
+.user-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 200px;
+}
+
+.user-section:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.user-info {
   display: flex;
   flex-direction: column;
-  padding: 2.2rem 1.2rem 1.2rem 1.2rem;
-  gap: 1.1rem;
-  animation: slideInMenu 0.22s cubic-bezier(.4,1.2,.6,1) 1;
+  gap: 0.1rem;
 }
 
-@keyframes slideInMenu {
-  from { transform: translateX(100%); }
-  to { transform: translateX(0); }
+.user-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: white;
+  line-height: 1.2;
 }
 
-.mobile-menu-user {
+.user-role {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+}
+
+/* 로그아웃 버튼 */
+.logout-button {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-top: 1.2rem;
-  margin-bottom: 0.2rem;
-  font-size: 1.01rem;
-  font-weight: 500;
-  color: #222;
-}
-
-.mobile-menu-close-btn {
-  position: absolute;
-  top: 0.7rem;
-  right: 0.7rem;
-  background: none;
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
   border: none;
-  font-size: 1.7rem;
-  color: #888;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
   cursor: pointer;
-  z-index: 2;
-  padding: 0;
-  line-height: 1;
-  transition: color 0.18s;
-}
-.mobile-menu-close-btn:hover, .mobile-menu-close-btn:focus {
-  color: #2563eb;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  white-space: nowrap;
+  min-width: 120px;
 }
 
-.mobile-menu .logout-button {
-  margin-top: 0 !important;
-  margin-left: 0 !important;
+.logout-button:hover {
+  background: rgba(239, 68, 68, 1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
+}
+
+/* 모바일 레이아웃 */
+.mobile-header-left,
+.mobile-header-center,
+.mobile-header-right {
+  display: flex;
+  align-items: center;
+}
+
+.mobile-header-left {
+  display: flex;
+  align-items: center;
+}
+
+.mobile-header-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+.home-button-mobile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.home-button-mobile:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.user-info-mobile {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.user-info-mobile:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.user-avatar-mobile {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  object-fit: cover;
+}
+
+.user-name-mobile {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: white;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.logout-button-mobile {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: rgba(239, 68, 68, 0.9);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.logout-button-mobile:hover {
+  background: rgba(239, 68, 68, 1);
+  transform: scale(1.05);
+}
+
+/* 모바일 메뉴 버튼 */
+.mobile-menu-btn {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 12px;
+  cursor: pointer;
+  padding: 0;
+  margin-left: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.05);
+}
+
+.mobile-menu-icon {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: white;
+  border-radius: 1px;
+  position: relative;
+  transition: all 0.3s ease;
+  margin: 0 auto;
+}
+
+.mobile-menu-icon::before,
+.mobile-menu-icon::after {
+  content: '';
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: white;
+  border-radius: 1px;
+  position: absolute;
+  left: 0;
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-icon::before {
+  top: -8px;
+}
+
+.mobile-menu-icon::after {
+  top: 8px;
+}
+
+.mobile-menu-btn.close .mobile-menu-icon {
+  background-color: transparent;
+}
+
+.mobile-menu-btn.close .mobile-menu-icon::before {
+  top: 0;
+  transform: rotate(45deg);
+}
+
+.mobile-menu-btn.close .mobile-menu-icon::after {
+  top: 0;
+  transform: rotate(-45deg);
+}
+
+/* 모바일 메뉴 컨테이너 */
+.mobile-menu-container {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  border-radius: 0 0 20px 20px;
+}
+
+.mobile-menu-container.slide-down {
+  animation: slideDownMenu 0.3s ease-out forwards;
+}
+
+.mobile-menu-container.slide-up {
+  animation: slideUpMenu 0.3s ease-out forwards;
+}
+
+.mobile-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  color: #374151;
+  text-decoration: none;
+  font-size: 1rem;
+  font-weight: 500;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.mobile-menu-item svg {
+  color: #6b7280;
+  transition: color 0.3s ease;
+}
+
+.mobile-menu-item:hover {
+  background: rgba(102, 126, 234, 0.1);
+  color: #667eea;
+  transform: translateX(8px);
+}
+
+.mobile-menu-item:hover svg {
+  color: #667eea;
+}
+
+.mobile-menu-item:last-child {
+  border-bottom: none;
+}
+
+@keyframes slideDownMenu {
+  from { 
+    opacity: 0; 
+    transform: translateY(-20px); 
+  }
+  to { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+}
+
+@keyframes slideUpMenu {
+  from { 
+    opacity: 1; 
+    transform: translateY(0); 
+  }
+  to { 
+    opacity: 0; 
+    transform: translateY(-20px); 
+  }
 }
 
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   .header-content {
-    padding: 0 0.5rem;
-    flex-direction: row;
-    gap: 0.4rem;
-    justify-content: space-between;
-    align-items: center;
-    position: relative;
+    padding: 0 1rem;
+    height: 60px;
   }
-  .header-left-mobile {
-    display: flex;
-    align-items: center;
-    flex-shrink: 1;
-    min-width: 0;
-  }
-  .header-right-mobile {
-    margin-left: auto;
-    position: relative;
-    display: flex;
-    align-items: center;
-  }
-  .mobile-dropdown-menu {
-    position: relative;
-    position: absolute;
-    top: 100%;
-    right: 0;
-    background: #fff;
-    box-shadow: 0 4px 16px rgba(30,41,59,0.13);
-    border-radius: 10px;
-    min-width: 150px;
-    z-index: 12001;
-    padding: 1.1rem 0.7rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-    animation: fadeInMenu 0.18s cubic-bezier(.4,1.2,.6,1) 1;
-  }
-  @keyframes fadeInMenu {
-    from { opacity: 0; transform: translateY(-10px); }
-    to { opacity: 1; transform: translateY(0); }
+  
+  .header-left, .header-nav, .header-right {
+    display: none !important;
   }
 }
 
 @media (min-width: 769px) {
-  .hamburger-btn, .mobile-menu-overlay {
+  .mobile-header-left, .mobile-header-center, .mobile-header-right, .home-button-mobile, .user-info-mobile, .logout-button-mobile, .mobile-menu-btn, .mobile-menu-container {
     display: none !important;
   }
 } 

@@ -19,6 +19,7 @@ public class DashboardService {
      * 대시보드 통합 통계 조회
      */
     public DashboardStatsResponse getDashboardStats() {
+
         try {
             // 송금 통계
             RemittanceStats remittanceStats = dashboardMapper.selectRemittanceStats();
@@ -46,7 +47,6 @@ public class DashboardService {
                     .build();
             
             return response;
-            
         } catch (Exception e) {
             log.error("대시보드 통계 조회 중 오류 발생: ", e);
             throw e;

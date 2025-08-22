@@ -2,6 +2,7 @@ import { useAtom } from 'jotai';
 import { useNavigate } from 'react-router-dom';
 import { authAtom, clearAuthAtom } from '../store/authStore';
 import { api } from '../services/api';
+import './Login.css';
 
 const Login = () => {
   const [auth, setAuth] = useAtom(authAtom);
@@ -62,8 +63,15 @@ const Login = () => {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h1 className="login-title">Sign in</h1>
-        <p className="login-subtitle">소셜 계정으로 간편하게 로그인하세요</p>
+        <div className="login-header">
+          <div className="login-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" fill="currentColor"/>
+            </svg>
+          </div>
+          <h1 className="login-title">환영합니다</h1>
+          <p className="login-subtitle">소셜 계정으로 간편하게 로그인하세요</p>
+        </div>
         
         <div className="social-buttons">
           <button onClick={handleGoogleLogin} className="social-login-btn">
@@ -76,7 +84,10 @@ const Login = () => {
             <span>Google로 로그인</span>
           </button>
         </div>
-        <p className='login-terms'>로그인함으로써 서비스 이용약관에 동의하게 됩니다.</p>
+        
+        <div className="login-footer">
+          <p className="login-terms">로그인함으로써 서비스 이용약관에 동의하게 됩니다.</p>
+        </div>
       </div>
     </div>
   );

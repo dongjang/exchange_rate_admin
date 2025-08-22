@@ -21,4 +21,7 @@ public class Bank {
 
     @Column(name = "bank_code", length = 20)
     private String bankCode;
+
+    @Transient
+    private String countryName;
 } 

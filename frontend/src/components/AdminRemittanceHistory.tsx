@@ -62,14 +62,11 @@ const AdminRemittanceHistory: React.FC<AdminRemittanceHistoryProps> = ({
         size: pageSize
       };
       
-      const [remittancesData, countData] = await Promise.all([
-        api.getAdminRemittanceHistory(searchParams),
-        api.getAdminRemittanceHistoryCount(searchParams)
-      ]);
+      const response = await api.getAdminRemittanceHistory(searchParams);
       
-      setRemittances(remittancesData || []);
-      setTotalCount(countData);
-      setTotalPages(Math.ceil(countData / pageSize));
+      setRemittances(response.list || []);
+      setTotalCount(response.count);
+      setTotalPages(Math.ceil(response.count / pageSize));
     } catch (error) {
       console.error('송금 이력 조회 실패:', error);
     } finally {
@@ -173,7 +170,7 @@ const AdminRemittanceHistory: React.FC<AdminRemittanceHistoryProps> = ({
   return (
     <div className="admin-remittance-history">
       {/* 검색 필터 */}
-      <div className="filter-section">
+      <div>
         <RemittanceHistoryFilter
           filters={filters}
           onFilterChange={handleFilterChange}
@@ -229,8 +226,8 @@ const AdminRemittanceHistory: React.FC<AdminRemittanceHistoryProps> = ({
           {
             key: 'createdAt',
             label: '송금일',
-            width: '150px',
-            render: (value) => new Date(value).toLocaleDateString('ko-KR')
+            width: '200px',
+            render: (value) => new Date(value).toLocaleString('ko-KR')
           },
           {
             key: 'amount',

@@ -39,6 +39,14 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   gap: 24px;
   min-height: 80px;
+  margin-bottom: 20px;
+}
+
+.admin-header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
 }
 
 .header-left {
@@ -499,6 +507,7 @@
   color: #374151;
   display: flex;
   align-items: center;
+  justify-content: flex-start;
 }
 
 .table-cell:last-child {
@@ -659,6 +668,13 @@
   cursor: not-allowed;
 }
 
+.page-ellipsis {
+  padding: 8px 12px;
+  color: #6b7280;
+  font-size: 14px;
+  user-select: none;
+}
+
 /* Reason Cell Styles */
 .reason-cell {
   max-width: 200px;
@@ -673,6 +689,31 @@
     flex-direction: column;
     gap: 16px;
     align-items: flex-start;
+    padding: 16px;
+  }
+  
+  .unified-header {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+    min-height: auto;
+  }
+  
+
+  
+  .limit-display {
+    flex-direction: column;
+    gap: 16px;
+    padding: 12px;
+  }
+  
+  .limit-display .limit-item {
+    min-width: auto;
+    width: 100%;
+  }
+  
+  .limit-display .limit-item:not(:last-child)::after {
+    display: none;
   }
   
   .limit-card {
@@ -683,14 +724,88 @@
   .search-input-group {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
   }
   
   .search-input {
     min-width: auto;
+    width: 100%;
+  }
+  
+  .results-summary {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+  
+  .summary-info {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .page-size-selector,
+  .sort-info {
+    width: 100%;
+  }
+  
+  .page-size-select,
+  .sort-select {
+    width: 100%;
+    max-width: none;
+  }
+  
+  .table-list-container {
+    overflow-x: auto;
   }
   
   .table-list-header,
   .table-list-row {
+    min-width: 800px;
+    display: flex;
+  }
+  
+  .table-header-cell,
+  .table-cell {
+    flex-shrink: 0;
+    min-width: 100px;
+  }
+  
+  .table-header-cell,
+  .table-cell {
+    padding: 6px 3px;
+    font-size: 0.8rem;
+    word-break: break-word;
+  }
+  
+  .pagination {
+    flex-wrap: wrap;
+    gap: 4px;
+    justify-content: center;
+  }
+  
+  .page-btn {
+    padding: 6px 8px;
+    font-size: 0.875rem;
+    min-width: 32px;
+  }
+  
+  .empty-state {
+    padding: 2rem 1rem;
+  }
+  
+  .empty-state h3 {
+    font-size: 1.1rem;
+  }
+  
+  .empty-state p {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .table-list-header,
+  .table-list-row {
+    min-width: 400px;
     grid-template-columns: 1fr;
   }
   
@@ -698,11 +813,166 @@
   .table-cell {
     border-right: none;
     border-bottom: 1px solid #e5e7eb;
+    padding: 12px 8px;
   }
   
   .table-header-cell:last-child,
   .table-cell:last-child {
     border-bottom: none;
+  }
+  
+  .table-header-cell {
+    background-color: #f8fafc;
+    font-weight: 600;
+    color: #374151;
+  }
+  
+  .pagination {
+    gap: 2px;
+  }
+  
+  .page-btn {
+    padding: 4px 6px;
+    font-size: 0.8rem;
+    min-width: 28px;
+  }
+}
+
+/* AdminRemittanceLimits 반응형 스타일 */
+@media (max-width: 768px) {
+  .admin-remittance-limits {
+    padding: 0 8px;
+  }
+  
+  .unified-header {
+    flex-direction: column;
+    gap: 16px;
+    padding: 16px;
+  }
+  
+  .header-left {
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }  
+  .admin-header-left {
+    gap: 12px;
+    width: 100%;
+  }  
+  .search-input {
+    width: 100%;
+  }
+  
+  .search-input input {
+    width: 100%;
+    min-width: auto;
+  }
+  
+  .search-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+  }
+  
+  .status-filter {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+  }
+  
+  .header-center {
+    width: 100%;
+  }
+  
+  .limit-display {
+    flex-direction: row;
+    gap: 24px;
+    padding: 16px;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+  
+  .limit-display .limit-item {
+    min-width: 120px;
+    flex: 0 0 auto;
+  }
+  
+  .limit-display .limit-item:not(:last-child)::after {
+    display: block;
+  }
+  
+  .header-right {
+    width: 100%;
+  }
+  
+  .btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    justify-content: center;
+  }
+  
+  .action-buttons {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .action-buttons .btn {
+    width: 100%;
+    padding: 8px;
+    font-size: 0.875rem;
+  }
+  
+  .status-badge {
+    padding: 4px 8px;
+    font-size: 0.75rem;
+  }
+  
+  .reason-cell {
+    max-width: none;
+    word-break: break-word;
+  }
+}
+
+@media (max-width: 480px) {
+  .admin-remittance-limits {
+    padding: 0 4px;
+  }
+  
+  .unified-header {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .limit-display {
+    padding: 12px;
+    gap: 12px;
+  }
+  
+  .limit-display .limit-label {
+    font-size: 12px;
+  }
+  
+  .limit-display .limit-value {
+    font-size: 14px;
+  }
+  
+  .search-input input,
+  .search-btn,
+  .status-filter,
+  .btn {
+    padding: 10px;
+    font-size: 0.9rem;
+  }
+  
+  .action-buttons .btn {
+    padding: 6px;
+    font-size: 0.8rem;
+  }
+  
+  .status-badge {
+    padding: 3px 6px;
+    font-size: 0.7rem;
   }
 } 
 

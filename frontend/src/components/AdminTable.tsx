@@ -5,6 +5,7 @@ export interface AdminTableColumn {
   key: string;
   label: string;
   width?: string;
+  align?: 'left' | 'center' | 'right';
   render?: (value: any, row?: any) => React.ReactNode;
 }
 
@@ -70,30 +71,27 @@ const AdminTable: React.FC<AdminTableProps> = ({
   return (
     <div className="admin-table">
       {/* 결과 요약 */}
-      {(showPageSizeSelector || showSortSelector || totalCount > 0) && (
         <div className="results-summary">
           <div className="summary-info">
-            {totalCount > 0 && (
               <span className="total-count">총 {totalCount}건</span>
-            )}
-            {showPageSizeSelector && onPageSizeChange && (
+            {data && data.length > 0 && onPageSizeChange && (
               <div className="page-size-selector">
-                <label>페이지 크기:</label>
+                <label>페이지</label>
                 <select 
                   value={pageSize} 
                   onChange={(e) => onPageSizeChange(Number(e.target.value))}
                   className="page-size-select"
                 >
                   {pageSizeOptions.map(size => (
-                    <option key={size} value={size}>{size}개씩</option>
+                    <option key={size} value={size}>{size}개 보기</option>
                   ))}
                 </select>
               </div>
             )}
           </div>
-          {showSortSelector && onSortOrderChange && (
+          {data && data.length > 0 && showSortSelector && onSortOrderChange && (
             <div className="sort-info">
-              <label>정렬:</label>
+              <label>정렬</label>
               <select
                 value={sortOrder}
                 onChange={(e) => onSortOrderChange(e.target.value)}
@@ -108,7 +106,6 @@ const AdminTable: React.FC<AdminTableProps> = ({
             </div>
           )}
         </div>
-      )}
 
       {/* 테이블 리스트 */}
       <div className="table-list-container">
@@ -117,7 +114,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
             <div className="loading-spinner"></div>
             <p>데이터를 불러오는 중...</p>
           </div>
-        ) : data.length > 0 ? (
+        ) : data && data.length > 0 ? (
           <div className="table-list-container">
             {/* 헤더 */}
             <div className="table-list-header">
@@ -125,7 +122,10 @@ const AdminTable: React.FC<AdminTableProps> = ({
                 <div 
                   key={column.key} 
                   className="table-header-cell"
-                  style={{ width: column.width }}
+                  style={{ 
+                    width: column.width,
+                    textAlign: column.align || 'left'
+                  }}
                 >
                   {column.label}
                 </div>
@@ -139,7 +139,12 @@ const AdminTable: React.FC<AdminTableProps> = ({
                   <div 
                     key={column.key} 
                     className="table-cell"
-                    style={{ width: column.width }}
+                    style={{ 
+                      width: column.width,
+                      textAlign: column.align || 'left',
+                      justifyContent: column.align === 'center' ? 'center' : 
+                                   column.align === 'right' ? 'flex-end' : 'flex-start'
+                    }}
                   >
                     {column.render 
                       ? column.render(row[column.key], row)
@@ -160,7 +165,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
       </div>
 
       {/* 페이지네이션 */}
-      {showPagination && onPageChange && totalPages > 1 && (
+      {data && data.length > 0 && onPageChange && (
         <div className="pagination">
           <button
             className="page-btn"
@@ -178,15 +183,69 @@ const AdminTable: React.FC<AdminTableProps> = ({
             &lsaquo;
           </button>
           
-          {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-            <button
-              key={page}
-              className={`page-btn ${currentPage === page ? 'active' : ''}`}
-              onClick={() => onPageChange(page)}
-            >
-              {page}
-            </button>
-          ))}
+          {(() => {
+            const maxVisiblePages = 10;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            // 시작 페이지 조정
+            if (endPage - startPage + 1 < maxVisiblePages) {
+              startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            const pages = [];
+            
+            // 첫 페이지
+            if (startPage > 1) {
+              pages.push(
+                <button
+                  key={1}
+                  className="page-btn"
+                  onClick={() => onPageChange(1)}
+                >
+                  1
+                </button>
+              );
+              if (startPage > 2) {
+                pages.push(
+                  <span key="ellipsis1" className="page-ellipsis">...</span>
+                );
+              }
+            }
+            
+            // 중간 페이지들
+            for (let i = startPage; i <= endPage; i++) {
+              pages.push(
+                <button
+                  key={i}
+                  className={`page-btn ${currentPage === i ? 'active' : ''}`}
+                  onClick={() => onPageChange(i)}
+                >
+                  {i}
+                </button>
+              );
+            }
+            
+            // 마지막 페이지
+            if (endPage < totalPages) {
+              if (endPage < totalPages - 1) {
+                pages.push(
+                  <span key="ellipsis2" className="page-ellipsis">...</span>
+                );
+              }
+              pages.push(
+                <button
+                  key={totalPages}
+                  className="page-btn"
+                  onClick={() => onPageChange(totalPages)}
+                >
+                  {totalPages}
+                </button>
+              );
+            }
+            
+            return pages;
+          })()}
           
           <button
             className="page-btn"

@@ -13,7 +13,11 @@ export const countryAtom = atom<Country[]>([]);
 // 송금 가능 국가 atom
 export const remittanceCountriesAtom = atom<Country[] | null>(null);
 
+// 환율 데이터 atom
+export const exchangeRatesAtom = atom<{ [key: string]: number }>({});
 
+// 관심 환율 atom
+export const favoriteCurrenciesAtom = atom<string[]>([]);
 
 export const getRemittanceCountries = atom(
   null,
@@ -22,5 +26,26 @@ export const getRemittanceCountries = atom(
       const data = await api.getRemittanceCountries();
       set(remittanceCountriesAtom, data);
     }
+  }
+);
+
+// 환율 데이터 업데이트 atom
+export const updateExchangeRatesAtom = atom(
+  null,
+  async (get: Getter, set: Setter) => {
+    const currentRates = get(exchangeRatesAtom);
+    if (Object.keys(currentRates).length === 0) {
+      const rates = await api.getExchangeRates();
+      set(exchangeRatesAtom, rates);
+    }
+  }
+);
+
+// 관심 환율 업데이트 atom
+export const updateFavoriteCurrenciesAtom = atom(
+  null,
+  async (get: Getter, set: Setter, userId: number) => {
+    const list = await api.getFavoriteCurrencyList(userId);
+    set(favoriteCurrenciesAtom, list);
   }
 ); 

@@ -24,5 +24,6 @@ public class DashboardController {
     public ResponseEntity<DashboardStatsResponse> getDashboardStats() {
         DashboardStatsResponse stats = dashboardService.getDashboardStats();
         return ResponseEntity.ok(stats);
+
     }
 } 

@@ -12,6 +12,7 @@ interface FileViewerModalProps {
     income?: { id: number; originalName: string; fileSize: number; fileType: string };
     bankbook?: { id: number; originalName: string; fileSize: number; fileType: string };
     business?: { id: number; originalName: string; fileSize: number; fileType: string };
+    qna?: { id: number; originalName: string; fileSize: number; fileType: string };
   };
 }
 
@@ -21,17 +22,23 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [pdfScale, setPdfScale] = useState(1.0);
+  const [imageScale, setImageScale] = useState(1.0);
   const [pageInputValue, setPageInputValue] = useState('');
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     if (isOpen) {
       // 소득 증빙을 우선적으로 선택
-      const firstFile = files.income || files.bankbook || files.business;
+      const firstFile = files.income || files.bankbook || files.business || files.qna;
       setCurrentFile(firstFile || null);
       setViewMode(null);
       setPdfScale(1.0);
+      setImageScale(1.0);
       setPageNumber(1);
       setPageInputValue('');
+      setDragOffset({ x: 0, y: 0 });
       
       // 첫 번째 파일이 있으면 자동으로 로드
       if (firstFile) {
@@ -44,8 +51,10 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
     setCurrentFile(file);
     setViewMode('loading');
     setPdfScale(1.0);
+    setImageScale(1.0);
     setPageNumber(1);
     setPageInputValue('');
+    setDragOffset({ x: 0, y: 0 });
     
     try {
       // Base64 API를 사용하여 파일 데이터 가져오기
@@ -137,15 +146,128 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
 
   const handleZoomIn = () => {
     setPdfScale(prev => Math.min(prev + 0.2, 3.0));
+    setImageScale(prev => Math.min(prev + 0.2, 2.0));
   };
 
   const handleZoomOut = () => {
-    setPdfScale(prev => Math.max(prev - 0.2, 0.5));
+    const newPdfScale = Math.max(pdfScale - 0.2, 0.5);
+    const newImageScale = Math.max(imageScale - 0.2, 0.5);
+    
+    setPdfScale(newPdfScale);
+    setImageScale(newImageScale);
+    
+    // 100% 이하로 축소할 때 위치 초기화
+    if (newPdfScale <= 1.0 || newImageScale <= 1.0) {
+      setDragOffset({ x: 0, y: 0 });
+    }
   };
 
   const handleZoomReset = () => {
     setPdfScale(1.0);
+    setImageScale(1.0);
+    setDragOffset({ x: 0, y: 0 });
   };
+
+  const handleMouseDown = (e: React.MouseEvent) => {
+    // 100% 미만에서도 드래그 가능하도록 수정
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - dragOffset.x, y: e.clientY - dragOffset.y });
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isDragging) {
+      setDragOffset({
+        x: e.clientX - dragStart.x,
+        y: e.clientY - dragStart.y
+      });
+    }
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleWheel = (e: React.WheelEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    
+    if (isImageFile(currentFile?.fileType || '')) {
+      const newImageScale = Math.max(Math.min(imageScale + delta, 2.0), 0.5);
+      setImageScale(newImageScale);
+      
+      // 100% 이하로 축소할 때 위치 초기화
+      if (newImageScale <= 1.0) {
+        setDragOffset({ x: 0, y: 0 });
+      }
+    } else if (isPdfFile(currentFile?.fileType || '')) {
+      const newPdfScale = Math.max(Math.min(pdfScale + delta, 3.0), 0.5);
+      setPdfScale(newPdfScale);
+      
+      // 100% 이하로 축소할 때 위치 초기화
+      if (newPdfScale <= 1.0) {
+        setDragOffset({ x: 0, y: 0 });
+      }
+    }
+  };
+
+  // wheel 이벤트 리스너를 직접 추가
+  useEffect(() => {
+    if (!isOpen || !currentFile) return;
+
+    const handleWheelEvent = (e: Event) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      const wheelEvent = e as WheelEvent;
+      const delta = wheelEvent.deltaY > 0 ? -0.1 : 0.1;
+      
+      if (isImageFile(currentFile.fileType)) {
+        const newImageScale = Math.max(Math.min(imageScale + delta, 2.0), 0.5);
+        setImageScale(newImageScale);
+        
+        // 100% 이하로 축소할 때 위치 초기화
+        if (newImageScale <= 1.0) {
+          setDragOffset({ x: 0, y: 0 });
+        }
+      } else if (isPdfFile(currentFile.fileType)) {
+        const newPdfScale = Math.max(Math.min(pdfScale + delta, 3.0), 0.5);
+        setPdfScale(newPdfScale);
+        
+        // 100% 이하로 축소할 때 위치 초기화
+        if (newPdfScale <= 1.0) {
+          setDragOffset({ x: 0, y: 0 });
+        }
+      }
+    };
+
+    const imageViewerElement = document.querySelector('[data-image-viewer]');
+    const pdfViewerElement = document.querySelector('[data-pdf-viewer]');
+    
+    if (imageViewerElement) {
+      imageViewerElement.addEventListener('wheel', handleWheelEvent, { passive: false });
+    }
+    
+    if (pdfViewerElement) {
+      pdfViewerElement.addEventListener('wheel', handleWheelEvent, { passive: false });
+    }
+    
+    return () => {
+      if (imageViewerElement) {
+        imageViewerElement.removeEventListener('wheel', handleWheelEvent);
+      }
+      if (pdfViewerElement) {
+        pdfViewerElement.removeEventListener('wheel', handleWheelEvent);
+      }
+    };
+  }, [isOpen, currentFile, imageScale, pdfScale]);
+
+
 
   if (!isOpen) return null;
 
@@ -162,18 +284,20 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
       justifyContent: 'center',
       zIndex: 1000
     }}>
-      <div style={{
-        background: 'white',
-        borderRadius: '12px',
-        padding: '24px',
-        maxWidth: '95vw',
-        maxHeight: '95vh',
-        width: '1200px',
-        height: '90vh',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '20px'
-      }}>
+             <div 
+         style={{
+           background: 'white',
+           borderRadius: '12px',
+           padding: '24px',
+           maxWidth: '95vw',
+           maxHeight: '95vh',
+           width: '1200px',
+           height: '90vh',
+           display: 'flex',
+           flexDirection: 'column',
+           gap: '20px'
+         }}
+       >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '600' }}>첨부파일 보기</h2>
           <button
@@ -190,65 +314,65 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
           </button>
         </div>
 
-        <div style={{ display: 'flex', gap: '16px', borderBottom: '1px solid #e5e7eb', paddingBottom: '16px' }}>
-          {files.income && (
-            <button
-              onClick={() => handleFileClick(files.income!)}
-              style={{
-                padding: '8px 12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                background: currentFile?.id === files.income?.id ? '#3b82f6' : 'white',
-                color: currentFile?.id === files.income?.id ? 'white' : '#374151',
-                cursor: 'pointer',
-                fontSize: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-            >
-              {getFileIcon(files.income.fileType)} 소득 증빙
-            </button>
-          )}
-          {files.bankbook && (
-            <button
-              onClick={() => handleFileClick(files.bankbook!)}
-              style={{
-                padding: '8px 12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                background: currentFile?.id === files.bankbook?.id ? '#3b82f6' : 'white',
-                color: currentFile?.id === files.bankbook?.id ? 'white' : '#374151',
-                cursor: 'pointer',
-                fontSize: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-            >
-              {getFileIcon(files.bankbook.fileType)} 통장 사본
-            </button>
-          )}
-          {files.business && (
-            <button
-              onClick={() => handleFileClick(files.business!)}
-              style={{
-                padding: '8px 12px',
-                border: '1px solid #d1d5db',
-                borderRadius: '6px',
-                background: currentFile?.id === files.business?.id ? '#3b82f6' : 'white',
-                color: currentFile?.id === files.business?.id ? 'white' : '#374151',
-                cursor: 'pointer',
-                fontSize: '14px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-            >
-              {getFileIcon(files.business.fileType)} 사업자 등록증
-            </button>
-          )}
-        </div>
+         <div style={{ display: 'flex', gap: '16px', borderBottom: '1px solid #e5e7eb', paddingBottom: '16px' }}>
+           {files.income && (
+             <button
+               onClick={() => handleFileClick(files.income!)}
+               style={{
+                 padding: '8px 12px',
+                 border: '1px solid #d1d5db',
+                 borderRadius: '6px',
+                 background: currentFile?.id === files.income?.id ? '#3b82f6' : 'white',
+                 color: currentFile?.id === files.income?.id ? 'white' : '#374151',
+                 cursor: 'pointer',
+                 fontSize: '14px',
+                 display: 'flex',
+                 alignItems: 'center',
+                 gap: '8px'
+               }}
+             >
+               {getFileIcon(files.income.fileType)} 소득 증빙
+             </button>
+           )}
+           {files.bankbook && (
+             <button
+               onClick={() => handleFileClick(files.bankbook!)}
+               style={{
+                 padding: '8px 12px',
+                 border: '1px solid #d1d5db',
+                 borderRadius: '6px',
+                 background: currentFile?.id === files.bankbook?.id ? '#3b82f6' : 'white',
+                 color: currentFile?.id === files.bankbook?.id ? 'white' : '#374151',
+                 cursor: 'pointer',
+                 fontSize: '14px',
+                 display: 'flex',
+                 alignItems: 'center',
+                 gap: '8px'
+               }}
+             >
+               {getFileIcon(files.bankbook.fileType)} 통장 사본
+             </button>
+           )}
+           {files.business && (
+             <button
+               onClick={() => handleFileClick(files.business!)}
+               style={{
+                 padding: '8px 12px',
+                 border: '1px solid #d1d5db',
+                 borderRadius: '6px',
+                 background: currentFile?.id === files.business?.id ? '#3b82f6' : 'white',
+                 color: currentFile?.id === files.business?.id ? 'white' : '#374151',
+                 cursor: 'pointer',
+                 fontSize: '14px',
+                 display: 'flex',
+                 alignItems: 'center',
+                 gap: '8px'
+               }}
+             >
+               {getFileIcon(files.business.fileType)} 사업자 등록증
+             </button>
+           )}
+         </div>
 
         {currentFile && (
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '16px' }}>
@@ -281,7 +405,9 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
           </div>
         )}
 
-        <div style={{ flex: 1, border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', minHeight: '600px', position: 'relative' }}>
+                 <div 
+           style={{ flex: 1, border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', minHeight: '600px', position: 'relative' }}
+         >
           {viewMode === 'loading' && (
             <div style={{
               position: 'absolute',
@@ -362,35 +488,152 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
           {viewMode === 'success' && currentFile && (
             <>
               {isImageFile(currentFile.fileType) ? (
-                <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <img
-                    src={currentFile.base64Data ? `data:${currentFile.fileType};base64,${currentFile.base64Data}` : `/api/files/${currentFile.id}?t=${Date.now()}`}
-                    alt={currentFile.originalName}
-                    style={{ 
-                      maxWidth: '100%', 
-                      maxHeight: '100%', 
-                      objectFit: 'contain',
-                      display: 'block'
-                    }}
-                    onLoad={handleImageLoad}
-                    onError={handleImageError}
-                    crossOrigin="anonymous"
-                    referrerPolicy="no-referrer"
-                  />
+                <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+                                     {/* 이미지 줌 컨트롤 */}
+                   <div style={{ 
+                     display: 'flex', 
+                     flexDirection: 'column',
+                     gap: '8px',
+                     padding: '12px',
+                     borderBottom: '1px solid #e5e7eb',
+                     backgroundColor: '#f9fafb'
+                   }}>
+                     {/* 사용법 안내 */}
+                     <div style={{
+                       textAlign: 'center',
+                       fontSize: '12px',
+                       color: '#6b7280',
+                       fontStyle: 'italic'
+                     }}>
+                       💡 마우스 휠로 확대/축소, 드래그로 이동 가능
+                     </div>
+                     {/* 줌 컨트롤 버튼들 */}
+                     <div style={{ 
+                       display: 'flex', 
+                       justifyContent: 'center', 
+                       alignItems: 'center', 
+                       gap: '12px'
+                     }}>
+
+                    <button
+                      onClick={handleZoomOut}
+                      disabled={imageScale <= 0.5}
+                      style={{
+                        padding: '6px 12px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '4px',
+                        background: 'white',
+                        color: imageScale <= 0.5 ? '#9ca3af' : '#374151',
+                        cursor: imageScale <= 0.5 ? 'not-allowed' : 'pointer',
+                        fontSize: '12px',
+                        fontWeight: '500'
+                      }}
+                    >
+                      🔍-
+                    </button>
+                    <span style={{ fontSize: '14px', color: '#6b7280', minWidth: '60px', textAlign: 'center' }}>
+                      {Math.round(imageScale * 100)}%
+                    </span>
+                    <button
+                      onClick={handleZoomIn}
+                                             disabled={imageScale >= 2.0}
+                      style={{
+                        padding: '6px 12px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '4px',
+                        background: 'white',
+                                                 color: imageScale >= 2.0 ? '#9ca3af' : '#374151',
+                         cursor: imageScale >= 2.0 ? 'not-allowed' : 'pointer',
+                        fontSize: '12px',
+                        fontWeight: '500'
+                      }}
+                    >
+                      🔍+
+                    </button>
+                    <button
+                      onClick={handleZoomReset}
+                      style={{
+                        padding: '6px 12px',
+                        border: '1px solid #d1d5db',
+                        borderRadius: '4px',
+                        background: 'white',
+                        color: '#374151',
+                        cursor: 'pointer',
+                        fontSize: '12px',
+                        fontWeight: '500'
+                      }}
+                                         >
+                       🔄 초기화
+                     </button>
+                     </div>
+                   </div>
+
+                                      {/* 이미지 뷰어 영역 */}
+                                       <div 
+                      data-image-viewer
+                      style={{ 
+                        flex: 1, 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        overflow: 'hidden', 
+                        padding: '20px',
+                                                cursor: isDragging ? 'grabbing' : 'grab',
+                        userSelect: 'none'
+                      }}
+                      onMouseDown={handleMouseDown}
+                      onMouseMove={handleMouseMove}
+                      onMouseUp={handleMouseUp}
+                      onMouseLeave={handleMouseLeave}
+                    >
+                                           <img
+                        src={currentFile.base64Data ? `data:${currentFile.fileType};base64,${currentFile.base64Data}` : `/api/files/${currentFile.id}?t=${Date.now()}`}
+                        alt={currentFile.originalName}
+                        style={{ 
+                          maxWidth: `${100 * imageScale}%`, 
+                          maxHeight: `${100 * imageScale}%`, 
+                          objectFit: 'contain',
+                          display: 'block',
+                          transition: imageScale === 1.0 ? 'max-width 0.2s ease, max-height 0.2s ease' : 'none',
+                          transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)`,
+                          cursor: isDragging ? 'grabbing' : 'grab'
+                        }}
+                       onLoad={handleImageLoad}
+                       onError={handleImageError}
+                       crossOrigin="anonymous"
+                       referrerPolicy="no-referrer"
+                       draggable={false}
+                     />
+                   </div>
                 </div>
               ) : isPdfFile(currentFile.fileType) ? (
                 <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                   {/* PDF 줌 컨트롤 */}
                   <div style={{ 
                     display: 'flex', 
-                    justifyContent: 'center', 
-                    alignItems: 'center', 
-                    gap: '12px', 
+                    flexDirection: 'column',
+                    gap: '8px',
                     padding: '12px',
                     borderBottom: '1px solid #e5e7eb',
                     backgroundColor: '#f9fafb'
                   }}>
-                    <button
+                    {/* 사용법 안내 */}
+                    <div style={{
+                      textAlign: 'center',
+                      fontSize: '12px',
+                      color: '#6b7280',
+                      fontStyle: 'italic'
+                    }}>
+                      💡 마우스 휠로 확대/축소, 드래그로 이동 가능
+                    </div>
+                    {/* 줌 컨트롤 버튼들 */}
+                    <div style={{ 
+                      display: 'flex', 
+                      justifyContent: 'center', 
+                      alignItems: 'center', 
+                      gap: '12px'
+                    }}>
+                      <button
                       onClick={handleZoomOut}
                       disabled={pdfScale <= 0.5}
                       style={{
@@ -440,41 +683,65 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                     >
                       🔄 초기화
                     </button>
+                    </div>
                   </div>
 
-                  {/* PDF 뷰어 영역 */}
-                  <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', overflow: 'auto', padding: '20px' }}>
-                    <Document
-                      file={currentFile.base64Data ? `data:${currentFile.fileType};base64,${currentFile.base64Data}` : `/api/files/${currentFile.id}`}
-                      onLoadSuccess={onDocumentLoadSuccess}
-                      loading={
-                        <div style={{ textAlign: 'center', padding: '20px' }}>
-                          <div style={{
-                            border: '3px solid #f3f3f3',
-                            borderTop: '3px solid #3b82f6',
-                            borderRadius: '50%',
-                            width: '30px',
-                            height: '30px',
-                            animation: 'spin 1s linear infinite',
-                            margin: '0 auto 10px'
-                          }}></div>
-                          <p>PDF를 불러오는 중...</p>
-                        </div>
-                      }
+                                     {/* PDF 뷰어 영역 */}
+                                       <div 
+                      data-pdf-viewer
+                      style={{ 
+                        flex: 1, 
+                        display: 'flex', 
+                        justifyContent: 'center', 
+                        alignItems: 'center', 
+                        overflow: 'hidden', 
+                        padding: '20px',
+                                                cursor: isDragging ? 'grabbing' : 'grab',
+                        userSelect: 'none'
+                      }}
+                      onMouseDown={handleMouseDown}
+                      onMouseMove={handleMouseMove}
+                      onMouseUp={handleMouseUp}
+                      onMouseLeave={handleMouseLeave}
                     >
-                      {numPages && (
-                        <div style={{ border: '1px solid #e5e7eb', borderRadius: '4px', padding: '8px', backgroundColor: 'white' }}>
-                          <Page
-                            pageNumber={pageNumber}
-                            width={Math.min(800 * pdfScale, window.innerWidth - 100)}
-                            scale={pdfScale}
-                            renderTextLayer={false}
-                            renderAnnotationLayer={false}
-                          />
-                        </div>
-                      )}
-                    </Document>
-                  </div>
+                     <Document
+                       file={currentFile.base64Data ? `data:${currentFile.fileType};base64,${currentFile.base64Data}` : `/api/files/${currentFile.id}`}
+                       onLoadSuccess={onDocumentLoadSuccess}
+                       loading={
+                         <div style={{ textAlign: 'center', padding: '20px' }}>
+                           <div style={{
+                             border: '3px solid #f3f3f3',
+                             borderTop: '3px solid #3b82f6',
+                             borderRadius: '50%',
+                             width: '30px',
+                             height: '30px',
+                             animation: 'spin 1s linear infinite',
+                             margin: '0 auto 10px'
+                           }}></div>
+                           <p>PDF를 불러오는 중...</p>
+                         </div>
+                       }
+                     >
+                       {numPages && (
+                         <div style={{ 
+                           border: '1px solid #e5e7eb', 
+                           borderRadius: '4px', 
+                           padding: '8px', 
+                           backgroundColor: 'white',
+                           transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)`,
+                           transition: pdfScale === 1.0 ? 'transform 0.2s ease' : 'none'
+                         }}>
+                           <Page
+                             pageNumber={pageNumber}
+                             width={Math.min(800 * pdfScale, window.innerWidth - 100)}
+                             scale={pdfScale}
+                             renderTextLayer={false}
+                             renderAnnotationLayer={false}
+                           />
+                         </div>
+                       )}
+                     </Document>
+                   </div>
 
                   {/* 페이지 네비게이션 (PDF 아래) */}
                   {numPages && (

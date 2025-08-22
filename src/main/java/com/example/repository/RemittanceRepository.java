@@ -115,5 +115,19 @@ public interface RemittanceRepository extends JpaRepository<Remittance, Long>, J
         @Param("startDate") LocalDateTime startDate,
         @Param("endDate") LocalDateTime endDate
     );
+
+    /**
+     * 특정 사용자의 특정 기간 동안 송금한 금액 합계를 조회합니다.
+     */
+    @Query("SELECT COALESCE(SUM(r.amount), 0) " +
+           "FROM Remittance r " +
+           "WHERE r.userId = :userId " +
+           "AND r.createdAt BETWEEN :startDate AND :endDate " +
+           "AND r.status = 'COMPLETED'")
+    BigDecimal sumAmountByUserIdAndDateRange(
+        @Param("userId") Long userId,
+        @Param("startDate") LocalDateTime startDate,
+        @Param("endDate") LocalDateTime endDate
+    );
     
 } 

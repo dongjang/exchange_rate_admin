@@ -1,5 +1,6 @@
 import { useAtom } from 'jotai';
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { FaCheck, FaDownload, FaEye, FaSearch, FaCog as FaSettings, FaTimes, FaUsers } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { api } from '../services/api';
@@ -36,10 +37,14 @@ interface RemittanceLimitRequest {
 }
 
 const AdminRemittanceLimits: React.FC = () => {
+  const location = useLocation();
   const [requests, setRequests] = useState<RemittanceLimitRequest[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
+  const [totalCount, setTotalCount] = useState(0);
+  const [sortOrder, setSortOrder] = useState('latest');
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('');
   const [isFileViewerOpen, setIsFileViewerOpen] = useState(false);
@@ -55,12 +60,28 @@ const AdminRemittanceLimits: React.FC = () => {
   const [isDefaultLimitModalOpen, setIsDefaultLimitModalOpen] = useState(false);
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(false);
   const [pendingRejectRequestId, setPendingRejectRequestId] = useState<number | null>(null);
+  const [pendingRejectRequestData, setPendingRejectRequestData] = useState<{
+    userId?: number;
+    dailyLimit?: number;
+    monthlyLimit?: number;
+    singleLimit?: number;
+  } | null>(null);
   const [processingRequestId, setProcessingRequestId] = useState<number | null>(null);
+
+  // URL state에서 activeTab이 'limits'인 경우 대기중 상태로 자동 설정
+  useEffect(() => {
+    if (location.state?.activeTab === 'limits') {
+      setStatusFilter('PENDING');
+    }
+  }, [location.state]);
 
   useEffect(() => {
     loadRequests();
+  }, [currentPage, pageSize, sortOrder, searchTerm, statusFilter]);
+
+  useEffect(() => {
     loadDefaultLimit();
-  }, [currentPage, searchTerm, statusFilter]);
+  }, []);
 
   const handleSearch = () => {
     setCurrentPage(1);
@@ -78,12 +99,14 @@ const AdminRemittanceLimits: React.FC = () => {
     try {
       const response = await api.getAdminRemittanceLimitRequests({
         page: currentPage - 1,
-        size: 10,
+        size: pageSize,
         searchTerm: searchTerm,
-        status: statusFilter || undefined
+        status: statusFilter || undefined,
+        sortOrder: sortOrder
       });
-      setRequests(response);
-      setTotalPages(Math.ceil(response.length / 10));
+      setRequests(response.list);
+      setTotalPages(Math.ceil(response.count / pageSize));
+      setTotalCount(response.count);
     } catch (error) {
       console.error('송금 한도 요청 목록을 불러오는데 실패했습니다:', error);
       Swal.fire({
@@ -110,6 +133,12 @@ const AdminRemittanceLimits: React.FC = () => {
     if (action === 'reject') {
       // 반려의 경우 코멘트 모달 열기
       setPendingRejectRequestId(requestId);
+      setPendingRejectRequestData({
+        userId,
+        dailyLimit,
+        monthlyLimit,
+        singleLimit
+      });
       setIsCommentModalOpen(true);
       return;
     }
@@ -134,12 +163,28 @@ const AdminRemittanceLimits: React.FC = () => {
   };
 
   const handleRejectWithComment = async (comment: string) => {
-    if (!pendingRejectRequestId) return;
+    if (!pendingRejectRequestId || !pendingRejectRequestData) return;
     
-    // 반려 시에는 한도 정보 없이 처리
-    await processRequest(pendingRejectRequestId, 'REJECTED', comment);
+    // 디버깅을 위한 로그 추가
+    console.log('handleRejectWithComment called:', {
+      pendingRejectRequestId,
+      pendingRejectRequestData,
+      comment
+    });
+    
+    // 반려 시에도 한도 정보와 함께 처리
+    await processRequest(
+      pendingRejectRequestId, 
+      'REJECTED', 
+      comment, 
+      pendingRejectRequestData.userId,
+      pendingRejectRequestData.dailyLimit,
+      pendingRejectRequestData.monthlyLimit,
+      pendingRejectRequestData.singleLimit
+    );
     setIsCommentModalOpen(false);
     setPendingRejectRequestId(null);
+    setPendingRejectRequestData(null);
   };
 
   const processRequest = async (requestId: number, status: 'APPROVED' | 'REJECTED', adminComment: string, userId?: number, dailyLimit?: number, monthlyLimit?: number, singleLimit?: number) => {
@@ -160,20 +205,13 @@ const AdminRemittanceLimits: React.FC = () => {
       const requestData: any = {
         status,
         adminId: userInfo.id,
+        userId: userId,
+        dailyLimit: dailyLimit,
+        monthlyLimit: monthlyLimit,
+        singleLimit: singleLimit,
         adminComment
       };
-            
-      // 승인인 경우에만 한도 정보 포함, 반려할 때도 userId는 포함
-      if (status === 'APPROVED') {
-        requestData.userId = userId;
-        requestData.dailyLimit = dailyLimit;
-        requestData.monthlyLimit = monthlyLimit;
-        requestData.singleLimit = singleLimit;
-      } else if (status === 'REJECTED') {
-        // 반려할 때도 userId 포함
-        requestData.userId = userId;
-      }
-      
+                  
       const response = await api.processRemittanceLimitRequest(requestId, requestData);
 
       Swal.fire({
@@ -316,6 +354,16 @@ const AdminRemittanceLimits: React.FC = () => {
       {/* 통합 헤더 섹션 */}
       <div className="unified-header">
         <div className="header-left">
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="status-filter"
+          >
+            <option value="">전체 상태</option>
+            <option value="PENDING">대기중</option>
+            <option value="APPROVED">승인</option>
+            <option value="REJECTED">반려</option>
+          </select>
           <div className="search-input">
             <FaSearch className="search-icon" />
             <input
@@ -329,16 +377,6 @@ const AdminRemittanceLimits: React.FC = () => {
           <button onClick={handleSearch} className="search-btn">
             검색
           </button>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            className="status-filter"
-          >
-            <option value="">전체 상태</option>
-            <option value="PENDING">대기중</option>
-            <option value="APPROVED">승인</option>
-            <option value="REJECTED">반려</option>
-          </select>
         </div>
         
         <div className="header-center">
@@ -366,7 +404,7 @@ const AdminRemittanceLimits: React.FC = () => {
             className="btn btn-primary"
             disabled={defaultLimitLoading}
           >
-            <FaSettings /> 기본한도설정
+            <FaSettings /> 기본 한도 설정
           </button>
         </div>
       </div>
@@ -400,7 +438,7 @@ const AdminRemittanceLimits: React.FC = () => {
           {
             key: 'reason',
             label: '신청 사유',
-            width: '200px',
+            width: '250px',
             render: (value) => <div className="reason-cell">{value}</div>
           },
           {
@@ -416,8 +454,8 @@ const AdminRemittanceLimits: React.FC = () => {
           {
             key: 'createdAt',
             label: '신청일',
-            width: '120px',
-            render: (value) => formatDate(value)
+            width: '170px',
+            render: (value) => new Date(value).toLocaleString('ko-KR')
           },
           {
             key: 'files',
@@ -437,7 +475,7 @@ const AdminRemittanceLimits: React.FC = () => {
           {
             key: 'actions',
             label: '작업',
-            width: '150px',
+            width: '80px',
             render: (_, row) => (
               row.status === 'PENDING' ? (
                 <div className="action-buttons">
@@ -448,13 +486,13 @@ const AdminRemittanceLimits: React.FC = () => {
                   >
                     <FaCheck /> 승인
                   </button>
-                  <button
-                    onClick={() => handleRequestAction('reject',row.id)}
-                    className="btn btn-danger btn-sm"
-                    disabled={processingRequestId === row.id}
-                  >
-                    <FaTimes /> 반려
-                  </button>
+                                     <button
+                     onClick={() => handleRequestAction('reject',row.id, row.userId, row.dailyLimit, row.monthlyLimit, row.singleLimit)}
+                     className="btn btn-danger btn-sm"
+                     disabled={processingRequestId === row.id}
+                   >
+                     <FaTimes /> 반려
+                   </button>
                 </div>
               ) : '-'
             )
@@ -463,13 +501,23 @@ const AdminRemittanceLimits: React.FC = () => {
         loading={loading}
         emptyMessage="송금 한도 요청이 없습니다"
         emptyIcon="📋"
-        totalCount={requests.length}
+        totalCount={totalCount}
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={setCurrentPage}
         showPagination={totalPages > 1}
-        showPageSizeSelector={false}
-        showSortSelector={false}
+        showPageSizeSelector={true}
+        showSortSelector={true}
+        pageSize={pageSize}
+        sortOrder={sortOrder}
+        onPageSizeChange={(newPageSize) => {
+          setPageSize(newPageSize);
+          setCurrentPage(1); // 페이지 크기 변경 시 첫 페이지로 이동
+        }}
+        onSortOrderChange={(sortOrder) => {
+          setSortOrder(sortOrder);
+          setCurrentPage(1); // 정렬 순서 변경 시 첫 페이지로 이동
+        }}
         sortOptions={[
           { value: "latest", label: "최신순" },
           { value: "oldest", label: "과거순" },
@@ -494,6 +542,7 @@ const AdminRemittanceLimits: React.FC = () => {
         onClose={() => {
           setIsCommentModalOpen(false);
           setPendingRejectRequestId(null);
+          setPendingRejectRequestData(null);
         }}
         onSubmit={handleRejectWithComment}
         title="반려 사유 입력"

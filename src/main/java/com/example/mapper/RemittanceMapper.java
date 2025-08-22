@@ -25,10 +25,10 @@ public interface RemittanceMapper {
     /**
      * 관리자용 송금 이력 조회
      */
-    List<RemittanceHistoryResponse> selectRemittanceHistory(@Param("search") RemittanceHistorySearchRequest search);
+    List<RemittanceHistoryResponse> selectRemittanceHistory(RemittanceHistorySearchRequest search);
     
     /**
      * 관리자용 송금 이력 개수 조회
      */
-    int countRemittanceHistory(@Param("search") RemittanceHistorySearchRequest search);
+    int countRemittanceHistory(RemittanceHistorySearchRequest search);
 } 

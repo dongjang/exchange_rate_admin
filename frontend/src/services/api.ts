@@ -5,6 +5,58 @@ import type { MyBankAccount } from '../store/myBankAccountStore';
 
 const API_BASE_URL = 'http://localhost:8080/api';
 
+// 전역 로딩 상태 관리
+let loadingCount = 0;
+let loadingCallbacks: ((isLoading: boolean) => void)[] = [];
+
+export const setLoadingCallback = (callback: (isLoading: boolean) => void) => {
+  loadingCallbacks.push(callback);
+};
+
+const updateLoadingState = (increment: boolean) => {
+  if (increment) {
+    loadingCount++;
+  } else {
+    loadingCount = Math.max(0, loadingCount - 1);
+  }
+  
+  const isLoading = loadingCount > 0;
+  
+  // 커스텀 이벤트 발생
+  window.dispatchEvent(new CustomEvent('loading-change', { 
+    detail: { loading: increment } 
+  }));
+  
+  loadingCallbacks.forEach(callback => callback(isLoading));
+};
+
+// Axios 인터셉터 설정
+axios.interceptors.request.use(
+  (config) => {
+    // 로딩 상태 증가
+    updateLoadingState(true);
+    return config;
+  },
+  (error) => {
+    // 에러 발생 시에도 로딩 상태 감소
+    updateLoadingState(false);
+    return Promise.reject(error);
+  }
+);
+
+axios.interceptors.response.use(
+  (response) => {
+    // 로딩 상태 감소
+    updateLoadingState(false);
+    return response;
+  },
+  (error) => {
+    // 에러 발생 시에도 로딩 상태 감소
+    updateLoadingState(false);
+    return Promise.reject(error);
+  }
+);
+
 export interface AuthUser {
   email: string;
   name: string;
@@ -12,22 +64,45 @@ export interface AuthUser {
 }
 
 export const api = {
-  // 모든 사용자 조회
+  // 현재 로그인한 사용자 정보 조회
+  async getCurrentUserInfo(): Promise<User> {
+    const response = await axios.get(`${API_BASE_URL}/users/loginUserInfo`, { withCredentials: true });
+    return response.data;
+  },
+
+  // 모든 사용자 조회 (관리자용)
   async getUsers(): Promise<User[]> {
     const response = await axios.get(`${API_BASE_URL}/users`, { withCredentials: true });
     return response.data;
   },
 
+  // 사용자 검색
+  async searchUsers(searchRequest: any): Promise<any> {
+    const response = await axios.post(`${API_BASE_URL}/users/search`, searchRequest, {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true,
+    });
+    return response.data;
+  },
+
   // 특정 사용자 조회
-  async getUserById(id: number): Promise<User> {
+  async getUserById(id: number): Promise<any> {
     const response = await axios.get(`${API_BASE_URL}/users/${id}`, { withCredentials: true });
     return response.data;
   },
 
- 
-  // 사용자 수정
-  async updateUser(id: number, user: Partial<User>): Promise<User> {
-    const response = await axios.post(`${API_BASE_URL}/users/${id}`, user, {
+  // 사용자 상태 업데이트
+  async updateUserStatus(id: number, status: string): Promise<any> {
+    const response = await axios.put(`${API_BASE_URL}/users/${id}/status`, { status }, {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true,
+    });
+    return response.data;
+  },
+
+  // 사용자 정보 수정
+  async updateUser(id: number, userData: any): Promise<any> {
+    const response = await axios.put(`${API_BASE_URL}/users/${id}`, userData, {
       headers: { 'Content-Type': 'application/json' },
       withCredentials: true,
     });
@@ -63,7 +138,7 @@ export const api = {
 
   // 국가/통화 리스트 조회
   async getCountries(): Promise<Country[]> {
-    const response = await axios.get(`${API_BASE_URL}/countries`, { withCredentials: true });
+    const response = await axios.get(`${API_BASE_URL}/countries/all`, { withCredentials: true });
     return response.data;
   },
 
@@ -75,7 +150,7 @@ export const api = {
 
     // 은행 리스트 조회 (currencyCode 파라미터)
     async getBanks(currencyCode: string): Promise<{ bankCode: string; name: string }[]> {
-      const response = await axios.get(`${API_BASE_URL}/bank`, {
+      const response = await axios.get(`${API_BASE_URL}/banks/currency_bank_info`, {
         params: { currencyCode },
         withCredentials: true,
       });
@@ -160,17 +235,17 @@ export const api = {
     return response.data;
   },
   
-  // 관리자용 송금 이력 조회
-  async getAdminRemittanceHistory(params: any): Promise<any[]> {
+  // 관리자용 송금 이력 조회 (count와 list 함께 반환)
+  async getAdminRemittanceHistory(params: any): Promise<{list: any[], count: number}> {
     const response = await axios.post(`${API_BASE_URL}/remittances/admin/search`, params, { withCredentials: true });
     return response.data;
   },
   
-  // 관리자용 송금 이력 개수 조회
-  async getAdminRemittanceHistoryCount(params: any): Promise<number> {
-    const response = await axios.post(`${API_BASE_URL}/remittances/admin/count`, params, { withCredentials: true });
-    return response.data;
-  },
+  // 관리자용 송금 이력 개수 조회 - 삭제됨 (getAdminRemittanceHistory에서 함께 반환)
+  // async getAdminRemittanceHistoryCount(params: any): Promise<number> {
+  //   const response = await axios.post(`${API_BASE_URL}/remittances/admin/count`, params, { withCredentials: true });
+  //   return response.data;
+  // },
 
   // 기본 송금 한도 관련 API
   async getDefaultRemittanceLimit(): Promise<any> {
@@ -202,7 +277,7 @@ export const api = {
     }
   },
 
-  // 한도 상향 신청 API
+  // 한도 변경 신청 API
   async createRemittanceLimitRequest(userId: number, data: FormData): Promise<any> {
     const response = await axios.post(`${API_BASE_URL}/remittance-limit-requests/user/${userId}`, data, {
       headers: { 'Content-Type': 'multipart/form-data' },
@@ -227,40 +302,21 @@ export const api = {
     return response.data;
   },
 
-
-
   async getAdminRemittanceLimitRequests(params: {
     userId?: number;
     status?: string;
     searchTerm?: string;
     page?: number;
     size?: number;
-  }): Promise<any[]> {
+    sortOrder?: string;
+  }): Promise<{list: any[], count: number}> {
     try {
-      const response = await axios.get(`${API_BASE_URL}/remittance-limit-requests/admin`, {
-        params,
+      const response = await axios.post(`${API_BASE_URL}/remittance-limit-requests/admin/search`, params, {
         withCredentials: true
       });
       return response.data;
     } catch (error) {
-      console.error('관리자 한도 상향 신청 조회 실패:', error);
-      throw error;
-    }
-  },
-
-  async countAdminRemittanceLimitRequests(params: {
-    userId?: number;
-    status?: string;
-    searchTerm?: string;
-  }): Promise<number> {
-    try {
-      const response = await axios.get(`${API_BASE_URL}/remittance-limit-requests/admin/count`, {
-        params,
-        withCredentials: true
-      });
-      return response.data;
-    } catch (error) {
-      console.error('관리자 한도 상향 신청 개수 조회 실패:', error);
+      console.error('관리자 한도 변경 신청 조회 실패:', error);
       throw error;
     }
   },
@@ -284,7 +340,7 @@ export const api = {
       
       console.log('API 호출 성공');
     } catch (error) {
-      console.error('한도 상향 신청 처리 실패:', error);
+      console.error('한도 변경 신청 처리 실패:', error);
       throw error;
     }
   },
@@ -296,7 +352,106 @@ export const api = {
         withCredentials: true
       });
     } catch (error) {
-      console.error('한도 상향 신청 취소 실패:', error);
+      console.error('한도 변경 신청 취소 실패:', error);
+      throw error;
+    }
+  },
+
+  // 송금 한도 체크
+  async checkRemittanceLimit(userId: number, amount: number): Promise<any> {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/remittances/check-limit`, {
+        userId,
+        amount
+      }, {
+        withCredentials: true
+      });
+      return response.data;
+    } catch (error) {
+      console.error('송금 한도 체크 실패:', error);
+      throw error;
+    }
+  },
+
+  // 공지사항 관련 API
+  async searchNotices(searchRequest: any): Promise<any> {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/notices/search`, searchRequest, {
+        withCredentials: true
+      });
+      return response.data;
+    } catch (error) {
+      console.error('공지사항 검색 실패:', error);
+      throw error;
+    }
+  },
+
+  async searchAdminNotices(searchRequest: any): Promise<any> {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/notices/admin/search`, searchRequest, {
+        withCredentials: true
+      });
+      return response.data;
+    } catch (error) {
+      console.error('관리자 공지사항 검색 실패:', error);
+      throw error;
+    }
+  },
+  
+  async incrementNoticeViewCount(noticeId: number): Promise<any> {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/notices/${noticeId}/increment-view`, {}, {
+        withCredentials: true
+      });
+      return response.data;
+    } catch (error) {
+      console.error('공지사항 조회수 증가 실패:', error);
+      throw error;
+    }
+  },
+
+  async createNotice(noticeRequest: any): Promise<void> {
+    try {
+      await axios.post(`${API_BASE_URL}/notices/admin`, noticeRequest, {
+        withCredentials: true
+      });
+    } catch (error) {
+      console.error('공지사항 생성 실패:', error);
+      throw error;
+    }
+  },
+
+  async updateNotice(id: number, noticeRequest: any): Promise<void> {
+    try {
+      await axios.put(`${API_BASE_URL}/notices/admin/${id}`, noticeRequest, {
+        withCredentials: true
+      });
+    } catch (error) {
+      console.error('공지사항 수정 실패:', error);
+      throw error;
+    }
+  },
+
+  async deleteNotice(id: number): Promise<void> {
+    try {
+      await axios.delete(`${API_BASE_URL}/notices/admin/${id}`, {
+        withCredentials: true
+      });
+    } catch (error) {
+      console.error('공지사항 삭제 실패:', error);
+      throw error;
+    }
+  },
+
+  // 환율 조회
+  async getExchangeRates(): Promise<{ [key: string]: number }> {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/exchange/exchangeRates`, { 
+        withCredentials: true 
+      });
+      return response.data.conversion_rates;
+    } catch (error) {
+      console.error('환율 조회 실패:', error);
       throw error;
     }
   },
@@ -392,5 +547,165 @@ export const api = {
       console.error('파일 다운로드 실패:', error);
       throw error;
     }
+  },
+
+  // Qna API
+  searchQna: async (request: any) => {
+    const response = await axios.post(`${API_BASE_URL}/qna/search`, request, {
+      withCredentials: true
+    });
+    return response.data;
+  },
+
+  createQna: async (formData: FormData) => {
+    const response = await axios.post(`${API_BASE_URL}/qna`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      withCredentials: true
+    });
+    return response.data;
+  },
+
+  updateQna: async (qnaId: number, formData: FormData) => {
+    const response = await axios.put(`${API_BASE_URL}/qna/${qnaId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+      withCredentials: true
+    });
+    return response.data;
+  },
+
+  cancelQna: async (qnaId: number) => {
+    const response = await axios.post(`${API_BASE_URL}/qna/${qnaId}/cancel`, {}, {
+      withCredentials: true
+    });
+    return response.data;
+  },
+
+  // 관리자용 Q&A 검색
+  searchAdminQna: async (request: any) => {
+    const response = await axios.post(`${API_BASE_URL}/qna/admin/search`, request, {
+      withCredentials: true
+    });
+    return response.data;
+  },
+
+  // Q&A 답변 등록
+  answerQna: async (qnaId: number, answerData: { answerContent: string }) => {
+    const response = await axios.post(`${API_BASE_URL}/qna/${qnaId}/answer`, answerData, {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true
+    });
+    return response.data;
+  },
+
+  // 한도 변경 신청 목록 조회 (관리자용)
+  getLimitRequests: async () => {
+    const response = await axios.get(`${API_BASE_URL}/remittances/limit-requests`, {
+      withCredentials: true
+    });
+    return response.data;
+  },
+
+  // 공지사항 조회수 TOP5 조회
+  getTop5Notices: async () => {
+    const response = await axios.get(`${API_BASE_URL}/notices/top5`, {
+      withCredentials: true
+    });
+    return response.data;
+  },
+
+  // Country API
+  searchCountries: async (request: any) => {
+    const response = await axios.post(`${API_BASE_URL}/countries/search`, request, {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true
+    });
+    return response.data;
+  },
+
+  getAllCountries: async () => {
+    const response = await axios.get(`${API_BASE_URL}/countries/all`, {
+      withCredentials: true
+    });
+    return response.data;
+  },
+
+  // getRemittanceCountries: async () => {
+  //   const response = await axios.get(`${API_BASE_URL}/countries/remittance`, {
+  //     withCredentials: true
+  //   });
+  //   return response.data;
+  // },
+
+  getCountryByCode: async (code: string) => {
+    const response = await axios.get(`${API_BASE_URL}/countries/${code}`, {
+      withCredentials: true
+    });
+    return response.data;
+  },
+
+  createCountry: async (request: any) => {
+    const response = await axios.post(`${API_BASE_URL}/countries`, request, {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true
+    });
+    return response.data;
+  },
+
+  updateCountry: async (code: string, request: any) => {
+    const response = await axios.put(`${API_BASE_URL}/countries/${code}`, request, {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true
+    });
+    return response.data;
+  },
+
+  deleteCountry: async (code: string) => {
+    const response = await axios.delete(`${API_BASE_URL}/countries/${code}`, {
+      withCredentials: true
+    });
+    return response.data;
+  },
+
+  // Bank API
+  searchBanks: async (request: any) => {
+    const response = await axios.post(`${API_BASE_URL}/banks/search`, request, {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true
+    });
+    return response.data;
+  },
+
+  getBankById: async (id: number) => {
+    const response = await axios.get(`${API_BASE_URL}/banks/${id}`, {
+      withCredentials: true
+    });
+    return response.data;
+  },
+
+  createBank: async (request: any) => {
+    const response = await axios.post(`${API_BASE_URL}/banks`, request, {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true
+    });
+    return response.data;
+  },
+
+  updateBank: async (id: number, request: any) => {
+    const response = await axios.put(`${API_BASE_URL}/banks/${id}`, request, {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true
+    });
+    return response.data;
+  },
+
+  deleteBank: async (id: number) => {
+    const response = await axios.delete(`${API_BASE_URL}/banks/${id}`, {
+      withCredentials: true
+    });
+    return response.data;
   },
 }; 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { useAtom } from 'jotai';
-import { remittanceCountriesAtom } from '../store/countryStore';
+import { remittanceCountriesAtom, countryAtom } from '../store/countryStore';
 
 interface RemittanceDetailModalProps {
   isOpen: boolean;

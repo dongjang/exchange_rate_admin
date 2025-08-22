@@ -1,21 +1,18 @@
 package com.example.mapper;
 
-import com.example.dto.QnaStats;
-import com.example.dto.QnaPendingItem;
+import com.example.dto.QnaResponse;
+import com.example.dto.QnaSearchRequest;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
 @Mapper
 public interface QnaMapper {
     
-    /**
-     * Q&A 통계 조회
-     */
-    QnaStats selectQnaStats();
+    List<QnaResponse> selectQnaList(QnaSearchRequest request);
     
-    /**
-     * 답변 대기 중인 Q&A 리스트 조회 (최대 5개)
-     */
-    List<QnaPendingItem> selectPendingQnaList();
+    int selectQnaCount(QnaSearchRequest request);
+    
+    void updateQnaStatus(@Param("qnaId") Long qnaId, @Param("status") String status);
 } 

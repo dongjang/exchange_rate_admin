@@ -5,6 +5,7 @@ import { useAtom } from 'jotai';
 import { userInfoAtom } from '../store/userStore';
 import RemittanceLimitModal from './RemittanceLimitModal';
 import Swal from 'sweetalert2';
+import './RemittanceLimitHistoryModal.css';
 
 interface FileInfo {
   id: number;
@@ -45,6 +46,13 @@ const RemittanceLimitHistoryModal: React.FC<RemittanceLimitHistoryModalProps> = 
   const [userInfo] = useAtom(userInfoAtom);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<RemittanceLimitRequest | null>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const formatCurrency = (amount: number) => {
     return amount.toLocaleString() + '원';
@@ -96,7 +104,7 @@ const RemittanceLimitHistoryModal: React.FC<RemittanceLimitHistoryModalProps> = 
       const response = await api.getUserRemittanceLimitRequests(userInfo.id);
       setRequests(response);
     } catch (error) {
-      console.error('한도 상향 신청 조회 실패:', error);
+      console.error('한도 변경 신청 조회 실패:', error);
     } finally {
       setLoading(false);
     }
@@ -108,7 +116,7 @@ const RemittanceLimitHistoryModal: React.FC<RemittanceLimitHistoryModalProps> = 
     const result = await Swal.fire({
       icon: 'warning',
       title: '신청 취소',
-      text: '정말로 이 한도 상향 신청을 취소하시겠습니까? 취소 후에는 복구할 수 없습니다.',
+      text: '정말로 이 한도 변경 신청을 취소하시겠습니까? 취소 후에는 복구할 수 없습니다.',
       showCancelButton: true,
       confirmButtonText: '취소',
       cancelButtonText: '돌아가기',
@@ -125,7 +133,7 @@ const RemittanceLimitHistoryModal: React.FC<RemittanceLimitHistoryModalProps> = 
       await Swal.fire({
         icon: 'success',
         title: '취소 완료',
-        text: '한도 상향 신청이 성공적으로 취소되었습니다.',
+        text: '한도 변경 신청이 성공적으로 취소되었습니다.',
         confirmButtonText: '확인'
       });
 
@@ -190,7 +198,7 @@ const RemittanceLimitHistoryModal: React.FC<RemittanceLimitHistoryModalProps> = 
             fontWeight: 700,
             color: '#1f2937'
           }}>
-            한도 상향 신청 상세
+            한도 변경 신청 상세
           </h2>
           <button
             onClick={onClose}
@@ -223,7 +231,7 @@ const RemittanceLimitHistoryModal: React.FC<RemittanceLimitHistoryModalProps> = 
             padding: '3rem',
             color: '#6b7280'
           }}>
-            로딩 중...
+            <div className="loading-spinner"></div>
           </div>
         ) : requests.length === 0 ? (
           <div style={{
@@ -236,7 +244,7 @@ const RemittanceLimitHistoryModal: React.FC<RemittanceLimitHistoryModalProps> = 
             <FaFileAlt style={{ fontSize: '3rem', marginBottom: '1rem', opacity: 0.5 }} />
             <p style={{ margin: 0, fontSize: '1.1rem' }}>신청 내역이 없습니다.</p>
             <p style={{ margin: '0.5rem 0 0 0', fontSize: '0.9rem', opacity: 0.7 }}>
-              한도 상향 신청을 하시면 여기서 확인하실 수 있습니다.
+              한도 변경 신청을 하시면 여기서 확인하실 수 있습니다.
             </p>
           </div>
         ) : (
@@ -343,22 +351,32 @@ const RemittanceLimitHistoryModal: React.FC<RemittanceLimitHistoryModalProps> = 
                       }}>
                         {request.incomeFile && (
                           <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            padding: '0.5rem',
+                            display: isMobile ? 'flex' : 'flex',
+                            flexDirection: isMobile ? 'column' : 'row',
+                            alignItems: isMobile ? 'flex-start' : 'center',
+                            gap: isMobile ? '0.25rem' : '0.5rem',
+                            padding: isMobile ? '0.75rem' : '0.5rem',
                             backgroundColor: '#f3f4f6',
-                            borderRadius: '6px',
+                            borderRadius: isMobile ? '8px' : '6px',
                             fontSize: '0.875rem'
                           }}>
-                            <FaFileAlt style={{ color: '#6b7280' }} />
-                            <span style={{ color: '#374151', fontWeight: '500' }}>소득 증빙:</span>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem',
+                              marginBottom: isMobile ? '0.25rem' : '0'
+                            }}>
+                              <FaFileAlt style={{ color: '#6b7280' }} />
+                              <span style={{ color: '#374151', fontWeight: '500' }}>소득 증빙:</span>
+                            </div>
                             <span 
                               style={{ 
                                 color: '#3b82f6', 
                                 cursor: 'pointer',
                                 textDecoration: 'underline',
-                                fontWeight: '500'
+                                fontWeight: '500',
+                                wordBreak: isMobile ? 'break-all' : 'normal',
+                                lineHeight: isMobile ? '1.4' : 'normal'
                               }}
                               onClick={() => api.downloadFile(request.incomeFile!.id)}
                               onMouseEnter={(e) => {
@@ -370,30 +388,47 @@ const RemittanceLimitHistoryModal: React.FC<RemittanceLimitHistoryModalProps> = 
                             >
                               {request.incomeFile.originalName}
                             </span>
-                            <span style={{ color: '#9ca3af', fontSize: '0.75rem' }}>
-                              ({formatFileSize(request.incomeFile.fileSize)})
-                            </span>
-                            <FaDownload style={{ color: '#6b7280', fontSize: '0.75rem' }} />
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem',
+                              marginTop: isMobile ? '0.25rem' : '0'
+                            }}>
+                              <span style={{ color: '#9ca3af', fontSize: '0.75rem' }}>
+                                ({formatFileSize(request.incomeFile.fileSize)})
+                              </span>
+                              <FaDownload style={{ color: '#6b7280', fontSize: '0.75rem' }} />
+                            </div>
                           </div>
                         )}
                         {request.bankbookFile && (
                           <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            padding: '0.5rem',
+                            display: isMobile ? 'flex' : 'flex',
+                            flexDirection: isMobile ? 'column' : 'row',
+                            alignItems: isMobile ? 'flex-start' : 'center',
+                            gap: isMobile ? '0.25rem' : '0.5rem',
+                            padding: isMobile ? '0.75rem' : '0.5rem',
                             backgroundColor: '#f3f4f6',
-                            borderRadius: '6px',
+                            borderRadius: isMobile ? '8px' : '6px',
                             fontSize: '0.875rem'
                           }}>
-                            <FaFileAlt style={{ color: '#6b7280' }} />
-                            <span style={{ color: '#374151', fontWeight: '500' }}>통장 사본:</span>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem',
+                              marginBottom: isMobile ? '0.25rem' : '0'
+                            }}>
+                              <FaFileAlt style={{ color: '#6b7280' }} />
+                              <span style={{ color: '#374151', fontWeight: '500' }}>통장 사본:</span>
+                            </div>
                             <span 
                               style={{ 
                                 color: '#3b82f6', 
                                 cursor: 'pointer',
                                 textDecoration: 'underline',
-                                fontWeight: '500'
+                                fontWeight: '500',
+                                wordBreak: isMobile ? 'break-all' : 'normal',
+                                lineHeight: isMobile ? '1.4' : 'normal'
                               }}
                               onClick={() => api.downloadFile(request.bankbookFile!.id)}
                               onMouseEnter={(e) => {
@@ -405,30 +440,47 @@ const RemittanceLimitHistoryModal: React.FC<RemittanceLimitHistoryModalProps> = 
                             >
                               {request.bankbookFile.originalName}
                             </span>
-                            <span style={{ color: '#9ca3af', fontSize: '0.75rem' }}>
-                              ({formatFileSize(request.bankbookFile.fileSize)})
-                            </span>
-                            <FaDownload style={{ color: '#6b7280', fontSize: '0.75rem' }} />
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem',
+                              marginTop: isMobile ? '0.25rem' : '0'
+                            }}>
+                              <span style={{ color: '#9ca3af', fontSize: '0.75rem' }}>
+                                ({formatFileSize(request.bankbookFile.fileSize)})
+                              </span>
+                              <FaDownload style={{ color: '#6b7280', fontSize: '0.75rem' }} />
+                            </div>
                           </div>
                         )}
                         {request.businessFile && (
                           <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '0.5rem',
-                            padding: '0.5rem',
+                            display: isMobile ? 'flex' : 'flex',
+                            flexDirection: isMobile ? 'column' : 'row',
+                            alignItems: isMobile ? 'flex-start' : 'center',
+                            gap: isMobile ? '0.25rem' : '0.5rem',
+                            padding: isMobile ? '0.75rem' : '0.5rem',
                             backgroundColor: '#f3f4f6',
-                            borderRadius: '6px',
+                            borderRadius: isMobile ? '8px' : '6px',
                             fontSize: '0.875rem'
                           }}>
-                            <FaFileAlt style={{ color: '#6b7280' }} />
-                            <span style={{ color: '#374151', fontWeight: '500' }}>사업자 등록증:</span>
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem',
+                              marginBottom: isMobile ? '0.25rem' : '0'
+                            }}>
+                              <FaFileAlt style={{ color: '#6b7280' }} />
+                              <span style={{ color: '#374151', fontWeight: '500' }}>사업자 등록증:</span>
+                            </div>
                             <span 
                               style={{ 
                                 color: '#3b82f6', 
                                 cursor: 'pointer',
                                 textDecoration: 'underline',
-                                fontWeight: '500'
+                                fontWeight: '500',
+                                wordBreak: isMobile ? 'break-all' : 'normal',
+                                lineHeight: isMobile ? '1.4' : 'normal'
                               }}
                               onClick={() => api.downloadFile(request.businessFile!.id)}
                               onMouseEnter={(e) => {
@@ -440,10 +492,17 @@ const RemittanceLimitHistoryModal: React.FC<RemittanceLimitHistoryModalProps> = 
                             >
                               {request.businessFile.originalName}
                             </span>
-                            <span style={{ color: '#9ca3af', fontSize: '0.75rem' }}>
-                              ({formatFileSize(request.businessFile.fileSize)})
-                            </span>
-                            <FaDownload style={{ color: '#6b7280', fontSize: '0.75rem' }} />
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '0.5rem',
+                              marginTop: isMobile ? '0.25rem' : '0'
+                            }}>
+                              <span style={{ color: '#9ca3af', fontSize: '0.75rem' }}>
+                                ({formatFileSize(request.businessFile.fileSize)})
+                              </span>
+                              <FaDownload style={{ color: '#6b7280', fontSize: '0.75rem' }} />
+                            </div>
                           </div>
                         )}
                       </div>

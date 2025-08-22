@@ -11,6 +11,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping("/api/remittance-limit-requests")
@@ -77,27 +79,18 @@ public class RemittanceLimitRequestController {
     }
     
     // 관리자 페이지용 API
-    @GetMapping("/admin")
-    public ResponseEntity<List<RemittanceLimitRequestResponse>> getAdminRequests(
-            @RequestParam(value = "userId", required = false) Long userId,
-            @RequestParam(value = "status", required = false) String status,
-            @RequestParam(value = "searchTerm", required = false) String searchTerm,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) {
-        
-        int offset = page * size;
-        List<RemittanceLimitRequestResponse> requests = remittanceLimitRequestService.getAdminRequests(userId, status, searchTerm, offset, size);
-        return ResponseEntity.ok(requests);
-    }
-    
-    @GetMapping("/admin/count")
-    public ResponseEntity<Integer> countAdminRequests(
-            @RequestParam(value = "userId", required = false) Long userId,
-            @RequestParam(value = "status", required = false) String status,
-            @RequestParam(value = "searchTerm", required = false) String searchTerm) {
-        
-        int count = remittanceLimitRequestService.countAdminRequests(userId, status, searchTerm);
-        return ResponseEntity.ok(count);
+    @PostMapping("/admin/search")
+    public ResponseEntity<Map<String, Object>> getAdminRequests(@RequestBody Map<String, Object> searchRequest) {
+        int count = remittanceLimitRequestService.countAdminRequests(searchRequest);
+        if(count > 0){
+            List<RemittanceLimitRequestResponse> requests = remittanceLimitRequestService.getAdminRequests(searchRequest);
+            Map<String, Object> response = new HashMap<>();
+            response.put("count", count);
+            response.put("list", requests);
+            return ResponseEntity.ok(response);
+        }else{
+            return ResponseEntity.ok(null);
+        }
     }
     
     @GetMapping("/admin/{requestId}")

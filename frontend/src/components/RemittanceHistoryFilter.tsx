@@ -8,6 +8,7 @@ import { remittanceCountriesAtom, getRemittanceCountries } from '../store/countr
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import './CustomCalendar.css';
+import { useLocation } from 'react-router-dom';
 
 interface RemittanceHistoryFilterProps {
   filters: {
@@ -42,6 +43,8 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
   const [startDate, setStartDate] = useState<Date | null>(filters.startDate ? new Date(filters.startDate) : null);
   const [endDate, setEndDate] = useState<Date | null>(filters.endDate ? new Date(filters.endDate) : null);
   const [isMobile, setIsMobile] = useState(false);
+  const location = useLocation();
+  const isAdminPage = location.pathname === '/admin/remittance';
 
   React.useEffect(() => {
     const checkMobile = () => setIsMobile(window.innerWidth <= 768);
@@ -222,6 +225,14 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
     }
   };
 
+  // 관리자 페이지에서 반응형일 때 텍스트 줄이기
+  const getPlaceholderText = (defaultText: string, shortText: string) => {
+    if (isAdminPage && isMobile) {
+      return shortText;
+    }
+    return defaultText;
+  };
+
   return (
     <div style={{
       background: '#fff',
@@ -244,7 +255,7 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
             value={filters.senderName || ''}
             onChange={(e) => handleInputChange('senderName', e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="보내는 사람"
+            placeholder={getPlaceholderText("보내는 사람", "보내는 사람")}
             style={{
               width: '100%',
               padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 0.75rem',
@@ -275,7 +286,7 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
           value={filters.recipient}
           onChange={(e) => handleInputChange('recipient', e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="받는 사람"
+          placeholder={getPlaceholderText("받는 사람", "받는 사람")}
           style={{
             width: '100%',
             padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 0.75rem',
@@ -368,7 +379,7 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
             }
           }}
         >
-          <option value="">전체 상태</option>
+          <option value="">{getPlaceholderText("전체 상태", "전체")}</option>
           <option value="COMPLETED">완료</option>
           <option value="WAITING">대기</option>
         </select>
@@ -387,7 +398,7 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
           value={minAmountInput}
           onChange={e => handleAmountInput('minAmount', e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder="최소 금액"
+          placeholder={getPlaceholderText("최소 금액", "최소")}
           style={{
             width: '100%',
             padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 0.75rem',

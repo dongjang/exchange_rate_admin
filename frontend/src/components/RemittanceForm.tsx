@@ -23,9 +23,10 @@ export interface RemittanceFormData {
 
 interface RemittanceFormProps {
   onSubmit?: (data: RemittanceFormData) => void;
+  refreshKey?: number;
 }
 
-function RemittanceForm({ onSubmit }: RemittanceFormProps) {
+function RemittanceForm({ onSubmit, refreshKey = 0 }: RemittanceFormProps) {
   const [remittanceCountries] = useAtom(remittanceCountriesAtom);
   const getRemitCountries = useSetAtom(getRemittanceCountries);
   useEffect(() => {
@@ -258,6 +259,68 @@ function RemittanceForm({ onSubmit }: RemittanceFormProps) {
     if (!result.isConfirmed) return;
 
     try {
+      // 한도 체크
+      const limitCheck = await api.checkRemittanceLimit(userInfo?.id || 0, cleanAmount);
+      
+      if (!limitCheck.success) {
+        // 한도 초과 시 상세 메시지 표시
+        let limitMessage = '';
+        
+        if (limitCheck.exceededType === 'BOTH') {
+          limitMessage = `
+            <div style="text-align: left; margin: 20px 0;">
+              <div style="color: #dc2626; font-weight: 600; margin-bottom: 16px;">⚠️ 한도 초과</div>
+              <div style="margin-bottom: 12px;">
+                <strong>요청 금액:</strong> ${limitCheck.requestedAmount?.toLocaleString()}원<br>
+                <strong>일일 한도:</strong> ${limitCheck.dailyLimit?.toLocaleString()}원<br>
+                <strong>월 한도:</strong> ${limitCheck.monthlyLimit?.toLocaleString()}원
+              </div>
+              <div style="color: #dc2626; font-weight: 600;">
+                일일 한도를 ${limitCheck.dailyExceededAmount?.toLocaleString()}원 초과<br>
+                월 한도를 ${limitCheck.monthlyExceededAmount?.toLocaleString()}원 초과
+              </div>
+            </div>
+          `;
+        } else if (limitCheck.exceededType === 'DAILY') {
+          limitMessage = `
+            <div style="text-align: left; margin: 20px 0;">
+              <div style="color: #dc2626; font-weight: 600; margin-bottom: 16px;">⚠️ 일일 한도 초과</div>
+              <div style="margin-bottom: 12px;">
+                <strong>요청 금액:</strong> ${limitCheck.requestedAmount?.toLocaleString()}원<br>
+                <strong>일일 한도:</strong> ${limitCheck.dailyLimit?.toLocaleString()}원<br>
+                <strong>오늘 송금액:</strong> ${limitCheck.todayAmount?.toLocaleString()}원
+              </div>
+              <div style="color: #dc2626; font-weight: 600;">
+                일일 한도를 ${limitCheck.dailyExceededAmount?.toLocaleString()}원 초과
+              </div>
+            </div>
+          `;
+        } else if (limitCheck.exceededType === 'MONTHLY') {
+          limitMessage = `
+            <div style="text-align: left; margin: 20px 0;">
+              <div style="color: #dc2626; font-weight: 600; margin-bottom: 16px;">⚠️ 월 한도 초과</div>
+              <div style="margin-bottom: 12px;">
+                <strong>요청 금액:</strong> ${limitCheck.requestedAmount?.toLocaleString()}원<br>
+                <strong>월 한도:</strong> ${limitCheck.monthlyLimit?.toLocaleString()}원<br>
+                <strong>이번 달 송금액:</strong> ${limitCheck.monthAmount?.toLocaleString()}원
+              </div>
+              <div style="color: #dc2626; font-weight: 600;">
+                월 한도를 ${limitCheck.monthlyExceededAmount?.toLocaleString()}원 초과
+              </div>
+            </div>
+          `;
+        }
+
+        await Swal.fire({
+          icon: 'error',
+          title: '한도 초과',
+          html: limitMessage,
+          confirmButtonText: '확인',
+          confirmButtonColor: '#dc2626',
+        });
+        return;
+      }
+
       // 송금 API 호출
       const remittanceData = {
         userId: userInfo?.id || 0,
@@ -281,6 +344,11 @@ function RemittanceForm({ onSubmit }: RemittanceFormProps) {
         confirmButtonColor: '#2563eb',
       });
 
+      // 송금 완료 후 한도 정보 새로고침
+      if (onSubmit) {
+        onSubmit(form);
+      }
+
       // 폼 초기화 (등록된 은행/계좌 정보는 유지)
       setForm({
         senderBank: myBankAccount?.bankCode || '',
@@ -298,6 +366,63 @@ function RemittanceForm({ onSubmit }: RemittanceFormProps) {
 
     } catch (error) {
       console.error('송금 신청 실패:', error);
+      
+      // 한도 초과 에러 처리
+      if (error instanceof Error && error.message.startsWith('LIMIT_EXCEEDED:')) {
+        const parts = error.message.split(':');
+        const exceededType = parts[1];
+        const message = parts[2];
+        
+        let limitMessage = '';
+        
+        if (exceededType === 'BOTH') {
+          limitMessage = `
+            <div style="text-align: left; margin: 20px 0;">
+              <div style="color: #dc2626; font-weight: 600; margin-bottom: 16px;">⚠️ 한도 초과</div>
+              <div style="margin-bottom: 12px;">
+                <strong>요청 금액:</strong> ${cleanAmount.toLocaleString()}원
+              </div>
+              <div style="color: #dc2626; font-weight: 600;">
+                일일 한도와 월 한도를 모두 초과했습니다.
+              </div>
+            </div>
+          `;
+        } else if (exceededType === 'DAILY') {
+          limitMessage = `
+            <div style="text-align: left; margin: 20px 0;">
+              <div style="color: #dc2626; font-weight: 600; margin-bottom: 16px;">⚠️ 일일 한도 초과</div>
+              <div style="margin-bottom: 12px;">
+                <strong>요청 금액:</strong> ${cleanAmount.toLocaleString()}원
+              </div>
+              <div style="color: #dc2626; font-weight: 600;">
+                일일 한도를 초과했습니다.
+              </div>
+            </div>
+          `;
+        } else if (exceededType === 'MONTHLY') {
+          limitMessage = `
+            <div style="text-align: left; margin: 20px 0;">
+              <div style="color: #dc2626; font-weight: 600; margin-bottom: 16px;">⚠️ 월 한도 초과</div>
+              <div style="margin-bottom: 12px;">
+                <strong>요청 금액:</strong> ${cleanAmount.toLocaleString()}원
+              </div>
+              <div style="color: #dc2626; font-weight: 600;">
+                월 한도를 초과했습니다.
+              </div>
+            </div>
+          `;
+        }
+
+        await Swal.fire({
+          icon: 'error',
+          title: '한도 초과',
+          html: limitMessage,
+          confirmButtonText: '확인',
+          confirmButtonColor: '#dc2626',
+        });
+        return;
+      }
+      
       await Swal.fire({
         icon: 'error',
         title: '송금 신청 실패',
@@ -408,7 +533,7 @@ function RemittanceForm({ onSubmit }: RemittanceFormProps) {
   return (
     <>
       {/* 송금 한도 표시 */}
-      <RemittanceLimitDisplay user={userInfo} />
+      <RemittanceLimitDisplay refreshKey={refreshKey} user={userInfo} />
       
       {/* 내 은행/계좌 등록/수정 버튼 */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', marginBottom: 8 }}>

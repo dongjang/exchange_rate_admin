@@ -46,9 +46,17 @@
                 AND u.name LIKE CONCAT('%', #{searchTerm}, '%')
             </if>
         </where>
-        ORDER BY rlr.created_at DESC
-        <if test="limit > 0">
-            LIMIT #{limit} OFFSET #{offset}
+        ORDER BY 
+        <choose>
+            <when test="sortOrder == 'latest'">
+                rlr.created_at DESC
+            </when>
+            <otherwise>
+                rlr.created_at ASC
+            </otherwise>
+        </choose>
+        <if test="size > 0">
+            LIMIT #{size} OFFSET #{page}
         </if>
     </select>
 
