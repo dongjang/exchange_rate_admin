@@ -32,15 +32,6 @@ function AppContent() {
   const setCountryList = useSetAtom(countryAtom);
   const location = useLocation();
 
-  const getUserInfo = async (email?: string) => {
-    const userEmail = email || userInfo?.email;
-    if (userEmail) {
-      const users = await api.getUsers();
-      const found = users.find(u => u.email === userEmail);
-      if (found) setUserInfo(found);
-    }
-  };
-
   const checkAuth = async () => {
     try {
       const authResult = await api.getCurrentUser();
@@ -53,14 +44,11 @@ function AppContent() {
           console.log('사용자 정보 조회 실패, OAuth 정보로 설정:', userError);
           // 사용자가 DB에 없으면 OAuth 정보로 임시 설정
           setUserInfo({
-            id: 0,
+            id: userInfo?.id || 0,
             email: authResult.user.email,
             name: authResult.user.name,
             pictureUrl: authResult.user.picture,
             status: 'ACTIVE',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            lastLoginAt: new Date().toISOString()
           });
         }
       }
@@ -110,7 +98,7 @@ function AppContent() {
       ) : (
         <>
           {!isAdminPage && (
-            <Header user={userInfo} onUserUpdated={getUserInfo} />
+            <Header user={userInfo} onUserUpdated={setUserInfo}/>
           )}
           <div className={`container ${isAdminPage ? 'admin-container' : ''}`}>
             <Routes>

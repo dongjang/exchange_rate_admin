@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAtom } from 'jotai';
-import { selectedUserAtom, usersAtom } from '../store/userStore';
+import { selectedUserAtom, userInfoAtom } from '../store/userStore';
 import { api } from '../services/api';
 import './UserModal.css';
 import Swal from 'sweetalert2';
@@ -12,7 +12,7 @@ interface UserModalProps {
 
 function UserModal({ isOpen, onClose }: UserModalProps) {
   const [selectedUser, setSelectedUser] = useAtom(selectedUserAtom);
-  const [users, setUsers] = useAtom(usersAtom);
+  const [, setUserInfo] = useAtom(userInfoAtom);
   const [formData, setFormData] = useState({
     email: '',
     name: '',
@@ -54,8 +54,11 @@ function UserModal({ isOpen, onClose }: UserModalProps) {
     try {
       if (selectedUser?.id) {
         // 수정 모드만 허용
-        const updatedUser = await api.updateUser(selectedUser.id, formData);
-        setUsers(users.map(user => user.id === selectedUser.id ? updatedUser : user));
+        await api.updateUser(selectedUser.id, formData);
+        // API 호출이 성공하면 formData로 users 상태 업데이트
+        const updatedUser = { ...selectedUser, ...formData };
+        // Header의 사용자 정보도 함께 업데이트
+        setUserInfo(updatedUser);
         handleClose();
         await Swal.fire({
           icon: 'success',

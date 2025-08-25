@@ -11,7 +11,7 @@ import { UserModal } from './UserModal';
 
 interface HeaderProps {
   user: User | null;
-  onUserUpdated: () => void;
+  onUserUpdated: (user: User | null) => void;
 }
 
 function Header({ user, onUserUpdated }: HeaderProps) {
@@ -65,7 +65,6 @@ function Header({ user, onUserUpdated }: HeaderProps) {
 
   const handleModalClose = () => {
     setIsModalOpen(false);
-    onUserUpdated(); // App에서 user를 갱신하도록 콜백 호출
   };
 
   const handleMenuToggle = () => {

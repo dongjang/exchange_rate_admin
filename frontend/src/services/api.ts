@@ -70,15 +70,11 @@ export const api = {
     return response.data;
   },
 
-  // 모든 사용자 조회 (관리자용)
-  async getUsers(): Promise<User[]> {
-    const response = await axios.get(`${API_BASE_URL}/users`, { withCredentials: true });
-    return response.data;
-  },
+
 
   // 사용자 검색
   async searchUsers(searchRequest: any): Promise<any> {
-    const response = await axios.post(`${API_BASE_URL}/users/search`, searchRequest, {
+    const response = await axios.post(`${API_BASE_URL}/users/admin/search`, searchRequest, {
       headers: { 'Content-Type': 'application/json' },
       withCredentials: true,
     });

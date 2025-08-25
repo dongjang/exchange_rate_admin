@@ -21,7 +21,7 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping("/search")
+    @PostMapping("/admin/search")
     public ResponseEntity<Map<String, Object>> searchUsers(@RequestBody UserSearchRequest searchRequest) {
         int count = userService.getUserCount(searchRequest);
         if(count > 0){
@@ -44,6 +44,15 @@ public class UserController {
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
         UserResponse user = userService.getUserById(id);
         return ResponseEntity.ok(user);
+    }
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Map<String, String>> updateUser(@PathVariable Long id, @RequestBody Map<String, Object> request) {
+        userService.updateUser(id, request);
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "사용자 상태가 성공적으로 업데이트되었습니다.");
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}/status")

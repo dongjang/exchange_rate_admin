@@ -27,6 +27,7 @@ public class UserService {
     }
     
     public int getUserCount(UserSearchRequest searchRequest) {
+        System.out.println("searchRequest: " + searchRequest);
         return userMapper.getUserCount(searchRequest);
     }
     

@@ -84,11 +84,8 @@ const AdminUserManagement: React.FC = () => {
   };
 
   const handlePageChange = (page: number) => {
-    if (page < 1 || (totalPages > 0 && page > totalPages)) {
-      return;
-    }
     setCurrentPage(page);
-    setSearchRequest(prev => ({ ...prev, page: (page - 1) * prev.size }));
+    setSearchRequest(prev => ({ ...prev, page: page - 1 }));
   };
 
   const formatCurrency = (amount: number) => {
