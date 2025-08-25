@@ -66,7 +66,6 @@ public class NoticeController {
     
     @PostMapping("/admin")
     public ResponseEntity<?> createNotice(@RequestBody NoticeRequest request, @AuthenticationPrincipal OAuth2User oauth2User) {
-        System.out.println("oauth2User : " + oauth2User);
         if (oauth2User == null) {
             return ResponseEntity.status(401).body("인증되지 않은 사용자입니다.");
         }
@@ -78,7 +77,6 @@ public class NoticeController {
         
         // 이메일로 사용자 찾기
         User user = userService.findByEmail(email);
-        System.out.println("user : " + user);
         if (user == null) {
             return ResponseEntity.status(404).body("사용자를 찾을 수 없습니다.");
         }

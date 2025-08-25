@@ -105,6 +105,60 @@ export const api = {
     return response.data;
   },
 
+  // 관리자 검색
+  async searchAdmins(searchRequest: any): Promise<any> {
+    const response = await axios.post(`${API_BASE_URL}/admins/search`, searchRequest, {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true,
+    });
+    return response.data;
+  },
+
+  // 특정 관리자 조회
+  async getAdminById(id: number): Promise<any> {
+    const response = await axios.get(`${API_BASE_URL}/admins/${id}`, { withCredentials: true });
+    return response.data;
+  },
+
+  // 관리자 등록
+  async createAdmin(adminData: any): Promise<any> {
+    const response = await axios.post(`${API_BASE_URL}/admins`, adminData, {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true,
+    });
+    return response.data;
+  },
+
+  // 관리자 수정
+  async updateAdmin(id: number, adminData: any): Promise<any> {
+    const response = await axios.put(`${API_BASE_URL}/admins/${id}`, adminData, {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true,
+    });
+    return response.data;
+  },
+
+  // 관리자 상태 업데이트
+  async updateAdminStatus(id: number, status: string): Promise<any> {
+    const response = await axios.put(`${API_BASE_URL}/admins/${id}/status`, { status }, {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true,
+    });
+    return response.data;
+  },
+
+  // 관리자 삭제
+  async deleteAdmin(id: number): Promise<any> {
+    const response = await axios.delete(`${API_BASE_URL}/admins/${id}`, { withCredentials: true });
+    return response.data;
+  },
+
+  // 관리자 아이디 중복 확인
+  async checkAdminIdDuplicate(adminId: string): Promise<any> {
+    const response = await axios.get(`${API_BASE_URL}/admins/check-admin-id/${adminId}`, { withCredentials: true });
+    return response.data;
+  },
+
   // 인증 관련 API
   async authSuccess(): Promise<{ success: boolean; message: string; user?: AuthUser }> {
     const response = await axios.get(`${API_BASE_URL}/auth/success`, { withCredentials: true });
@@ -440,12 +494,12 @@ export const api = {
   },
 
   // 환율 조회
-  async getExchangeRates(): Promise<{ [key: string]: number }> {
+  async getExchangeRates(): Promise<any> {
     try {
       const response = await axios.get(`${API_BASE_URL}/exchange/exchangeRates`, { 
         withCredentials: true 
       });
-      return response.data.conversion_rates;
+      return response.data;
     } catch (error) {
       console.error('환율 조회 실패:', error);
       throw error;
@@ -702,6 +756,25 @@ export const api = {
     const response = await axios.delete(`${API_BASE_URL}/banks/${id}`, {
       withCredentials: true
     });
+    return response.data;
+  },
+
+  // Admin Authentication APIs
+  async adminLogin(loginData: { adminId: string; password: string }): Promise<any> {
+    const response = await axios.post(`${API_BASE_URL}/admin/login`, loginData, {
+      headers: { 'Content-Type': 'application/json' },
+      withCredentials: true
+    });
+    return response.data;
+  },
+
+  async getCurrentAdmin(): Promise<any> {
+    const response = await axios.get(`${API_BASE_URL}/admin/current`, { withCredentials: true });
+    return response.data;
+  },
+
+  async adminLogout(): Promise<any> {
+    const response = await axios.post(`${API_BASE_URL}/admin/logout`, {}, { withCredentials: true });
     return response.data;
   },
 }; 

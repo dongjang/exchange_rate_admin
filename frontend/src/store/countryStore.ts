@@ -35,8 +35,13 @@ export const updateExchangeRatesAtom = atom(
   async (get: Getter, set: Setter) => {
     const currentRates = get(exchangeRatesAtom);
     if (Object.keys(currentRates).length === 0) {
-      const rates = await api.getExchangeRates();
-      set(exchangeRatesAtom, rates);
+      const response = await api.getExchangeRates();
+      console.log(response);
+      if (response.success && response.rates) {
+        set(exchangeRatesAtom, response.rates as { [key: string]: number });
+      } else {
+        console.error('환율 데이터 조회 실패:', response.message);
+      }
     }
   }
 );

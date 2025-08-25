@@ -271,9 +271,6 @@ public class RemittanceLimitRequestService {
                              BigDecimal monthlyLimit,   
                              BigDecimal singleLimit) {
         remittanceLimitRequestMapper.updateRemittanceLimitRequestStatus(requestId, status.name(), adminId, adminComment);
-        System.out.println("dailyLimit: " + dailyLimit);
-        System.out.println("monthlyLimit: " + monthlyLimit);
-        System.out.println("singleLimit: " + singleLimit);
         //승인일 때만 추가
         if(RemittanceLimitRequest.RequestStatus.APPROVED.equals(status)){
         //사용자 별로 한 개만 존재하도록 삭제 후 추가
@@ -353,7 +350,6 @@ public class RemittanceLimitRequestService {
             // 요청 삭제
             remittanceLimitRequestRepository.delete(request);
             
-            System.out.println("신청 취소: user_remittance_limit에 기존 데이터가 없어서 요청을 삭제했습니다.");
         }
     }
 } 

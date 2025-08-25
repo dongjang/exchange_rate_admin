@@ -1,7 +1,10 @@
 package com.example.controller;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.dto.FavoriteCurrencyRequest;
-import com.example.dto.FavoriteCurrencyResponse;
 import com.example.service.ExchangeRateService;
 
 import lombok.RequiredArgsConstructor;
@@ -23,8 +25,18 @@ public class ExchangeRateController {
 
     // 환율 조회
     @GetMapping("/exchangeRates")
-    public String getExchangeRates() {
-        return exchangeRateService.getRates();
+    public ResponseEntity<Map<String, Object>> getExchangeRates() {
+        try{
+            Map<String, Object> result = exchangeRateService.getRates();
+            result.put("success", true);
+            return ResponseEntity.ok(result);
+        }catch(Exception e){
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("message", "환율 정보를 가져오는데 실패했습니다.\n"+e.getMessage());
+            System.out.println("error: "+e.getMessage());
+            return ResponseEntity.ok(errorResponse);
+        }
     }
 
     // 로그인된 사용자의 관심 환율 조회
