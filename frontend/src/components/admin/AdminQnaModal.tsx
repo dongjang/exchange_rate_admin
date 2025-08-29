@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import Swal from 'sweetalert2';
 import { api } from '../../services/api';
 import SimpleFileViewer from './SimpleFileViewer';
 
@@ -69,19 +70,35 @@ const AdminQnaModal: React.FC<AdminQnaModalProps> = ({
 
   const handleAnswerSubmit = async () => {
     if (!answerContent.trim()) {
-      alert('답변 내용을 입력해주세요.');
+      Swal.fire('오류', '답변 내용을 입력해주세요.', 'error');
+      return;
+    }
+
+    // Swal 컨펌창 표시
+    const result = await Swal.fire({
+      title: '답변 등록',
+      text: '답변을 등록하시겠습니까?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#3b82f6',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: '등록',
+      cancelButtonText: '취소'
+    });
+
+    if (!result.isConfirmed) {
       return;
     }
 
     setIsSubmitting(true);
     try {
       await api.answerQna(qna.id, { answerContent });
-      alert('답변이 등록되었습니다.');
+      Swal.fire('성공', '답변이 등록되었습니다.', 'success');
       onAnswerSubmit?.();
       onClose();
     } catch (error) {
       console.error('답변 등록 실패:', error);
-      alert('답변 등록에 실패했습니다.');
+      Swal.fire('오류', '답변 등록에 실패했습니다.', 'error');
     } finally {
       setIsSubmitting(false);
     }

@@ -24,6 +24,8 @@ public class RemittanceHistoryDto {
     private String receiverCountry;
     private BigDecimal amount;
     private String currency;
+    private BigDecimal exchangeRate;
+    private BigDecimal convertedAmount;
     private String status;
     private LocalDateTime createdAt;
     
@@ -38,6 +40,8 @@ public class RemittanceHistoryDto {
                 .receiverCountry(remittance.getReceiverCountry())
                 .amount(remittance.getAmount())
                 .currency(remittance.getCurrency())
+                .exchangeRate(remittance.getExchangeRate())
+                .convertedAmount(remittance.getConvertedAmount())
                 .status(remittance.getStatus())
                 .createdAt(remittance.getCreatedAt())
                 .build();

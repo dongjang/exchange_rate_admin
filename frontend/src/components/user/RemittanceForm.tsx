@@ -30,11 +30,20 @@ function RemittanceForm({ onSubmit, refreshKey = 0 }: RemittanceFormProps) {
   const [remittanceCountries] = useAtom(remittanceCountriesAtom);
   const getRemitCountries = useSetAtom(getRemittanceCountries);
   const [exchangeRates] = useAtom(exchangeRatesAtom);
+  const updateExchangeRates = useSetAtom(updateExchangeRatesAtom);
+  
   useEffect(() => {
     if (!remittanceCountries) {
       getRemitCountries();
     }
   }, [remittanceCountries, getRemitCountries]);
+  
+  // 환율 데이터가 비어있을 때만 조회
+  useEffect(() => {
+    if (!exchangeRates || Object.keys(exchangeRates).length === 0) {
+      updateExchangeRates();
+    }
+  }, [exchangeRates, updateExchangeRates]);
   const [myBankAccount, setMyBankAccount] = useAtom(myBankAccountAtom);
   const [userInfo] = useAtom(userInfoAtom);
   const [amountInput, setAmountInput] = useState('');
@@ -88,20 +97,19 @@ function RemittanceForm({ onSubmit, refreshKey = 0 }: RemittanceFormProps) {
 
   // 통화 표시 이름 생성
   const getCurrencyDisplayName = (currencyCode: string) => {
-    const currencyNames: { [key: string]: string } = {
-      'USD': '달러 (USD)',
-      'EUR': '유로 (EUR)',
-      'JPY': '엔 (JPY)',
-      'CNY': '위안 (CNY)',
-      'GBP': '파운드 (GBP)',
-      'CAD': '캐나다 달러 (CAD)',
-      'AUD': '호주 달러 (AUD)',
-      'CHF': '스위스 프랑 (CHF)',
-      'HKD': '홍콩 달러 (HKD)',
-      'SGD': '싱가포르 달러 (SGD)',
-      'KRW': '원 (KRW)'
-    };
-    return currencyNames[currencyCode] || `${currencyCode}`;
+    if (!remittanceCountries) return currencyCode;
+    
+    const country = remittanceCountries.find(c => c.code === currencyCode);
+    if (country) {
+      return `${country.codeName} (${country.code})`;
+    }
+    
+    // fallback for KRW
+    if (currencyCode === 'KRW') {
+      return '원 (KRW)';
+    }
+    
+    return currencyCode;
   };
 
   // 선택된 통화로 변환된 금액 계산
@@ -267,16 +275,17 @@ function RemittanceForm({ onSubmit, refreshKey = 0 }: RemittanceFormProps) {
               </span>
               <span style="font-weight: 600; font-size: 1.2rem; color: #222;">${fee ? fee.toLocaleString() : 0}원</span>
             </div>
-            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #e5e7eb; padding-top: 12px;">
-              ${convertedAmount > 0 && form.currency ? `
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                <span style="display: flex; align-items: center; gap: 6px; color: #059669; font-size: 1.1rem;">
-                  <span style="font-size: 1.2rem;">💱</span>
-                  <span>변환 금액</span>
-                </span>
-                <span style="font-weight: 600; font-size: 1.2rem; color: #059669;">${convertedAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${getCurrencyDisplayName(form.currency)}</span>
-              </div>
-              ` : ''}
+            <div style="border-top: 1px solid #e5e7eb; padding-top: 12px; margin-bottom: 12px;"></div>
+            ${convertedAmount > 0 && form.currency ? `
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+              <span style="display: flex; align-items: center; gap: 6px; color: #059669; font-size: 1.1rem;">
+                <span style="font-size: 1.2rem;">💱</span>
+                <span>변환 금액</span>
+              </span>
+              <span style="font-weight: 600; font-size: 1.2rem; color: #059669;">${convertedAmount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} ${getCurrencyDisplayName(form.currency)}</span>
+            </div>
+            ` : ''}
+            <div style="display: flex; justify-content: space-between; align-items: center;">
               <span style="display: flex; align-items: center; gap: 6px; color: #64748b; font-size: 1.1rem;">
                 <span style="font-size: 1.3rem;">💰</span>
                 <span>총 출금액</span>
@@ -307,7 +316,7 @@ function RemittanceForm({ onSubmit, refreshKey = 0 }: RemittanceFormProps) {
             <div style="text-align: left; margin: 20px 0;">
               <div style="color: #dc2626; font-weight: 600; margin-bottom: 16px;">⚠️ 한도 초과</div>
               <div style="margin-bottom: 12px;">
-                <strong>요청 금액:</strong> ${limitCheck.requestedAmount?.toLocaleString()}원<br>
+                <strong>요청 금액:</strong> ${limitCheck.requestedAmount?.toLocaleString()}원<br><br>
                 <strong>일일 한도:</strong> ${limitCheck.dailyLimit?.toLocaleString()}원<br>
                 <strong>월 한도:</strong> ${limitCheck.monthlyLimit?.toLocaleString()}원
               </div>
@@ -324,7 +333,6 @@ function RemittanceForm({ onSubmit, refreshKey = 0 }: RemittanceFormProps) {
               <div style="margin-bottom: 12px;">
                 <strong>요청 금액:</strong> ${limitCheck.requestedAmount?.toLocaleString()}원<br>
                 <strong>일일 한도:</strong> ${limitCheck.dailyLimit?.toLocaleString()}원<br>
-                <strong>오늘 송금액:</strong> ${limitCheck.todayAmount?.toLocaleString()}원
               </div>
               <div style="color: #dc2626; font-weight: 600;">
                 일일 한도를 ${limitCheck.dailyExceededAmount?.toLocaleString()}원 초과
@@ -338,7 +346,6 @@ function RemittanceForm({ onSubmit, refreshKey = 0 }: RemittanceFormProps) {
               <div style="margin-bottom: 12px;">
                 <strong>요청 금액:</strong> ${limitCheck.requestedAmount?.toLocaleString()}원<br>
                 <strong>월 한도:</strong> ${limitCheck.monthlyLimit?.toLocaleString()}원<br>
-                <strong>이번 달 송금액:</strong> ${limitCheck.monthAmount?.toLocaleString()}원
               </div>
               <div style="color: #dc2626; font-weight: 600;">
                 월 한도를 ${limitCheck.monthlyExceededAmount?.toLocaleString()}원 초과
@@ -357,6 +364,10 @@ function RemittanceForm({ onSubmit, refreshKey = 0 }: RemittanceFormProps) {
         return;
       }
 
+      // 환율과 변환된 금액 계산
+      const exchangeRate = exchangeRates[form.currency] || 0;
+      const convertedAmount = exchangeRate > 0 ? cleanAmount / exchangeRate : 0;
+
       // 송금 API 호출
       const remittanceData = {
         userId: userInfo?.id || 0,
@@ -368,6 +379,8 @@ function RemittanceForm({ onSubmit, refreshKey = 0 }: RemittanceFormProps) {
         receiverCountry: form.receiverCountry,
         amount: cleanAmount,
         currency: form.currency,
+        exchangeRate: exchangeRate,
+        convertedAmount: convertedAmount,
         status: 'COMPLETED'
       };
 
@@ -719,7 +732,7 @@ function RemittanceForm({ onSubmit, refreshKey = 0 }: RemittanceFormProps) {
                 <span style={{ fontSize: '1.1rem' }}>💱</span>
                 <span style={{ color: '#059669', fontWeight: 600 }}>변환 금액</span>
               </span>
-              <span style={{ fontWeight: 700, fontSize: '1.1rem', color: '#059669' }}>
+              <span style={{ fontWeight: 700, fontSize: '1rem', color: '#059669' }}>
                 {getConvertedAmount(cleanAmount, selectedCurrency.value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {getCurrencyDisplayName(selectedCurrency.value)}
               </span>
             </div>

@@ -93,9 +93,18 @@ const AdminQna: React.FC = () => {
     setSearchRequest(prev => ({ ...prev, page: (page - 1) * prev.size }));
   };
 
-  const handleQnaClick = (qna: Qna) => {
-    setSelectedQna(qna);
-    setIsModalOpen(true);
+  const handleQnaClick = async (qna: Qna) => {
+    try {
+      // 개별 API 호출로 최신 데이터 가져오기
+      const qnaDetail = await api.getAdminQnaById(qna.id);
+      setSelectedQna(qnaDetail);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error('Q&A 상세 정보 조회 실패:', error);
+      // 에러 발생 시 기존 데이터로 모달 열기
+      setSelectedQna(qna);
+      setIsModalOpen(true);
+    }
   };
 
   const handleCloseModal = () => {

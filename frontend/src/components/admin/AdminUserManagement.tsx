@@ -106,7 +106,8 @@ const AdminUserManagement: React.FC = () => {
          {
        key: 'name',
        label: '사용자명',
-       width: '120px',
+       minWidth: '120px',
+       flex: 1,
        render: (value: any, user: User) => (
         <div
         style={{
@@ -125,35 +126,40 @@ const AdminUserManagement: React.FC = () => {
     {
       key: 'email',
       label: '이메일',
-      width: '200px',
+      minWidth: '200px',
+      flex: 1.5,
       render: (value: any, user: User) => user.email,
       align: 'left' as const
     },
     {
       key: 'dailyLimit',
       label: '일일 한도',
-      width: '120px',
+      minWidth: '120px',
+      flex: 1,
       render: (value: any, user: User) => formatCurrency(user.dailyLimit),
       align: 'right' as const
     },
     {
       key: 'monthlyLimit',
       label: '월 한도',
-      width: '120px',
+      minWidth: '120px',
+      flex: 1,
       render: (value: any, user: User) => formatCurrency(user.monthlyLimit),
       align: 'right' as const
     },
     {
       key: 'singleLimit',
       label: '1회 한도',
-      width: '120px',
+      minWidth: '120px',
+      flex: 1,
       render: (value: any, user: User) => formatCurrency(user.singleLimit),
       align: 'right' as const
     },
     {
       key: 'limitType',
       label: '한도 유형',
-      width: '120px',
+      minWidth: '120px',
+      flex: 1,
       render: (value: any) => (
         <span style={{
           padding: '4px 8px',
@@ -171,7 +177,8 @@ const AdminUserManagement: React.FC = () => {
     {
       key: 'status',
       label: '상태',
-      width: '100px',
+      minWidth: '100px',
+      flex: 0.8,
       render: (value: any, user: User) => (
         <span style={{
           padding: '4px 8px',
@@ -189,14 +196,16 @@ const AdminUserManagement: React.FC = () => {
     {
       key: 'lastLoginAt',
       label: '최근 로그인',
-      width: '150px',
+      minWidth: '150px',
+      flex: 1.2,
       render: (value: any, user: User) => formatDate(user.lastLoginAt),
       align: 'center' as const
     },
     {
       key: 'createdAt',
       label: '가입일',
-      width: '150px',
+      minWidth: '150px',
+      flex: 1.2,
       render: (value: any, user: User) => formatDate(user.createdAt),
       align: 'center' as const
     }

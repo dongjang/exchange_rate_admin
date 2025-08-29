@@ -1,11 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaUsers, FaUserShield } from 'react-icons/fa';
+import { useLocation } from 'react-router-dom';
 import AdminLayout from './AdminLayout';
 import AdminUserManagement from './AdminUserManagement';
 import AdminAdminManagement from './AdminAdminManagement';
 
 const AdminUsers: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'users' | 'admins'>('users');
+  const location = useLocation();
+
+  // URL 파라미터에서 tab 확인
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const tab = params.get('tab');
+    if (tab === 'admin') {
+      setActiveTab('admins');
+    }
+  }, [location.search]);
 
   return (
     <AdminLayout>

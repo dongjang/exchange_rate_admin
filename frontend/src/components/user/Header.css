@@ -134,11 +134,17 @@
   cursor: pointer;
   transition: all 0.3s ease;
   min-width: 200px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  z-index: 10;
 }
 
 .user-section:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.2);
   transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
 .user-avatar {
@@ -148,12 +154,15 @@
   border: 2px solid rgba(255, 255, 255, 0.3);
   object-fit: cover;
   background: rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
 }
 
 .user-info {
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
+  min-width: 0;
+  flex: 1;
 }
 
 .user-name {
@@ -161,12 +170,18 @@
   font-size: 0.9rem;
   color: white;
   line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .user-role {
   font-size: 0.75rem;
   color: rgba(255, 255, 255, 0.7);
   font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* 로그아웃 버튼 */
@@ -174,7 +189,7 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: rgba(239, 68, 68, 0.9);
+  background: rgba(255, 255, 255, 0.1);
   color: white;
   border: none;
   padding: 0.75rem 1.25rem;
@@ -184,35 +199,47 @@
   font-size: 0.9rem;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   white-space: nowrap;
   min-width: 120px;
 }
 
 .logout-button:hover {
-  background: rgba(239, 68, 68, 1);
+  background: rgba(255, 255, 255, 0.2);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(239, 68, 68, 0.3);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
 /* 모바일 레이아웃 */
-.mobile-header-left,
-.mobile-header-center,
-.mobile-header-right {
+.user-mobile-header-left,
+.user-mobile-header-center,
+.user-mobile-header-right {
   display: flex;
   align-items: center;
 }
 
-.mobile-header-left {
+.user-mobile-header-left {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  flex: 1;
+  min-width: 60px;
 }
 
-.mobile-header-center {
+.user-mobile-header-center {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 2;
+  gap: 0.75rem;
+}
+
+.user-mobile-header-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   flex: 1;
+  min-width: 60px;
 }
 
 .home-button-mobile {
@@ -243,6 +270,7 @@
   border-radius: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
+  margin-right: 0.5rem;
 }
 
 .user-info-mobile:hover {
@@ -271,20 +299,23 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  background: rgba(239, 68, 68, 0.9);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  width: 90px;
+  height: 40px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   color: white;
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
+  font-size: 0.85rem;
+  font-weight: 600;
 }
 
 .logout-button-mobile:hover {
-  background: rgba(239, 68, 68, 1);
-  transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
 /* 모바일 메뉴 버튼 */
@@ -436,8 +467,10 @@
 /* 반응형 디자인 */
 @media (max-width: 768px) {
   .header-content {
-    padding: 0 1rem;
+    padding: 0 20px;
     height: 60px;
+    margin: 0;
+    max-width: none;
   }
   
   .header-left, .header-nav, .header-right {
@@ -446,7 +479,119 @@
 }
 
 @media (min-width: 769px) {
-  .mobile-header-left, .mobile-header-center, .mobile-header-right, .home-button-mobile, .user-info-mobile, .logout-button-mobile, .mobile-menu-btn, .mobile-menu-container {
+  .user-mobile-header-left, .user-mobile-header-center, .user-mobile-header-right, .home-button-mobile, .user-info-mobile, .logout-button-mobile, .mobile-menu-btn, .mobile-menu-container {
     display: none !important;
   }
+} 
+
+/* 데스크톱 사용자 섹션 */
+.desktop-user-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 200px;
+  position: relative;
+  z-index: 10;
+}
+
+.desktop-user-section:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.desktop-user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
+}
+
+.desktop-user-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.desktop-user-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: white;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.desktop-user-role {
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 500;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 데스크톱 로그아웃 버튼 */
+.desktop-logout-button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: none;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
+  min-width: 120px;
+}
+
+.desktop-logout-button:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+} 
+
+/* 사용자 모바일 헤더 레이아웃 */
+.user-mobile-header-left,
+.user-mobile-header-center,
+.user-mobile-header-right {
+  display: flex;
+  align-items: center;
+}
+
+.user-mobile-header-left {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex: 1;
+}
+
+.user-mobile-header-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 2;
+}
+
+.user-mobile-header-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex: 1;
 } 

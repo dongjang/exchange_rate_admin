@@ -18,4 +18,5 @@ public class NoticeResponse {
     private LocalDateTime updatedAt;
     private Long createdUserId;
     private String createdUserName;
+    private String updatedUserName;
 }

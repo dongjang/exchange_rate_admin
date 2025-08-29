@@ -16,6 +16,8 @@ interface RemittanceDetailModalProps {
     receiverCountry: string;
     amount: number;
     currency: string;
+    exchangeRate?: number;
+    convertedAmount?: number;
     status: string;
     createdAt: string;
     updatedAt: string;
@@ -116,6 +118,39 @@ const RemittanceDetailModal: React.FC<RemittanceDetailModalProps> = ({
         <h3 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: '1.5rem', color: '#1e293b', textAlign: 'center' }}>송금 상세</h3>
         
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.8rem', fontSize: '1rem' }}>
+          {/* 받는 사람 */}
+          <div>
+            <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#374151', marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <span style={{ fontSize: '1.1rem' }}>👥</span>
+              받는 사람
+            </h4>
+            <div style={{ 
+              background: '#f8fafc', 
+              padding: '1.2rem', 
+              borderRadius: 10,
+              border: '1px solid #e2e8f0'
+            }}>
+              <div style={{ fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#6b7280', fontWeight: 500 }}>이름</span>
+                  <span style={{ color: '#1e293b', fontWeight: 600 }}>{remittance.receiverName}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#6b7280', fontWeight: 500 }}>은행</span>
+                  <span style={{ color: '#1e293b', fontWeight: 600 }}>{remittance.receiverBank}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#6b7280', fontWeight: 500 }}>계좌번호</span>
+                  <span style={{ color: '#1e293b', fontWeight: 600, fontFamily: 'monospace' }}>{remittance.receiverAccount}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#6b7280', fontWeight: 500 }}>수취 통화</span>
+                  <span style={{ color: '#1e293b', fontWeight: 600 }}>{formatCurrencyLabel(remittance.currency)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* 송금 금액 및 상태 */}
           <div style={{ 
             background: 'linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%)',
@@ -130,6 +165,22 @@ const RemittanceDetailModal: React.FC<RemittanceDetailModalProps> = ({
                 {formatAmount(remittance.amount)}원
               </span>
             </div>
+            {remittance.exchangeRate && remittance.convertedAmount && (
+              <>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
+                  <span style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 500 }}>환율</span>
+                  <span style={{ fontWeight: 600, fontSize: '1rem', color: '#1e293b' }}>
+                    1 {formatCurrencyLabel(remittance.currency).split(' - ')[1]} = {remittance.exchangeRate.toLocaleString()}원
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
+                  <span style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 500 }}>변환 금액</span>
+                  <span style={{ fontWeight: 600, fontSize: '1rem', color: '#1e293b' }}>
+                    {remittance.convertedAmount.toLocaleString()} {formatCurrencyLabel(remittance.currency).split(' - ')[1]}
+                  </span>
+                </div>
+              </>
+            )}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 500 }}>상태</span>
               <span style={{ 
@@ -166,39 +217,6 @@ const RemittanceDetailModal: React.FC<RemittanceDetailModalProps> = ({
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ color: '#6b7280', fontWeight: 500 }}>계좌번호</span>
                   <span style={{ color: '#1e293b', fontWeight: 600, fontFamily: 'monospace' }}>{remittance.senderAccount}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 받는 사람 */}
-          <div>
-            <h4 style={{ fontSize: '0.95rem', fontWeight: 600, color: '#374151', marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '1.1rem' }}>👥</span>
-              받는 사람
-            </h4>
-            <div style={{ 
-              background: '#f8fafc', 
-              padding: '1.2rem', 
-              borderRadius: 10,
-              border: '1px solid #e2e8f0'
-            }}>
-              <div style={{ fontSize: '0.9rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: '#6b7280', fontWeight: 500 }}>이름</span>
-                  <span style={{ color: '#1e293b', fontWeight: 600 }}>{remittance.receiverName}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: '#6b7280', fontWeight: 500 }}>은행</span>
-                  <span style={{ color: '#1e293b', fontWeight: 600 }}>{remittance.receiverBank}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: '#6b7280', fontWeight: 500 }}>계좌번호</span>
-                  <span style={{ color: '#1e293b', fontWeight: 600, fontFamily: 'monospace' }}>{remittance.receiverAccount}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ color: '#6b7280', fontWeight: 500 }}>수취 통화</span>
-                  <span style={{ color: '#1e293b', fontWeight: 600 }}>{formatCurrencyLabel(remittance.currency)}</span>
                 </div>
               </div>
             </div>

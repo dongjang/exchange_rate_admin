@@ -1,4 +1,4 @@
-package com.example.controller;
+package com.example.controller.admin;
 
 import java.util.HashMap;
 import java.util.List;
@@ -12,25 +12,21 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.dto.BankRequest;
 import com.example.dto.BankResponse;
 import com.example.dto.BankSearchRequest;
-import com.example.dto.BanksInfoResponse;
-import com.example.repository.BankRepository;
 import com.example.service.BankService;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/banks")
+@RequestMapping("/api/admin/banks")
 @RequiredArgsConstructor
-public class BankController {
+public class AdminBankController {
     
     private final BankService bankService;
-    private final BankRepository bankRepository;
     
     @PostMapping("/search")
     public ResponseEntity<Map<String, Object>> searchBanks(@RequestBody BankSearchRequest searchRequest) {
@@ -78,19 +74,4 @@ public class BankController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/currency_bank_info")
-    public ResponseEntity<List<BankResponse>> getBanksByCurrency(@RequestParam String currencyCode) {
-        List<BanksInfoResponse> banks = bankRepository.findBanksByCurrencyCode(currencyCode);
-        List<BankResponse> responses = banks.stream()
-                .map(bank -> BankResponse.builder()
-                        .id(null) // BanksInfoResponse에는 id가 없음
-                        .name(bank.getName())
-                        .bankCode(bank.getBankCode())
-                        .currencyCode(currencyCode) // 파라미터로 받은 currencyCode 사용
-                        .countryName(null) // BanksInfoResponse에는 countryName이 없음
-                        .codeName(null) // BanksInfoResponse에는 codeName이 없음
-                        .build())
-                .collect(java.util.stream.Collectors.toList());
-        return ResponseEntity.ok(responses);
-    }
 } 

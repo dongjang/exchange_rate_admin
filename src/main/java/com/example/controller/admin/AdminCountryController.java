@@ -1,24 +1,30 @@
-package com.example.controller;
+package com.example.controller.admin;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.example.dto.CountryRequest;
 import com.example.dto.CountryResponse;
 import com.example.dto.CountrySearchRequest;
 import com.example.service.CountryService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/countries")
+@RequestMapping("/api/admin/countries")
 @RequiredArgsConstructor
-public class CountryController {
+public class AdminCountryController {
     
     private final CountryService countryService;
     
@@ -74,9 +80,4 @@ public class CountryController {
         return ResponseEntity.ok(countries);
     }
     
-    @GetMapping("/remittance")
-    public ResponseEntity<List<CountryResponse>> getRemittanceCountries() {
-        List<CountryResponse> countries = countryService.getRemittanceCountries();
-        return ResponseEntity.ok(countries);
-    }
 } 

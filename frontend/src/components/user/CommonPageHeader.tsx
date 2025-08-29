@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface CommonPageHeaderProps {
   title: string;
@@ -14,12 +14,21 @@ const CommonPageHeader: React.FC<CommonPageHeaderProps> = ({
   subtitle,
   gradientColors = { from: '#667eea', to: '#764ba2' }
 }) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   return (
     <div style={{
       background: `linear-gradient(135deg, ${gradientColors.from} 0%, ${gradientColors.to} 100%)`,
-      borderRadius: '20px',
-      padding: '40px',
-      marginBottom: '30px',
+      borderRadius: isMobile ? '16px' : '20px',
+      padding: isMobile ? '24px 20px' : '40px',
+      marginBottom: isMobile ? '20px' : '30px',
       color: 'white',
       textAlign: 'center',
       boxShadow: `0 10px 25px rgba(102, 126, 234, 0.3)`,
@@ -36,9 +45,9 @@ const CommonPageHeader: React.FC<CommonPageHeaderProps> = ({
         pointerEvents: 'none'
       }} />
       <h1 style={{
-        fontSize: '2.5rem',
+        fontSize: isMobile ? '1.8rem' : '2.5rem',
         fontWeight: '700',
-        margin: '0 0 10px 0',
+        margin: isMobile ? '0 0 8px 0' : '0 0 10px 0',
         position: 'relative',
         zIndex: 1,
         textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
@@ -46,7 +55,7 @@ const CommonPageHeader: React.FC<CommonPageHeaderProps> = ({
         {title}
       </h1>
       <p style={{
-        fontSize: '1.1rem',
+        fontSize: isMobile ? '0.9rem' : '1.1rem',
         margin: 0,
         opacity: 0.9,
         position: 'relative',

@@ -16,7 +16,7 @@ import CommonNoticeModal from './CommonNoticeModal';
 import './Dashboard.css';
 
 interface User {
-  id?: number;
+  id: number;
   email: string;
   name?: string;
   pictureUrl?: string;
@@ -40,6 +40,8 @@ interface RemittanceHistory {
   receiverCountry: string;
   amount: number;
   currency: string;
+  exchangeRate?: number;
+  convertedAmount?: number;
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -85,7 +87,7 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
   // 관심 환율 목록 조회 (atom 사용)
   const getUserFavoriteCurrencyList = async () => {
     try {
-      await updateFavoriteCurrencies(user?.id || 0);
+      await updateFavoriteCurrencies();
     } catch {
       console.error('관심 환율 조회 실패');
     }
@@ -382,15 +384,15 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
                     key={remit.id} 
                     className="remittance-item"
                   >
-                    <div className="remittance-info">
+                    <div className="remittance-details-left">
                       <span className="date">{formatDate(remit.createdAt)}</span>
                       <div className="receiver-currency-row">
                         <span className="receiver-name">{remit.receiverName}</span>
                         <span className="currency-pair">
                           {formatRemittanceCurrencyLabel(remit.currency)}
                         </span>
+                        <span className="amount">{formatAmount(remit.amount, remit.currency)}</span>
                       </div>
-                      <span className="amount">{formatAmount(remit.amount, remit.currency)}</span>
                     </div>
                     <span className={`status ${remit.status.toLowerCase()}`}>
                       {getStatusText(remit.status)}

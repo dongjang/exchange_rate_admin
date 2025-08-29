@@ -21,6 +21,4 @@ public class RemittanceLimitCheckResponse {
     private BigDecimal monthlyLimit;
     private BigDecimal dailyExceededAmount;
     private BigDecimal monthlyExceededAmount;
-    private BigDecimal todayAmount;
-    private BigDecimal monthAmount;
 }

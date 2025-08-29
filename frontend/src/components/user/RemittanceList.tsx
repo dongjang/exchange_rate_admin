@@ -121,10 +121,11 @@ function RemittanceList({ remittances, onRemittanceClick }: RemittanceListProps)
         }}>
           <thead>
             <tr style={{ 
-              background: 'linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%)', 
-              color: '#fff',
+              background: '#fff', 
+              color: '#374151',
               fontSize: isMobile ? '0.75rem' : '0.875rem',
-              fontWeight: 600
+              fontWeight: 600,
+              borderBottom: '2px solid #e2e8f0'
             }}>
               <th style={{ padding: isMobile ? '0.5rem' : '1rem', textAlign: 'left' }}>받는 사람</th>
               <th style={{ padding: isMobile ? '0.5rem' : '1rem', textAlign: 'left' }}>수취 통화</th>
@@ -149,29 +150,26 @@ function RemittanceList({ remittances, onRemittanceClick }: RemittanceListProps)
             ) : (
               remittances.map((r, index) => (
                 <tr key={r.id || `remittance-${index}`}
+                  onClick={() => handleRemittanceClick(r)}
                   style={{ 
                     borderBottom: '1px solid #e5e7eb',
                     fontSize: isMobile ? '0.75rem' : '0.875rem',
-                    transition: 'background-color 0.2s'
+                    transition: 'background-color 0.2s',
+                    cursor: 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = '#f8fafc';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
                   }}
                 >
                   <td 
-                    onClick={() => handleRemittanceClick(r)}
                     style={{ 
                       padding: isMobile ? '0.5rem' : '1rem', 
                       textAlign: 'left',
                       fontWeight: 600,
-                      color: '#1e293b',
-                      cursor: 'pointer',
-                      textDecoration: 'underline',
-                      textDecorationColor: '#3b82f6',
-                      textDecorationThickness: '1px'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.backgroundColor = '#f8fafc';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.backgroundColor = 'transparent';
+                      color: '#1e293b'
                     }}
                   >
                     {isMobile ? truncateText(r.receiverName, 6) : r.receiverName}
@@ -180,8 +178,7 @@ function RemittanceList({ remittances, onRemittanceClick }: RemittanceListProps)
                     padding: isMobile ? '0.5rem' : '1rem', 
                     textAlign: 'left',
                     fontWeight: 600,
-                    color: '#1e293b',
-                    cursor: isMobile && formatCurrencyLabel(r.currency).length > 12 ? 'pointer' : 'default'
+                    color: '#1e293b'
                   }}
                   title={isMobile && formatCurrencyLabel(r.currency).length > 12 ? formatCurrencyLabel(r.currency) : undefined}
                   >
@@ -225,11 +222,11 @@ function RemittanceList({ remittances, onRemittanceClick }: RemittanceListProps)
             <h3 style={{ fontSize: '1.18rem', fontWeight: 700, marginBottom: '1.2rem', color: '#2563eb' }}>송금 상세</h3>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.7rem', fontSize: '1.08rem' }}>
               <div><b>받는 사람:</b> {selected.receiverName}</div>
+              <div><b>금액:</b> {selected.amount.toLocaleString()}</div>
+              <div><b>상태:</b> {getStatusText(selected.status)}</div>
               <div><b>국가:</b> {selected.receiverCountry}</div>
               <div><b>계좌번호:</b> {selected.receiverAccount}</div>
               <div><b>수취 통화:</b> {formatCurrencyLabel(selected.currency)}</div>
-              <div><b>금액:</b> {selected.amount.toLocaleString()}</div>
-              <div><b>상태:</b> {getStatusText(selected.status)}</div>
               <div><b>신청일:</b> {new Date(selected.createdAt).toLocaleDateString('ko-KR')}</div>
             </div>
           </div>

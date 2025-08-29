@@ -22,6 +22,8 @@ public class RemittanceHistoryResponse {
     private String receiverBankName;
     private String receiverName;
     private BigDecimal amount;
+    private BigDecimal exchangeRate;
+    private BigDecimal convertedAmount;
     private String status;
     private LocalDateTime createdAt;
 } 

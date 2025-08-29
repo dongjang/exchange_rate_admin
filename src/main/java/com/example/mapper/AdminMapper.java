@@ -13,6 +13,5 @@ public interface AdminMapper {
     AdminResponse getAdminById(Long id);
     void insertAdmin(AdminResponse admin);
     void updateAdmin(AdminResponse admin);
-    void deleteAdmin(Long id);
     void updateAdminStatus(@Param("id") Long id, @Param("status") String status);
 }

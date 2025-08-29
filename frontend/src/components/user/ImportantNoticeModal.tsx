@@ -15,10 +15,7 @@ const ImportantNoticeModal: React.FC<ImportantNoticeModalProps> = ({
   const [currentNoticeIndex, setCurrentNoticeIndex] = useState(0);
   const [hideToday, setHideToday] = useState(false);
 
-  console.log('ImportantNoticeModal props:', { isOpen, noticesLength: notices.length });
-
   if (!isOpen || notices.length === 0) {
-    console.log('ImportantNoticeModal: 조건에 맞지 않아 렌더링하지 않음');
     return null;
   }
 

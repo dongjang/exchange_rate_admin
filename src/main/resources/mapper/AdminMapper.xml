@@ -125,13 +125,11 @@
             status = #{status},
             updated_at = NOW(),
             updated_admin_id = #{updatedAdminId}
+            <if test="password != null and password != ''">
+                , password = #{password}
+            </if>
         WHERE id = #{id}
     </update>
-
-    <!-- 관리자 삭제 -->
-    <delete id="deleteAdmin" parameterType="long">
-        DELETE FROM admin WHERE id = #{id}
-    </delete>
 
     <!-- 관리자 상태 업데이트 -->
     <update id="updateAdminStatus">

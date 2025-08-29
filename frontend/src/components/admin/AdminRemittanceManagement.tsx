@@ -7,11 +7,11 @@ import AdminLayout from './AdminLayout';
 import './AdminRemittanceManagement.css';
 
 interface AdminRemittanceManagementProps {
-  user?: any;
+  admin?: any;
 }
 
 const AdminRemittanceManagement: React.FC<AdminRemittanceManagementProps> = ({ 
-  user 
+  admin 
 }) => {
   const location = useLocation();
   const [activeTab, setActiveTab] = useState<'history' | 'limits'>('history');
@@ -24,7 +24,7 @@ const AdminRemittanceManagement: React.FC<AdminRemittanceManagementProps> = ({
   }, [location.state]);
 
   return (
-    <AdminLayout user={user}>
+    <AdminLayout admin={admin}>
       {/* Tab Navigation */}
       <div className="tab-navigation">
         <button 

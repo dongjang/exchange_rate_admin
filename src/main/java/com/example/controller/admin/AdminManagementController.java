@@ -1,4 +1,4 @@
-package com.example.controller;
+package com.example.controller.admin;
 
 import com.example.dto.AdminRequest;
 import com.example.dto.AdminResponse;
@@ -13,8 +13,8 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/admins")
-public class AdminController {
+@RequestMapping("/api/admin")
+public class AdminManagementController {
 
     @Autowired
     private AdminService adminService;
@@ -46,9 +46,8 @@ public class AdminController {
 
     @PostMapping
     public ResponseEntity<Map<String, String>> createAdmin(@RequestBody AdminRequest adminRequest) {
-        // TODO: 현재 로그인한 관리자 ID를 가져오는 로직 필요
-        Long currentAdminId = 1L; // 임시값
-        adminService.createAdmin(adminRequest, currentAdminId);
+
+        adminService.createAdmin(adminRequest);
         Map<String, String> response = new HashMap<>();
         response.put("message", "관리자가 성공적으로 등록되었습니다.");
         return ResponseEntity.ok(response);
@@ -56,9 +55,8 @@ public class AdminController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Map<String, String>> updateAdmin(@PathVariable Long id, @RequestBody AdminRequest adminRequest) {
-        // TODO: 현재 로그인한 관리자 ID를 가져오는 로직 필요
-        Long currentAdminId = 1L; // 임시값
-        adminService.updateAdmin(id, adminRequest, currentAdminId);
+
+        adminService.updateAdmin(id, adminRequest);
         Map<String, String> response = new HashMap<>();
         response.put("message", "관리자 정보가 성공적으로 수정되었습니다.");
         return ResponseEntity.ok(response);
@@ -70,14 +68,6 @@ public class AdminController {
         adminService.updateAdminStatus(id, status);
         Map<String, String> response = new HashMap<>();
         response.put("message", "관리자 상태가 성공적으로 업데이트되었습니다.");
-        return ResponseEntity.ok(response);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> deleteAdmin(@PathVariable Long id) {
-        adminService.deleteAdmin(id);
-        Map<String, String> response = new HashMap<>();
-        response.put("message", "관리자가 성공적으로 삭제되었습니다.");
         return ResponseEntity.ok(response);
     }
 

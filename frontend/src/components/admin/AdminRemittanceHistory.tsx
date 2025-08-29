@@ -14,6 +14,8 @@ interface Remittance {
   receiverBankName: string;
   receiverName: string;
   amount: number;
+  exchangeRate?: number;
+  convertedAmount?: number;
   status: string;
   createdAt: string;
 }
@@ -187,58 +189,106 @@ const AdminRemittanceHistory: React.FC<AdminRemittanceHistoryProps> = ({
           {
             key: 'userName',
             label: '보내는 사람',
-            width: '150px'
+            minWidth: '100px',
+            flex: 1
           },
           {
             key: 'senderAccount',
             label: '보내는 계좌',
-            width: '150px',
+            minWidth: '70px',
+            flex: 1,
             render: (value) => value || '-'
           },
           {
             key: 'receiverName',
             label: '받는 사람',
-            width: '150px'
+            minWidth: '100px',
+            flex: 1
           },
           {
             key: 'receiverAccount',
             label: '받는 계좌',
-            width: '150px',
+            minWidth: '70px',
+            flex: 1,
             render: (value) => value || '-'
           },
           {
             key: 'currency',
             label: '수취통화',
-            width: '200px'
+            minWidth: '150px',
+            flex: 1.5
           },
           {
             key: 'senderBank',
             label: '보내는 은행',
-            width: '150px',
+            minWidth: '100px',
+            flex: 1,
             render: (value) => value || '-'
           },
           {
             key: 'receiverBankName',
             label: '받는 은행',
-            width: '100%',
+            minWidth: '300px',
+            flex: 1,
             render: (value) => value || '-'
           },
           {
             key: 'createdAt',
             label: '송금일',
-            width: '200px',
+            minWidth: '140px',
+            flex: 1.2,
+            align: 'center' as const,
             render: (value) => new Date(value).toLocaleString('ko-KR')
+          },
+          {
+            key: 'exchangeRate',
+            label: '환율',
+            minWidth: '60px',
+            flex: 0.8,
+            align: 'right' as const,
+            render: (value, row) => {
+              if (row.exchangeRate) {
+                return (
+                  <div style={{ fontSize: '12px', color: '#6b7280', fontWeight: '500' }}>
+                    {row.exchangeRate.toLocaleString()}원
+                  </div>
+                );
+              }
+              return '-';
+            }
+          },
+          {
+            key: 'convertedAmount',
+            label: '변환 금액',
+            minWidth: '150px',
+            flex: 1,
+            align: 'right' as const,
+            render: (value, row) => {
+              if (row.convertedAmount && row.currency) {
+                const currencyName = row.currency.split(' - ')[1] || row.currency;
+                return (
+                  <div style={{ fontSize: '12px', color: '#059669', fontWeight: '500' }}>
+                    {row.convertedAmount.toLocaleString()} {currencyName}
+                  </div>
+                );
+              }
+              return '-';
+            }
           },
           {
             key: 'amount',
             label: '송금액',
-            width: '150px',
+            minWidth: '150px',
+            flex: 1,
+            align: 'right' as const,
             render: (value) => formatCurrency(value)
           },
           {
             key: 'status',
             label: '상태',
-            width: '80px',
+            minWidth: '70px',
+            flex: 0.7,
+            align: 'center' as const,
             render: (value) => {
               const statusInfo = getStatusBadge(value);
               return (

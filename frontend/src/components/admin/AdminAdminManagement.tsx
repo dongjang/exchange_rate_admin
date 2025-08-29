@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from 'react';
+import { useAtom, useSetAtom } from 'jotai';
+import { useNavigate } from 'react-router-dom';
 import AdminTable from './AdminTable';
 import AdminAdminSearchForm from './AdminAdminSearchForm';
 import AdminAdminModal from './AdminAdminModal';
 import { api } from '../../services/api';
+import { adminInfoAtom, setAdminAuthAtom } from '../../store/adminStore';
+import Swal from 'sweetalert2';
 
 interface Admin {
   id: number;
@@ -47,10 +51,44 @@ const AdminAdminManagement: React.FC = () => {
   });
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedAdminId, setSelectedAdminId] = useState<number | null>(null);
+  const [adminInfo] = useAtom(adminInfoAtom);
+  const [, setAdminAuthState] = useAtom(setAdminAuthAtom);
+  const navigate = useNavigate();
+  
+  // 현재 로그인한 관리자가 최고 관리자인지 확인
+  const isSuperAdmin = adminInfo?.role === 'SUPER_ADMIN';
 
   const handleAdminNameClick = (adminId: number) => {
+    if (!isSuperAdmin) return; // 최고 관리자가 아니면 클릭 무시
     setSelectedAdminId(adminId);
     setIsModalOpen(true);
+  };
+
+  // 관리자 정보 업데이트 후 처리
+  const handleAdminUpdated = async () => {
+    await fetchAdmins();
+    
+    // 본인 정보가 수정되었고 비밀번호가 변경된 경우 로그아웃 처리
+    if (selectedAdminId === adminInfo?.id) {
+      await Swal.fire({
+        icon: 'info',
+        title: '비밀번호 변경 완료',
+        text: '비밀번호가 변경되었습니다. 다시 로그인해 주세요.',
+        confirmButtonColor: '#3b82f6'
+      });
+      
+      // 로그아웃 처리
+      try {
+        await api.adminLogout();
+        setAdminAuthState({
+          isAuthenticated: false,
+          isLoading: false,
+        });
+        navigate('/admin');
+      } catch (error) {
+        console.error('Logout failed:', error);
+      }
+    }
   };
 
   const fetchAdmins = async () => {
@@ -85,6 +123,7 @@ const AdminAdminManagement: React.FC = () => {
   };
 
   const handleAdd = () => {
+    if (!isSuperAdmin) return; // 최고 관리자가 아니면 등록 무시
     setSelectedAdminId(null);
     setIsModalOpen(true);
   };
@@ -108,14 +147,15 @@ const AdminAdminManagement: React.FC = () => {
     {
       key: 'name',
       label: '관리자명',
-      width: '120px',
+      minWidth: '120px',
+      flex: 1,
       render: (value: any, admin: Admin) => (
         <div
           style={{
-            textDecoration: 'underline', 
+            textDecoration: isSuperAdmin ? 'underline' : 'none', 
             fontWeight: 'bold', 
-            cursor: 'pointer',
-            color: '#007bff'
+            cursor: isSuperAdmin ? 'pointer' : 'default',
+            color: isSuperAdmin ? '#007bff' : '#333'
           }}
           onClick={() => handleAdminNameClick(admin.id)}
         >
@@ -127,21 +167,24 @@ const AdminAdminManagement: React.FC = () => {
     {
       key: 'adminId',
       label: '아이디',
-      width: '120px',
+      minWidth: '120px',
+      flex: 1,
       render: (value: any, admin: Admin) => admin.adminId,
       align: 'left' as const
     },
     {
       key: 'email',
       label: '이메일',
-      width: '200px',
+      minWidth: '200px',
+      flex: 1.5,
       render: (value: any, admin: Admin) => admin.email,
       align: 'left' as const
     },
     {
       key: 'role',
       label: '권한',
-      width: '100px',
+      minWidth: '100px',
+      flex: 0.8,
       render: (value: any) => (
         <span style={{
           padding: '4px 8px',
@@ -151,7 +194,7 @@ const AdminAdminManagement: React.FC = () => {
           backgroundColor: value === 'SUPER_ADMIN' ? '#fef3c7' : '#dbeafe',
           color: value === 'SUPER_ADMIN' ? '#92400e' : '#1e40af'
         }}>
-          {value === 'SUPER_ADMIN' ? '최고 관리자' : '관리자'}
+          {value === 'SUPER_ADMIN' ? '최고 관리자' : '일반 관리자'}
         </span>
       ),
       align: 'center' as const
@@ -159,7 +202,8 @@ const AdminAdminManagement: React.FC = () => {
     {
       key: 'status',
       label: '상태',
-      width: '100px',
+      minWidth: '100px',
+      flex: 0.8,
       render: (value: any) => (
         <span style={{
           padding: '4px 8px',
@@ -195,6 +239,20 @@ const AdminAdminManagement: React.FC = () => {
       <div className="panel-header">
         <h2>관리자 관리</h2>
         <p>관리자 정보와 권한을 관리할 수 있습니다.</p>
+        {!isSuperAdmin && (
+          <div style={{
+            background: '#fef3c7',
+            border: '1px solid #f59e0b',
+            borderRadius: '8px',
+            padding: '12px 16px',
+            marginTop: '12px',
+            color: '#92400e',
+            fontSize: '14px',
+            fontWeight: '500'
+          }}>
+            ⚠️ 등록 및 수정은 최고 관리자만 가능합니다.
+          </div>
+        )}
       </div>
       <div className="panel-content">
         {/* 검색 폼 */}
@@ -203,6 +261,7 @@ const AdminAdminManagement: React.FC = () => {
           setSearchRequest={setSearchRequest}
           onSearch={handleSearch}
           onAdd={handleAdd}
+          isSuperAdmin={isSuperAdmin}
         />
 
         {/* 관리자 테이블 */}
@@ -245,7 +304,7 @@ const AdminAdminManagement: React.FC = () => {
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           adminId={selectedAdminId}
-          onAdminUpdated={fetchAdmins}
+          onAdminUpdated={handleAdminUpdated}
         />
       </div>
     </div>

@@ -8,15 +8,19 @@ import java.util.Map;
 @Data
 @AllArgsConstructor
 public class UserInfoResponse {
+    private Long id;
     private String email;
     private String name;
-    private String picture;
+    private String pictureUrl;
+    private String status;
 
     public Map<String, Object> toMap() {
         Map<String, Object> map = new HashMap<>();
+        map.put("id", id);
         map.put("email", email);
         map.put("name", name);
-        map.put("picture", picture);
+        map.put("pictureUrl", pictureUrl);
+        map.put("status", status);
         return map;
     }
 } 

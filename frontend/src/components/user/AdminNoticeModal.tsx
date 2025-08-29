@@ -27,15 +27,15 @@ interface NoticeModalProps {
     content: string;
     priority: string;
     status: string;
-    noticeStartAt: Date | null;
-    noticeEndAt: Date | null;
+    noticeStartAt: string | null;
+    noticeEndAt: string | null;
   };
   setFormData: (data: any) => void;
   priorityOptions: { value: string; label: string }[];
   statusOptions: { value: string; label: string }[];
 }
 
-const NoticeModal: React.FC<NoticeModalProps> = ({
+const AdminNoticeModal: React.FC<NoticeModalProps> = ({
   isOpen,
   onClose,
   onSubmit,
@@ -280,12 +280,12 @@ const NoticeModal: React.FC<NoticeModalProps> = ({
                 <div style={{ flex: 1 }}>
                   <input
                     type="date"
-                    value={formData.noticeStartAt ? formData.noticeStartAt.toISOString().split('T')[0] : ''}
-                    onChange={(e) => {
-                      const date = e.target.value ? new Date(e.target.value) : null;
-                      setFormData({ ...formData, noticeStartAt: date });
-                    }}
+                       onChange={(e) => {
+                       setFormData({ ...formData, noticeStartAt: e.target.value || null });
+                     }}
+                     value={formData.noticeStartAt || ''}
                     min={new Date().toISOString().split('T')[0]}
+                    max={formData.noticeEndAt || new Date().toISOString().split('T')[0]}
                     style={{
                       width: '100%',
                       padding: '12px 16px',
@@ -313,12 +313,11 @@ const NoticeModal: React.FC<NoticeModalProps> = ({
                 <div style={{ flex: 1 }}>
                   <input
                     type="date"
-                    value={formData.noticeEndAt ? formData.noticeEndAt.toISOString().split('T')[0] : ''}
-                    onChange={(e) => {
-                      const date = e.target.value ? new Date(e.target.value) : null;
-                      setFormData({ ...formData, noticeEndAt: date });
-                    }}
-                    min={formData.noticeStartAt ? formData.noticeStartAt.toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}
+                      onChange={(e) => {
+                       setFormData({ ...formData, noticeEndAt: e.target.value || null });
+                     }}
+                     value={formData.noticeEndAt || ''}
+                    min={formData.noticeStartAt || new Date().toISOString().split('T')[0]}
                     style={{
                       width: '100%',
                       padding: '12px 16px',
@@ -449,4 +448,4 @@ const NoticeModal: React.FC<NoticeModalProps> = ({
   );
 };
 
-export default NoticeModal;
+export default AdminNoticeModal;

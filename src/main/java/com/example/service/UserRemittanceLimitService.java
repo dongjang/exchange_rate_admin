@@ -1,21 +1,19 @@
 package com.example.service;
 
-import com.example.domain.DefaultRemittanceLimit;
-import com.example.domain.Remittance;
-import com.example.domain.UserRemittanceLimit;
-import com.example.dto.UserRemittanceLimitResponse;
-import com.example.repository.DefaultRemittanceLimitRepository;
-import com.example.repository.RemittanceRepository;
-import com.example.repository.UserRemittanceLimitRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.math.BigDecimal;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import com.example.dto.UserLimitsResponse;
+import com.example.dto.UserRemittanceLimitResponse;
+import com.example.mapper.RemittanceMapper;
+import com.example.repository.DefaultRemittanceLimitRepository;
+import com.example.repository.RemittanceRepository;
+import com.example.repository.UserRemittanceLimitRepository;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Service
 @RequiredArgsConstructor
@@ -25,68 +23,24 @@ public class UserRemittanceLimitService {
     private final UserRemittanceLimitRepository userRemittanceLimitRepository;
     private final DefaultRemittanceLimitRepository defaultRemittanceLimitRepository;
     private final RemittanceRepository remittanceRepository;
+    private final RemittanceMapper remittanceMapper;
     
     /**
      * 사용자의 송금 한도를 조회합니다.
-     * 사용자별 한도가 없으면 기본 한도를 반환합니다.
-     * 실제 이체 가능한 한도는 한도에서 한도 승인일 이후 송금한 금액을 뺀 값입니다.
+     * 새로운 쿼리를 사용하여 정확한 한도 계산을 수행합니다.
      */
     @Transactional(readOnly = true)
     public UserRemittanceLimitResponse getUserRemittanceLimit(Long userId) {
-        // 사용자별 한도 조회
-        UserRemittanceLimit userLimit = userRemittanceLimitRepository.findByUserId(userId).orElse(null);
+        // 새로운 쿼리로 일일 한도와 월 한도 조회
+        BigDecimal availableDailyLimit = remittanceMapper.getDailyLimit(userId);
+        BigDecimal availableMonthlyLimit = remittanceMapper.getMonthlyLimit(userId);
+        
+        // 사용자별 한도 조회 (단일 한도용)
+        UserLimitsResponse userLimits = remittanceMapper.getUserLimits(userId);
         
         UserRemittanceLimitResponse response = new UserRemittanceLimitResponse();
         
-        BigDecimal dailyLimit, monthlyLimit, singleLimit;
-        LocalDateTime limitStartDate = null;
-        
-        if (userLimit != null) {
-            // 사용자별 한도가 있는 경우
-            dailyLimit = userLimit.getDailyLimit();
-            monthlyLimit = userLimit.getMonthlyLimit();
-            singleLimit = userLimit.getSingleLimit();
-            response.setLimitType("USER_LIMIT");
-            
-            // 한도 승인일 또는 수정일을 기준으로 설정
-            limitStartDate = userLimit.getUpdatedAt();
-        } else {
-            // 기본 한도 조회
-            DefaultRemittanceLimit defaultLimit = defaultRemittanceLimitRepository.findByIsActiveTrue().orElse(null);
-            
-            if (defaultLimit != null) {
-                dailyLimit = defaultLimit.getDailyLimit();
-                monthlyLimit = defaultLimit.getMonthlyLimit();
-                singleLimit = defaultLimit.getSingleLimit();
-            } else {
-                // 기본 한도도 없으면 기본값 설정
-                dailyLimit = BigDecimal.valueOf(1000000); // 100만원
-                monthlyLimit = BigDecimal.valueOf(5000000); // 500만원
-                singleLimit = BigDecimal.valueOf(1000000); // 100만원
-            }
-            response.setLimitType("DEFAULT_LIMIT");
-            
-            // 기본 한도의 경우 이번 달 1일부터 계산
-            limitStartDate = LocalDateTime.of(LocalDate.now().withDayOfMonth(1), LocalTime.MIN);
-        }
-        
-        // 오늘 송금한 금액 계산 (오전 0시 0분 0초부터)
-        LocalDateTime todayStart = LocalDateTime.of(LocalDate.now(), LocalTime.MIN);
-        LocalDateTime todayEnd = LocalDateTime.of(LocalDate.now(), LocalTime.MAX);
-        BigDecimal todayAmount = remittanceRepository.sumAmountByUserIdAndDateRange(
-            userId, todayStart, todayEnd);
-        
-        // 이번 달 송금한 금액 계산 (월 1일 0시 0분 0초부터)
-        LocalDateTime monthStart = LocalDateTime.of(LocalDate.now().withDayOfMonth(1), LocalTime.MIN);
-        LocalDateTime monthEnd = LocalDateTime.of(LocalDate.now().withDayOfMonth(
-            LocalDate.now().lengthOfMonth()), LocalTime.MAX);
-        BigDecimal monthAmount = remittanceRepository.sumAmountByUserIdAndDateRange(
-            userId, monthStart, monthEnd);
-        
-        // 실제 이체 가능한 한도 계산 (0보다 작으면 0으로 설정)
-        BigDecimal availableDailyLimit = dailyLimit.subtract(todayAmount != null ? todayAmount : BigDecimal.ZERO);
-        BigDecimal availableMonthlyLimit = monthlyLimit.subtract(monthAmount != null ? monthAmount : BigDecimal.ZERO);
-        
+        // 0보다 작으면 0으로 설정
         if (availableDailyLimit.compareTo(BigDecimal.ZERO) < 0) {
             availableDailyLimit = BigDecimal.ZERO;
         }
@@ -97,11 +51,13 @@ public class UserRemittanceLimitService {
         // 응답 설정
         response.setDailyLimit(availableDailyLimit);
         response.setMonthlyLimit(availableMonthlyLimit);
-        response.setSingleLimit(singleLimit);
-        response.setOriginalDailyLimit(dailyLimit);
-        response.setOriginalMonthlyLimit(monthlyLimit);
-        response.setTodayAmount(todayAmount != null ? todayAmount : BigDecimal.ZERO);
-        response.setMonthAmount(monthAmount != null ? monthAmount : BigDecimal.ZERO);
+        response.setOriginalDailyLimit(userLimits.getDailyLimit());
+        response.setOriginalMonthlyLimit(userLimits.getMonthlyLimit());
+        response.setSingleLimit(userLimits.getSingleLimit());
+        
+        // 한도 타입 설정
+        String limitType = userLimits.getLimitType();
+        response.setLimitType(limitType);
         
         return response;
     }

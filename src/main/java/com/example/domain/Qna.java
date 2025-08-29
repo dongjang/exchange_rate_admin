@@ -52,9 +52,8 @@ public class Qna {
     @Column(name = "answer_content", columnDefinition = "TEXT")
     private String answerContent;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "answer_user_id")
-    private User answerUser;
+    @Column(name = "answer_user_id")
+    private Long answerUserId;
     
     public enum QnaStatus {
         PENDING,    // 대기중

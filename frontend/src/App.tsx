@@ -18,7 +18,7 @@ import RemittanceHistoryPage from './components/user/RemittanceHistoryPage';
 import { api } from './services/api';
 import { authAtom, setAuthAtom } from './store/authStore';
 import { countryAtom } from './store/countryStore';
-import { userInfoAtom } from './store/userStore';
+import { userInfoAtom, type User, } from './store/userStore';
 import { adminAuthAtom, setAdminAuthAtom, adminInfoAtom, setAdminInfoAtom } from './store/adminStore';
 import AdminNotices from './components/admin/AdminNotices';
 import AdminQna from './components/admin/AdminQna';
@@ -38,31 +38,42 @@ function AppContent() {
   const setCountryList = useSetAtom(countryAtom);
   const location = useLocation();
 
-  const checkUserAuth = async () => {
+  // 페이지 타입 판별 변수들
+  const validAdminPaths = ['/admin', '/admin/remittance', '/admin/countries-banks', '/admin/users', '/admin/notices', '/admin/qna'];
+  const isAdminPage = validAdminPaths.includes(location.pathname);
+  const isNotFoundPage = !['/', '/exchange-rates', '/remittance', '/remittance-history', '/notices', '/qna', '/admin', '/admin/remittance', '/admin/countries-banks', '/admin/users', '/admin/notices', '/admin/qna', '/auth/success', '/auth/failure'].includes(location.pathname);
+
+  const handleUserAuthSuccess = async () => {
+    // 함수 시작 시 로딩 상태 설정
+    setAuthState({ isAuthenticated: false, isLoading: true });
+    
     try {
-      const authResult = await api.getCurrentUser();
-      if (authResult.success && authResult.user?.email) {
-        // DB에서 현재 사용자 정보 get
-        try {
-          const userInfo = await api.getCurrentUserInfo();
-          setUserInfo(userInfo);
-        } catch (userError) {
-          console.log('사용자 정보 조회 실패, OAuth 정보로 설정:', userError);
-          // 사용자가 DB에 없으면 OAuth 정보로 임시 설정
-          setUserInfo({
-            id: userInfo?.id || 0,
-            email: authResult.user.email,
-            name: authResult.user.name,
-            pictureUrl: authResult.user.picture,
-            status: 'ACTIVE',
-          });
-        }
+      const successResult = await api.authSuccess();
+      
+      if (successResult.success && successResult.user) {
+        setAuthState({
+          isAuthenticated: true,
+          isLoading: false,
+        });
+        // AuthUser를 User 타입으로 변환
+        const user: User = {
+          id: successResult.user.id,
+          email: successResult.user.email,
+          name: successResult.user.name,
+          pictureUrl: successResult.user.pictureUrl,
+          status: successResult.user.status || 'ACTIVE' // status가 없으면 기본값 설정
+        };
+        setUserInfo(user);
+        return true;
+      } else {
+        setAuthState({ isAuthenticated: false, isLoading: false });
+        return false;
       }
-      setAuthState({ isAuthenticated: authResult.success, isLoading: false });
     } catch (error) {
-      console.error('사용자 인증 확인 실패:', error);
+      console.error('사용자 인증 실패:', error);
+      // 에러 발생 시에도 로딩 상태 해제
       setAuthState({ isAuthenticated: false, isLoading: false });
-      setUserInfo(null);
+      return false;
     }
   };
 
@@ -84,24 +95,28 @@ function AppContent() {
   };
 
   useEffect(() => { 
-    checkUserAuth(); 
-    // 관리자 로그인 페이지가 아닐 때만 관리자 인증 확인
-    if (!isAdminLoginPage) {
+    // 관리자 페이지이거나 admin 경로에서 404가 발생한 경우 관리자 인증 확인
+    if (isAdminPage || location.pathname.startsWith('/admin')) {
       checkAdminAuth();
     }
   }, [location.pathname]);
 
+  // 사용자 인증 상태 확인 (앱 시작 시 한 번만)
+  useEffect(() => {
+    // 관리자 페이지가 아니고, 아직 인증 상태를 모르는 경우에만 체크
+    if (!isAdminPage && auth.isAuthenticated === 'unknown' && !auth.isLoading) {
+      handleUserAuthSuccess();
+    }
+  }, []); // 의존성 배열을 빈 배열로 설정하여 한 번만 실행
+
   // 로그인 성공 시 country 리스트 get
   useEffect(() => {
     if (auth.isAuthenticated) {
-      api.getCountries().then(setCountryList);
+      api.getAllCountries().then(setCountryList);
     }
   }, [auth.isAuthenticated, setCountryList]);
 
-  const validAdminPaths = ['/admin', '/admin/remittance', '/admin/countries-banks', '/admin/users', '/admin/notices', '/admin/qna'];
-  const isAdminPage = validAdminPaths.includes(location.pathname);
-  const isAdminLoginPage = location.pathname === '/admin/login';
-  const isNotFoundPage = !['/', '/exchange-rates', '/remittance', '/remittance-history', '/notices', '/qna', '/admin', '/admin/remittance', '/admin/countries-banks', '/admin/users', '/admin/notices', '/admin/qna', '/auth/success', '/auth/failure'].includes(location.pathname);
+  //const isAdminLoginPage = location.pathname === '/admin/login'; // 실제 로그인 페이지만
 
   // 관리자 페이지인 경우 관리자 인증 확인 (사용자 로그인 상태와 무관)
   if (isAdminPage) {
@@ -148,9 +163,6 @@ function AppContent() {
   return (
     <div className="app">
       <GlobalLoading />
-      {isAdminLoginPage ? (
-        <AdminLogin />
-      ) : (
         <>
           {!isAdminPage && !isNotFoundPage && (
             <Header user={userInfo} onUserUpdated={setUserInfo}/>
@@ -169,14 +181,13 @@ function AppContent() {
               <Route path="/admin/users" element={<AdminUsers />} />
               <Route path="/admin/notices" element={<AdminNotices />} />
               <Route path="/admin/qna" element={<AdminQna />} />
-              <Route path="/auth/success" element={<AuthSuccess />} />
+              <Route path="/auth/success" element={<AuthSuccess handleUserAuthSuccess={handleUserAuthSuccess}/>} />
               <Route path="/auth/failure" element={<AuthFailure />} />
               {/* 404 처리 */}
               <Route path="*" element={<NotFound />} />
             </Routes>
           </div>
         </>
-      )}
     </div>
   );
 }

@@ -25,7 +25,7 @@ function RemittanceApplyPage() {
       />
       <div style={{ boxShadow: '0 4px 24px rgba(30,41,59,0.13), 0 1.5px 6px rgba(59,130,246,0.07)', borderRadius: 18, background: 'linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%)', border: '1.5px solid #e0e7ef', padding: '0 0 2.2rem 0' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', padding: '1.2rem 2rem 1.1rem 2rem' }}>
-          <button
+          {/* <button
             onClick={handleRefresh}
             style={{
               display: 'flex',
@@ -52,7 +52,7 @@ function RemittanceApplyPage() {
           >
             <FaSync style={{ fontSize: '12px' }} />
             새로고침
-          </button>
+          </button> */}
         </div>
         <div style={{ padding: '1.5rem 1.5rem 0 1.5rem' }}>
           <RemittanceForm refreshKey={refreshKey} onSubmit={handleRemittanceComplete} />

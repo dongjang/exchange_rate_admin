@@ -9,10 +9,10 @@ import AdminLimitRequests from './AdminLimitRequests';
 import AdminTop5Notices from './AdminTop5Notices';
 
 interface AdminDashboardProps {
-  user?: any;
+  admin?: any;
 }
 
-const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
+const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -134,7 +134,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ user }) => {
   }
 
   return (
-    <AdminLayout user={user}>
+    <AdminLayout admin={admin}>
       <div className="admin-dashboard-container">
         {/* 첫 번째 로우: 통계 카드들 */}
         <div className="dashboard-grid">

@@ -124,10 +124,22 @@ const AdminCountriesBanks: React.FC = () => {
     setSearchRequest(prev => ({ ...prev, page: (page - 1) * prev.size }));
   };
 
-  const handleCountryClick = (country: Country) => {
-    setSelectedCountry(country);
-    setIsEditMode(true);
-    setIsModalOpen(true);
+  const handleCountryClick = async (country: Country) => {
+    try {
+      // 개별 API 호출로 최신 데이터 가져오기
+      const countryDetail = await api.getCountryByCode(country.code);
+      setSelectedCountry(countryDetail);
+      setIsEditMode(true);
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error('국가 상세 정보 조회 실패:', error);
+      await Swal.fire({
+        title: '조회 실패',
+        text: '국가 상세 정보를 가져오는데 실패했습니다.',
+        icon: 'error',
+        confirmButtonColor: '#ef4444'
+      });
+    }
   };
 
   const handleDeleteClick = async (country: Country) => {
@@ -260,10 +272,22 @@ const AdminCountriesBanks: React.FC = () => {
     setBankSearchRequest(prev => ({ ...prev, page: (page - 1) * prev.size }));
   };
 
-  const handleBankClick = (bank: Bank) => {
-    setSelectedBank(bank);
-    setIsBankEditMode(true);
-    setIsBankModalOpen(true);
+  const handleBankClick = async (bank: Bank) => {
+    try {
+      // 개별 API 호출로 최신 데이터 가져오기
+      const bankDetail = await api.getBankById(bank.id!);
+      setSelectedBank(bankDetail);
+      setIsBankEditMode(true);
+      setIsBankModalOpen(true);
+    } catch (error) {
+      console.error('은행 상세 정보 조회 실패:', error);
+      await Swal.fire({
+        title: '조회 실패',
+        text: '은행 상세 정보를 가져오는데 실패했습니다.',
+        icon: 'error',
+        confirmButtonColor: '#ef4444'
+      });
+    }
   };
 
   const handleBankDeleteClick = async (id: number) => {

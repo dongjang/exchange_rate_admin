@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import Select from 'react-select';
 import { useAtom, useSetAtom } from 'jotai';
-import { remittanceCountriesAtom, getRemittanceCountries, exchangeRatesAtom } from '../../store/countryStore';
+import { remittanceCountriesAtom, getRemittanceCountries, exchangeRatesAtom, updateExchangeRatesAtom } from '../../store/countryStore';
 
 function formatNumberWithCommas(value: string | number) {
   const num = typeof value === 'string' ? value.replace(/[^0-9]/g, '') : value.toString();
@@ -22,6 +22,8 @@ export function RemitSimulationModal({ isOpen, onClose, rates }: RemitSimulation
   const [currency, setCurrency] = useState('');
   const [backdropClicked, setBackdropClicked] = useState(false);
   const [exchangeRates] = useAtom(exchangeRatesAtom);
+  const updateExchangeRates = useSetAtom(updateExchangeRatesAtom);
+  
   // 모달이 열릴 때마다 입력값/통화 초기화
   useEffect(() => {
     if (isOpen) {
@@ -29,6 +31,13 @@ export function RemitSimulationModal({ isOpen, onClose, rates }: RemitSimulation
       setCurrency('');
     }
   }, [isOpen]);
+  
+  // 환율 데이터가 비어있을 때만 조회
+  useEffect(() => {
+    if (isOpen && (!exchangeRates || Object.keys(exchangeRates).length === 0)) {
+      updateExchangeRates();
+    }
+  }, [isOpen, exchangeRates, updateExchangeRates]);
 
   const [remittanceCountries] = useAtom(remittanceCountriesAtom);
   const getRemitCountries = useSetAtom(getRemittanceCountries);
@@ -53,20 +62,19 @@ export function RemitSimulationModal({ isOpen, onClose, rates }: RemitSimulation
 
   // 통화 표시 이름 생성
   const getCurrencyDisplayName = (currencyCode: string) => {
-    const currencyNames: { [key: string]: string } = {
-      'USD': '달러 (USD)',
-      'EUR': '유로 (EUR)',
-      'JPY': '엔 (JPY)',
-      'CNY': '위안 (CNY)',
-      'GBP': '파운드 (GBP)',
-      'CAD': '캐나다 달러 (CAD)',
-      'AUD': '호주 달러 (AUD)',
-      'CHF': '스위스 프랑 (CHF)',
-      'HKD': '홍콩 달러 (HKD)',
-      'SGD': '싱가포르 달러 (SGD)',
-      'KRW': '원 (KRW)'
-    };
-    return currencyNames[currencyCode] || `${currencyCode}`;
+    if (!remittanceCountries) return currencyCode;
+    
+    const country = remittanceCountries.find(c => c.code === currencyCode);
+    if (country) {
+      return `${country.codeName} (${country.code})`;
+    }
+    
+    // fallback for KRW
+    if (currencyCode === 'KRW') {
+      return '원 (KRW)';
+    }
+    
+    return currencyCode;
   };
   
   // USD 등 타 통화 환산: (송금액-수수료) / (KRW 환율)

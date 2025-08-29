@@ -3,12 +3,12 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Swal from 'sweetalert2';
 import { api } from '../../services/api';
-import { authAtom, setAuthAtom } from '../../store/authStore';
+import { adminAuthAtom, setAdminAuthAtom } from '../../store/adminStore';
 import type { User } from '../../store/userStore';
 import { selectedUserAtom } from '../../store/userStore';
 import './AdminHeader.css';
 import { Link } from 'react-router-dom';
-import { UserModal } from '../user/UserModal';
+
 
 interface AdminHeaderProps {
   user: User | null;
@@ -16,11 +16,10 @@ interface AdminHeaderProps {
 }
 
 function AdminHeader({ user, onUserUpdated }: AdminHeaderProps) {
-  const [auth, setAuth] = useAtom(authAtom);
-  const [, setAuthState] = useAtom(setAuthAtom);
+  const [, setAdminAuthState] = useAtom(setAdminAuthAtom);
   const setSelectedUser = useSetAtom(selectedUserAtom);
   const navigate = useNavigate();
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
@@ -43,7 +42,7 @@ function AdminHeader({ user, onUserUpdated }: AdminHeaderProps) {
     if (!result.isConfirmed) return;
     try {
       await api.logout();
-      setAuthState({
+      setAdminAuthState({
         isAuthenticated: false,
         isLoading: false,
       });
@@ -171,7 +170,6 @@ function AdminHeader({ user, onUserUpdated }: AdminHeaderProps) {
           </>
         )}
       </div>
-      <UserModal isOpen={isModalOpen} onClose={handleModalClose} />
     </header>
   );
 }

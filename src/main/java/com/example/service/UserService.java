@@ -95,6 +95,13 @@ public class UserService {
     public User findByEmailFromRepository(String email) {
         return userRepository.findByEmail(email);
     }
+    
+    /**
+     * 이메일로 사용자 정보 조회 (ID, 상태 포함)
+     */
+    public User findUserByEmail(String email) {
+        return userRepository.findByEmail(email);
+    }
 
     @Transactional
     public void saveUser(String email, String name, String picture, String provider) {

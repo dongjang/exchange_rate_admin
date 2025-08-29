@@ -128,6 +128,31 @@ const AdminRemittanceLimits: React.FC = () => {
     }
   };
 
+  const handleDefaultLimitButtonClick = async () => {
+    try {
+      // 로딩 상태 표시
+      Swal.fire({
+        title: '기본 한도 조회 중...',
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        }
+      });
+      
+      // DB에서 최신 기본 한도 조회
+      await loadDefaultLimit();
+      
+      // 로딩 닫기
+      Swal.close();
+      
+      // 조회 완료 후 모달 열기
+      setIsDefaultLimitModalOpen(true);
+    } catch (error) {
+      console.error('기본 한도 조회 실패:', error);
+      Swal.fire('오류', '기본 한도를 불러오는데 실패했습니다.', 'error');
+    }
+  };
+
   const handleRequestAction = async (action: 'approve' | 'reject',requestId: number,userId?: number, dailyLimit?: number, monthlyLimit?: number, singleLimit?: number) => {
 
     if (action === 'reject') {
@@ -165,12 +190,6 @@ const AdminRemittanceLimits: React.FC = () => {
   const handleRejectWithComment = async (comment: string) => {
     if (!pendingRejectRequestId || !pendingRejectRequestData) return;
     
-    // 디버깅을 위한 로그 추가
-    console.log('handleRejectWithComment called:', {
-      pendingRejectRequestId,
-      pendingRejectRequestData,
-      comment
-    });
     
     // 반려 시에도 한도 정보와 함께 처리
     await processRequest(
@@ -191,20 +210,10 @@ const AdminRemittanceLimits: React.FC = () => {
     setProcessingRequestId(requestId);
     try {
       
-      // 사용자 정보 확인
-      if (!userInfo || !userInfo.id) {
-        Swal.fire({
-          icon: 'error',
-          title: '오류',
-          text: '로그인 정보를 찾을 수 없습니다. 다시 로그인해주세요.'
-        });
-        return;
-      }
       
       // 요청 데이터 구성
       const requestData: any = {
         status,
-        adminId: userInfo.id,
         userId: userId,
         dailyLimit: dailyLimit,
         monthlyLimit: monthlyLimit,
@@ -212,7 +221,7 @@ const AdminRemittanceLimits: React.FC = () => {
         adminComment
       };
                   
-      const response = await api.processRemittanceLimitRequest(requestId, requestData);
+      await api.processRemittanceLimitRequest(requestId, requestData);
 
       Swal.fire({
         icon: 'success',
@@ -400,7 +409,7 @@ const AdminRemittanceLimits: React.FC = () => {
         
         <div className="header-right">
           <button
-            onClick={() => setIsDefaultLimitModalOpen(true)}
+            onClick={handleDefaultLimitButtonClick}
             className="btn btn-primary"
             disabled={defaultLimitLoading}
           >
@@ -415,36 +424,47 @@ const AdminRemittanceLimits: React.FC = () => {
           {
             key: 'userName',
             label: '사용자명',
-            width: '120px'
+            minWidth: '120px',
+            flex: 1
           },
           {
             key: 'dailyLimit',
             label: '일일 한도',
-            width: '120px',
+            minWidth: '120px',
+            flex: 1,
+            align: 'right' as const,
             render: (value) => formatCurrency(value) + '원'
           },
           {
             key: 'monthlyLimit',
             label: '월 한도',
-            width: '120px',
+            minWidth: '120px',
+            flex: 1,
+            align: 'right' as const,
             render: (value) => formatCurrency(value) + '원'
           },
           {
             key: 'singleLimit',
             label: '1회 한도',
-            width: '120px',
+            minWidth: '120px',
+            flex: 1,
+            align: 'right' as const,
             render: (value) => formatCurrency(value) + '원'
           },
           {
             key: 'reason',
             label: '신청 사유',
-            width: '250px',
+            minWidth: '250px',
+            flex: 2,
+            align: 'left' as const,
             render: (value) => <div className="reason-cell">{value}</div>
           },
           {
             key: 'status',
             label: '상태',
-            width: '100px',
+            minWidth: '100px',
+            flex: 0.8,
+            align: 'center' as const,
             render: (value) => (
               <span className={`status-badge ${getStatusBadgeClass(value)}`}>
                 {getStatusText(value)}
@@ -454,13 +474,17 @@ const AdminRemittanceLimits: React.FC = () => {
           {
             key: 'createdAt',
             label: '신청일',
-            width: '170px',
+            minWidth: '170px',
+            flex: 1.2,
+            align: 'center' as const,
             render: (value) => new Date(value).toLocaleString('ko-KR')
           },
           {
             key: 'files',
             label: '첨부파일',
-            width: '100px',
+            minWidth: '100px',
+            flex: 0.8,
+            align: 'center' as const,
             render: (_, row) => (
               (row.incomeFileId || row.bankbookFileId || row.businessFileId) ? (
                 <button
@@ -475,7 +499,9 @@ const AdminRemittanceLimits: React.FC = () => {
           {
             key: 'actions',
             label: '작업',
-            width: '80px',
+            minWidth: '80px',
+            flex: 0.8,
+            align: 'center' as const,
             render: (_, row) => (
               row.status === 'PENDING' ? (
                 <div className="action-buttons">

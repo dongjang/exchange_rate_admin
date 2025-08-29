@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaUserShield, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { useAtom } from 'jotai';
@@ -15,8 +15,16 @@ const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [adminAuth] = useAtom(adminAuthAtom);
   const [, setAdminAuth] = useAtom(setAdminAuthAtom);
   const [, setAdminInfo] = useAtom(setAdminInfoAtom);
+
+  // 이미 로그인된 관리자 체크
+  useEffect(() => {
+    if (adminAuth.isAuthenticated) {
+      navigate('/admin');
+    }
+  }, [adminAuth.isAuthenticated, navigate]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -43,6 +51,7 @@ const AdminLogin = () => {
       const response = await api.adminLogin(formData);
       
       if (response.success) {
+
         // 관리자 정보 설정
         setAdminInfo(response.admin);
         setAdminAuth({ isAuthenticated: true, isLoading: false });

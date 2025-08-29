@@ -97,19 +97,23 @@ const NoticePage: React.FC = () => {
 
   const handleRowClick = async (notice: Notice) => {
     try {
+      // 개별 API 호출로 최신 데이터 가져오기
+      const noticeDetail = await api.getNoticeById(notice.id);
+      
       // 조회수 증가 API 호출
       await api.incrementNoticeViewCount(notice.id);
       
+      // 최신 데이터로 조회수 증가된 상태로 설정
+      const updatedNotice = { ...noticeDetail, viewCount: noticeDetail.viewCount + 1 };
+      setSelectedNotice(updatedNotice);
+      
       // 로컬 상태도 업데이트
       setNoticeList(prev => prev.map(n => 
-        n.id === notice.id ? { ...n, viewCount: n.viewCount + 1 } : n
+        n.id === notice.id ? updatedNotice : n
       ));
-      
-      // 선택된 공지사항의 조회수도 업데이트
-      setSelectedNotice({ ...notice, viewCount: notice.viewCount + 1 });
     } catch (error) {
-      console.error('조회수 증가 실패:', error);
-      // 조회수 증가에 실패해도 모달은 열기
+      console.error('공지사항 상세 정보 조회 또는 조회수 증가 실패:', error);
+      // 에러 발생 시 기존 데이터로 모달 열기
       setSelectedNotice(notice);
     }
     setIsModalOpen(true);
@@ -147,12 +151,22 @@ const NoticePage: React.FC = () => {
     }
   };
 
+  // 반응형 감지
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // 테이블 컬럼 정의
   const columns = [
     {
       key: 'title',
       label: '제목',
-      width: '3fr',
+      width: isMobile ? '4.5fr' : '4fr',
       render: (notice: Notice) => (
         <div style={{
           fontWeight: '500',
@@ -172,14 +186,14 @@ const NoticePage: React.FC = () => {
       align: 'center' as const,
       render: (notice: Notice) => (
         <span style={{
-          padding: '4px 12px',
+          padding: isMobile ? '3px 8px' : '4px 12px',
           borderRadius: '20px',
-          fontSize: '12px',
+          fontSize: isMobile ? '10px' : '12px',
           fontWeight: '600',
           backgroundColor: getPriorityColor(notice.priority) + '20',
           color: getPriorityColor(notice.priority)
         }}>
-          {getPriorityLabel(notice.priority)}
+          {isMobile ? (getPriorityLabel(notice.priority) === '높음' ? '높음' : '보통') : getPriorityLabel(notice.priority)}
         </span>
       )
     },
@@ -187,9 +201,13 @@ const NoticePage: React.FC = () => {
       key: 'viewCount',
       label: '조회수',
       width: '1fr',
-      align: 'center' as const,
+      align: 'right' as const,
       render: (notice: Notice) => (
-        <div style={{ fontSize: '14px', color: '#64748b' }}>
+        <div style={{ 
+          fontSize: isMobile ? '11px' : '14px', 
+          color: '#64748b',
+          textAlign: 'right'
+        }}>
           {notice.viewCount}
         </div>
       )
@@ -197,10 +215,13 @@ const NoticePage: React.FC = () => {
     {
       key: 'createdAt',
       label: '등록일',
-      width: '1fr',
+      width: isMobile ? '1.5fr' : '1fr',
       align: 'center' as const,
       render: (notice: Notice) => (
-        <div style={{ fontSize: '14px', color: '#64748b' }}>
+        <div style={{ 
+          fontSize: isMobile ? '11px' : '14px', 
+          color: '#64748b' 
+        }}>
           {new Date(notice.createdAt).toLocaleDateString('ko-KR', {
             year: 'numeric',
             month: '2-digit',
@@ -325,8 +346,8 @@ const NoticePage: React.FC = () => {
                 cursor: 'pointer',
                 transition: 'background-color 0.2s ease'
               }}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#059669'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = '#10b981'}
+              onMouseEnter={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#059669'}
+              onMouseLeave={(e) => (e.target as HTMLButtonElement).style.backgroundColor = '#10b981'}
             >
               검색
             </button>

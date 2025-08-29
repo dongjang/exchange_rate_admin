@@ -466,7 +466,7 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                 >
                   다운로드
                 </button>
-                <button
+                {/* <button
                   onClick={() => currentFile && window.open(`/api/files/${currentFile.id}`, '_blank')}
                   style={{
                     padding: '8px 16px',
@@ -480,7 +480,7 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                   }}
                 >
                   새 탭에서 열기
-                </button>
+                </button> */}
               </div>
             </div>
           )}

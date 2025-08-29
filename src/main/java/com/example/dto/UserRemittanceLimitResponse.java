@@ -16,7 +16,4 @@ public class UserRemittanceLimitResponse {
     private BigDecimal originalDailyLimit;
     private BigDecimal originalMonthlyLimit;
     
-    // 오늘/이번 달 송금한 금액
-    private BigDecimal todayAmount;
-    private BigDecimal monthAmount;
 } 

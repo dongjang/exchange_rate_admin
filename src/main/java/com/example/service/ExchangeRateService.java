@@ -5,20 +5,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.type.TypeReference;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
+import com.example.context.SessionContext;
 import com.example.domain.User;
 import com.example.domain.UserFavoriteCurrency;
+import com.example.dto.ExchangeRateStats;
 import com.example.dto.FavoriteCurrencyRequest;
 import com.example.dto.FavoriteCurrencyResponse;
-import com.example.dto.ExchangeRateStats;
 import com.example.dto.FavoriteCurrencyTop5;
 import com.example.mapper.ExchangeRateMapper;
 import com.example.repository.UserFavoriteCurrencyRepository;
@@ -36,7 +35,9 @@ public class ExchangeRateService {
     @Value("${exchange.api-key}")
     private String apiKey;
 
+    @Cacheable(value = "exchangeRates", key = "'currentRates'", unless = "#result == null")
     public Map<String, Object> getRates() {
+        System.out.println("🌐 외부 환율 API 호출 중... (캐시 미스)");
         String url = "https://v6.exchangerate-api.com/v6/" + apiKey + "/latest/USD";
         RestTemplate restTemplate = new RestTemplate();
         
@@ -46,7 +47,7 @@ public class ExchangeRateService {
             // KRW 기준으로 변환된 환율 데이터 구성
             Map<String, Object> response = new HashMap<>();
             
-                // 값이 Integer인 게 있어서 Double로 변환 후 계산산
+                // 값이 Integer인 게 있어서 Double로 변환 후 계산
                 @SuppressWarnings("unchecked")
                 Map<String, Object> originalRatesRaw = (Map<String, Object>) apiResponse.get("conversion_rates");
                 Map<String, Double> originalRates = new HashMap<>();
@@ -95,13 +96,17 @@ public class ExchangeRateService {
     }
 
 
-    public List<String> getFavoriteCurrencyCodes(Long userId) {
+    public List<String> getFavoriteCurrencyCodes() {
+        Long userId = SessionContext.getCurrentUserId();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
         return userFavoriteCurrencyRepository.findCurrencyCodesByUser(user);
     }
 
     public List<FavoriteCurrencyResponse> getFavoriteCurrencyResponses(Long userId) {
+
+        
+        System.out.println("userId탐2: "+SessionContext.getCurrentUserId());
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
         return userFavoriteCurrencyRepository.findByUser(user).stream()

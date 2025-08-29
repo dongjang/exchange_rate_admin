@@ -36,7 +36,6 @@ export const updateExchangeRatesAtom = atom(
     const currentRates = get(exchangeRatesAtom);
     if (Object.keys(currentRates).length === 0) {
       const response = await api.getExchangeRates();
-      console.log(response);
       if (response.success && response.rates) {
         set(exchangeRatesAtom, response.rates as { [key: string]: number });
       } else {
@@ -49,8 +48,8 @@ export const updateExchangeRatesAtom = atom(
 // 관심 환율 업데이트 atom
 export const updateFavoriteCurrenciesAtom = atom(
   null,
-  async (get: Getter, set: Setter, userId: number) => {
-    const list = await api.getFavoriteCurrencyList(userId);
+  async (get: Getter, set: Setter,) => {
+    const list = await api.getFavoriteCurrencyList();
     set(favoriteCurrenciesAtom, list);
   }
 ); 

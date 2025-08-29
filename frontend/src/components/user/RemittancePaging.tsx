@@ -36,12 +36,13 @@ const RemittancePaging: React.FC<RemittancePagingProps> = ({
       alignItems: 'center',
       padding: '1rem 1.5rem',
       background: '#fff',
-      borderRadius: '0 0 18px 18px',
+      borderRadius: '18px',
       margin: '0',
-      borderTop: '1px solid #e5e7eb',
       width: '100%',
       boxSizing: 'border-box',
-      gap: isMobile ? '1rem' : '0'
+      gap: isMobile ? '1rem' : '0',
+      boxShadow: '0 4px 24px rgba(30,41,59,0.13), 0 1.5px 6px rgba(59,130,246,0.07)',
+      border: '1.5px solid #e0e7ef'
     }}>
       <div style={{ 
         display: 'flex', 

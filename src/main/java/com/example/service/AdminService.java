@@ -1,5 +1,6 @@
 package com.example.service;
 
+import com.example.context.SessionContext;
 import com.example.domain.Admin;
 import com.example.dto.AdminRequest;
 import com.example.dto.AdminResponse;
@@ -39,22 +40,25 @@ public class AdminService {
     }
 
     @Transactional
-    public void createAdmin(AdminRequest adminRequest, Long currentAdminId) {
+    public void createAdmin(AdminRequest adminRequest) {
+
         AdminResponse adminResponse = new AdminResponse();
+        
         adminResponse.setAdminId(adminRequest.getAdminId());
         adminResponse.setPassword(passwordEncoder.encode(adminRequest.getPassword()));
         adminResponse.setName(adminRequest.getName());
         adminResponse.setEmail(adminRequest.getEmail());
         adminResponse.setRole(adminRequest.getRole());
         adminResponse.setStatus(adminRequest.getStatus());
-        adminResponse.setUpdatedAdminId(currentAdminId);
         
         adminMapper.insertAdmin(adminResponse);
     }
 
     @Transactional
-    public void updateAdmin(Long id, AdminRequest adminRequest, Long currentAdminId) {
+    public void updateAdmin(Long id, AdminRequest adminRequest) {
         AdminResponse adminResponse = new AdminResponse();
+        Long currentAdminId = SessionContext.getCurrentAdminId();
+        
         adminResponse.setId(id);
         adminResponse.setName(adminRequest.getName());
         adminResponse.setEmail(adminRequest.getEmail());
@@ -62,17 +66,17 @@ public class AdminService {
         adminResponse.setStatus(adminRequest.getStatus());
         adminResponse.setUpdatedAdminId(currentAdminId);
         
+        // 비밀번호가 입력된 경우에만 암호화하여 설정
+        if (adminRequest.getPassword() != null && !adminRequest.getPassword().trim().isEmpty()) {
+            adminResponse.setPassword(passwordEncoder.encode(adminRequest.getPassword()));
+        }
+        
         adminMapper.updateAdmin(adminResponse);
     }
 
     @Transactional
     public void updateAdminStatus(Long id, String status) {
         adminMapper.updateAdminStatus(id, status);
-    }
-
-    @Transactional
-    public void deleteAdmin(Long id) {
-        adminMapper.deleteAdmin(id);
     }
 
     public Admin findByAdminId(String adminId) {

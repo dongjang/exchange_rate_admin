@@ -21,5 +21,6 @@ public class QnaResponse {
     private Long answerUserId;
     private String answerUserName;
     private String userName;
+    private Long userId;
     private Long fileSize;
 }

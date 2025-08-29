@@ -82,7 +82,6 @@ const QnaPage: React.FC = () => {
   };
 
   const handlePageChange = (page: number) => {
-    console.log('페이지 변경:', page, '->', page - 1);
     setCurrentPage(page);
     setSearchRequest(prev => ({ ...prev, page: (page - 1) * prev.size }));
   };
@@ -103,15 +102,30 @@ const QnaPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleEdit = (qna: Qna) => {
-    setEditingQna(qna);
-    setFormData({
-      title: qna.title,
-      content: qna.content,
-      file: null,
-      removeExistingFile: false
-    });
-    setIsModalOpen(true);
+  const handleEdit = async (qna: Qna) => {
+    try {
+      // 개별 API 호출로 최신 데이터 가져오기
+      const qnaDetail = await api.getQnaById(qna.id);
+      setEditingQna(qnaDetail);
+      setFormData({
+        title: qnaDetail.title,
+        content: qnaDetail.content,
+        file: null,
+        removeExistingFile: false
+      });
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error('Q&A 상세 정보 조회 실패:', error);
+      // 에러 발생 시 기존 데이터로 모달 열기
+      setEditingQna(qna);
+      setFormData({
+        title: qna.title,
+        content: qna.content,
+        file: null,
+        removeExistingFile: false
+      });
+      setIsModalOpen(true);
+    }
   };
 
   const handleSubmit = async () => {
@@ -222,12 +236,22 @@ const QnaPage: React.FC = () => {
     }
   };
 
+  // 반응형 감지
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // 테이블 컬럼 정의
   const columns = [
     {
       key: 'title',
       label: '제목',
-      width: '3fr',
+      width: isMobile ? '4.5fr' : '4fr',
       render: (qna: Qna) => (
         <div style={{
           fontWeight: '500',
@@ -247,14 +271,14 @@ const QnaPage: React.FC = () => {
       align: 'center' as const,
       render: (qna: Qna) => (
         <span style={{
-          padding: '4px 12px',
+          padding: isMobile ? '3px 8px' : '4px 12px',
           borderRadius: '20px',
-          fontSize: '12px',
+          fontSize: isMobile ? '10px' : '12px',
           fontWeight: '600',
           backgroundColor: getStatusColor(qna.status) + '20',
           color: getStatusColor(qna.status)
         }}>
-          {getStatusLabel(qna.status)}
+          {isMobile ? (getStatusLabel(qna.status) === '대기중' ? '대기' : '완료') : getStatusLabel(qna.status)}
         </span>
       )
     },
@@ -266,9 +290,9 @@ const QnaPage: React.FC = () => {
       render: (qna: Qna) => (
         qna.fileName ? (
           <span style={{
-            padding: '4px 8px',
+            padding: isMobile ? '3px 6px' : '4px 8px',
             borderRadius: '12px',
-            fontSize: '11px',
+            fontSize: isMobile ? '9px' : '11px',
             fontWeight: '600',
             backgroundColor: '#10b981',
             color: 'white',
@@ -278,15 +302,15 @@ const QnaPage: React.FC = () => {
           </span>
         ) : (
           <span style={{
-            padding: '4px 8px',
+            padding: isMobile ? '3px 6px' : '4px 8px',
             borderRadius: '12px',
-            fontSize: '11px',
+            fontSize: isMobile ? '9px' : '11px',
             fontWeight: '600',
             backgroundColor: '#e5e7eb',
             color: '#6b7280',
             display: 'inline-block'
           }}>
-            없음
+            {isMobile ? '없음' : '없음'}
           </span>
         )
       )
@@ -294,10 +318,13 @@ const QnaPage: React.FC = () => {
     {
       key: 'createdAt',
       label: '등록일',
-      width: '1fr',
+      width: isMobile ? '1.5fr' : '1fr',
       align: 'center' as const,
       render: (qna: Qna) => (
-        <div style={{ fontSize: '14px', color: '#64748b' }}>
+        <div style={{ 
+          fontSize: isMobile ? '11px' : '14px', 
+          color: '#64748b' 
+        }}>
           {new Date(qna.createdAt).toLocaleDateString('ko-KR', {
             year: 'numeric',
             month: '2-digit',

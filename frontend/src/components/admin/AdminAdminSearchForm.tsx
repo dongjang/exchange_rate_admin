@@ -17,13 +17,15 @@ interface AdminAdminSearchFormProps {
   setSearchRequest: React.Dispatch<React.SetStateAction<AdminSearchRequest>>;
   onSearch: () => void;
   onAdd: () => void;
+  isSuperAdmin?: boolean;
 }
 
 const AdminAdminSearchForm: React.FC<AdminAdminSearchFormProps> = ({
   searchRequest,
   setSearchRequest,
   onSearch,
-  onAdd
+  onAdd,
+  isSuperAdmin = false
 }) => {
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -112,8 +114,8 @@ const AdminAdminSearchForm: React.FC<AdminAdminSearchFormProps> = ({
             }}
           >
             <option value="">전체 권한</option>
+            <option value="ADMIN">일반 관리자</option>
             <option value="SUPER_ADMIN">최고 관리자</option>
-            <option value="ADMIN">관리자</option>
           </select>
         </div>
         <div style={{ width: '140px' }}>
@@ -154,26 +156,28 @@ const AdminAdminSearchForm: React.FC<AdminAdminSearchFormProps> = ({
           <FaSearch />
           검색
         </button>
-        <button
-          onClick={onAdd}
-          style={{
-            padding: '14px 20px',
-            backgroundColor: '#10b981',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: '600',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            marginLeft: 'auto'
-          }}
-        >
-          <FaPlus />
-          등록
-        </button>
+                {isSuperAdmin && (
+          <button
+            onClick={onAdd}
+            style={{
+              padding: '14px 20px',
+              backgroundColor: '#10b981',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              marginLeft: 'auto'
+            }}
+          >
+            <FaPlus />
+            등록
+          </button>
+        )}
       </div>
     </div>
   );

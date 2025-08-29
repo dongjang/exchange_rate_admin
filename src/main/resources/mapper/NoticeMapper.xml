@@ -11,20 +11,15 @@
             n.priority,
             n.notice_start_at as noticeStartAt,
             n.notice_end_at as noticeEndAt,
-            CASE
-                WHEN n.priority = 'HIGH' 
-                     AND n.notice_start_at &lt;= NOW() 
-                     AND (n.notice_end_at IS NULL OR n.notice_end_at &gt;= NOW())
-                THEN 'HIGH'
-                ELSE 'NORMAL'
-            END as effectivePriority,
             n.view_count as viewCount,
             n.created_at as createdAt,
             n.updated_at as updatedAt,
             n.created_user_id as createdUserId,
-            u.name as createdUserName
+            ac.name as createdUserName,
+            au.name as updatedUserName
         FROM notice n
-        LEFT JOIN user u ON n.created_user_id = u.id
+        LEFT JOIN admin ac ON ac.id = n.created_user_id
+        LEFT JOIN admin au ON au.id = n.updated_user_id
         <where>
             <if test="title != null and title != ''">
                 AND n.title LIKE CONCAT('%', #{title}, '%')
@@ -64,6 +59,8 @@
     <select id="getNoticeCount" parameterType="NoticeSearchRequest" resultType="int">
         SELECT COUNT(*)
         FROM notice n
+        LEFT JOIN admin ac ON ac.id = n.created_user_id
+        LEFT JOIN admin au ON au.id = n.updated_user_id
         <where>
             <if test="title != null and title != ''">
                 AND n.title LIKE CONCAT('%', #{title}, '%')

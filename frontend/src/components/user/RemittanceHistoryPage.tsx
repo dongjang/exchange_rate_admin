@@ -20,6 +20,8 @@ interface RemittanceHistory {
   receiverCountry: string;
   amount: number;
   currency: string;
+  exchangeRate?: number;
+  convertedAmount?: number;
   status: string;
   createdAt: string;
   updatedAt: string;
@@ -221,53 +223,23 @@ function RemittanceHistoryPage() {
     setSelectedRemittance(remittance);
   };
 
-  // // 사용자 정보가 로드되지 않았을 때
-  // if (!userInfo?.id) {
-  //   return (
-  //     <div style={{ maxWidth: 1200, margin: '1.5rem auto 2.5rem auto', padding: '0 1rem' }}>
-  //       <CommonPageHeader
-  //         title="📋 송금 이력"
-  //         subtitle="송금 내역을 확인하실 수 있습니다"
-  //         gradientColors={{ from: '#3b82f6', to: '#60a5fa' }}
-  //       />
-  //       <div style={{ boxShadow: '0 4px 24px rgba(30,41,59,0.13), 0 1.5px 6px rgba(59,130,246,0.07)', borderRadius: 18, background: 'linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%)', border: '1.5px solid #e0e7ef', padding: '0 0 2.2rem 0' }}>
-  //         <div style={{ padding: '2.5rem 2.5rem 0 2.5rem' }}>
-  //           <div style={{ textAlign: 'center', color: '#64748b', padding: '2.5rem 0', fontSize: '1.1rem' }}>
-  //             사용자 정보를 불러오는 중...
-  //           </div>
-  //         </div>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-  // if (loading) {
-  // return (
-  //   <div style={{ maxWidth: 1200, margin: '1.5rem auto 2.5rem auto', padding: '0 1rem' }}>
-  //     <CommonPageHeader
-  //       title="📋 송금 이력"
-  //       subtitle="송금 내역을 확인하실 수 있습니다"
-  //       gradientColors={{ from: '#3b82f6', to: '#60a5fa' }}
-  //     />
-  //     <div style={{ boxShadow: '0 4px 24px rgba(30,41,59,0.13), 0 1.5px 6px rgba(59,130,246,0.07)', borderRadius: 18, background: 'linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%)', border: '1.5px solid #e0e7ef', padding: '0 0 2.2rem 0' }}>
-  //       <div style={{ padding: '2.5rem 2.5rem 0 2.5rem' }}>
-  //         <div style={{ textAlign: 'center', color: '#64748b', padding: '2.5rem 0', fontSize: '1.1rem' }}>
-  //           송금 이력을 불러오는 중...
-  //         </div>
-  //       </div>
-  //     </div>
-  //   </div>
-  // );
-  // }
-
   return (
-    <div style={{ maxWidth: 1200, margin: '1.5rem auto 2.5rem auto', padding: '0 1rem' }}>
+    <div style={{ maxWidth: 650, margin: '0.9rem auto 2.5rem'}}>
       <CommonPageHeader
         title="📋 송금 이력"
         subtitle="송금 내역을 확인하실 수 있습니다"
         gradientColors={{ from: '#667eea', to: '#764ba2' }}
       />
-      <div style={{ boxShadow: '0 4px 24px rgba(30,41,59,0.13), 0 1.5px 6px rgba(59,130,246,0.07)', borderRadius: 18, background: 'linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%)', border: '1.5px solid #e0e7ef', padding: '0 0 0 0', overflow: 'hidden' }}>
+      {/* 검색 폼 영역 */}
+      <div style={{ 
+        boxShadow: '0 4px 24px rgba(30,41,59,0.13), 0 1.5px 6px rgba(59,130,246,0.07)', 
+        borderRadius: 18, 
+        background: 'linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%)', 
+        border: '1.5px solid #e0e7ef', 
+        padding: '0 0 0 0', 
+        overflow: 'hidden',
+        marginBottom: '24px'
+      }}>
         <div style={{ padding: '0', overflow: 'hidden' }}>
           <RemittanceHistoryFilter 
             filters={filters}
@@ -276,32 +248,58 @@ function RemittanceHistoryPage() {
             onQuickDateRangeChange={handleQuickDateRangeChange}
             useSortSelect={true}
           />
-          {error ? (
-            <div style={{ textAlign: 'center', color: '#ef4444', padding: '2.5rem 0', fontSize: '1.1rem' }}>
-              {error}
-            </div>
-          ) : (
-            <div style={{ 
-              background: '#fff', 
-              borderTop: '1px solid #e5e7eb',
-              overflow: 'hidden'
-            }}>
-              <RemittanceList 
-                remittances={remittances}
-                onRemittanceClick={handleRemittanceClick}
-              />
-              <RemittancePaging
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalItems={totalItems}
-                pageSize={pageSize}
-                onPageChange={handlePageChange}
-                onPageSizeChange={handlePageSizeChange}
-              />
-            </div>
-          )}
         </div>
       </div>
+
+      {/* 리스트 영역 */}
+      {error ? (
+        <div style={{ 
+          boxShadow: '0 4px 24px rgba(30,41,59,0.13), 0 1.5px 6px rgba(59,130,246,0.07)', 
+          borderRadius: 18, 
+          background: 'linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%)', 
+          border: '1.5px solid #e0e7ef', 
+          padding: '2.5rem',
+          textAlign: 'center', 
+          color: '#ef4444', 
+          fontSize: '1.1rem',
+          marginBottom: '24px'
+        }}>
+          {error}
+        </div>
+      ) : (
+        <div style={{ 
+          boxShadow: '0 4px 24px rgba(30,41,59,0.13), 0 1.5px 6px rgba(59,130,246,0.07)', 
+          borderRadius: 18, 
+          background: 'linear-gradient(135deg, #f8fafc 0%, #e0e7ef 100%)', 
+          border: '1.5px solid #e0e7ef', 
+          padding: '0 0 0 0', 
+          overflow: 'hidden',
+          marginBottom: '24px'
+        }}>
+          <div style={{ 
+            background: '#fff', 
+            borderTop: '1px solid #e5e7eb',
+            overflow: 'hidden'
+          }}>
+            <RemittanceList 
+              remittances={remittances}
+              onRemittanceClick={handleRemittanceClick}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* 페이징 영역 */}
+      {!error && (
+          <RemittancePaging
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={totalItems}
+            pageSize={pageSize}
+            onPageChange={handlePageChange}
+            onPageSizeChange={handlePageSizeChange}
+          />
+      )}
       <RemittanceDetailModal
         isOpen={!!selectedRemittance}
         onClose={() => setSelectedRemittance(null)}

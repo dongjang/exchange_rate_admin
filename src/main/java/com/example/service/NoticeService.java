@@ -1,17 +1,20 @@
 package com.example.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.example.context.SessionContext;
 import com.example.domain.Notice;
 import com.example.dto.NoticeRequest;
 import com.example.dto.NoticeResponse;
 import com.example.dto.NoticeSearchRequest;
 import com.example.mapper.NoticeMapper;
 import com.example.repository.NoticeRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -35,21 +38,28 @@ public class NoticeService {
     }
     
     @Transactional
-    public Notice createNotice(NoticeRequest request, Long userId) {
+    public Notice createNotice(NoticeRequest request) {
         // 중요도가 높음이면 기존 높음 공지사항들을 보통으로 변경
         if ("HIGH".equals(request.getPriority())) {
             noticeRepository.updateHighPriorityToNormal();
         }
         
+        Long adminId = SessionContext.getCurrentAdminId();
+
         Notice notice = new Notice();
         notice.setTitle(request.getTitle());
         notice.setContent(request.getContent());
         notice.setPriority(request.getPriority());
-        notice.setNoticeStartAt(request.getNoticeStartAt());
-        notice.setNoticeEndAt(request.getNoticeEndAt());
+        // 시작일은 00:00:00, 종료일은 23:59:59로 설정
+        if (request.getNoticeStartAt() != null && !request.getNoticeStartAt().isEmpty()) {
+            notice.setNoticeStartAt(java.time.LocalDate.parse(request.getNoticeStartAt()).atStartOfDay());
+        }
+        if (request.getNoticeEndAt() != null && !request.getNoticeEndAt().isEmpty()) {
+            notice.setNoticeEndAt(java.time.LocalDate.parse(request.getNoticeEndAt()).atTime(23, 59, 59));
+        }
         notice.setStatus("ACTIVE");
         notice.setViewCount(0);
-        notice.setCreatedUserId(userId);
+        notice.setCreatedUserId(adminId);
         
         return noticeRepository.save(notice);
     }
@@ -64,13 +74,20 @@ public class NoticeService {
         Notice notice = noticeRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("공지사항을 찾을 수 없습니다."));
         
+        Long adminId = SessionContext.getCurrentAdminId();
+        
         notice.setTitle(request.getTitle());
         notice.setContent(request.getContent());
         notice.setPriority(request.getPriority());
-        notice.setNoticeStartAt(request.getNoticeStartAt());
-        notice.setNoticeEndAt(request.getNoticeEndAt());
+        // 시작일은 00:00:00, 종료일은 23:59:59로 설정
+        if (request.getNoticeStartAt() != null && !request.getNoticeStartAt().isEmpty()) {
+            notice.setNoticeStartAt(java.time.LocalDate.parse(request.getNoticeStartAt()).atStartOfDay());
+        }
+        if (request.getNoticeEndAt() != null && !request.getNoticeEndAt().isEmpty()) {
+            notice.setNoticeEndAt(java.time.LocalDate.parse(request.getNoticeEndAt()).atTime(23, 59, 59));
+        }
         notice.setStatus(request.getStatus());
-        
+        notice.setUpdatedUserId(adminId);
         return noticeRepository.save(notice);
     }
     
@@ -85,6 +102,18 @@ public class NoticeService {
     @Transactional
     public void incrementViewCount(Long noticeId) {
         noticeRepository.incrementViewCount(noticeId);
+    }
+    
+    @Transactional(readOnly = true)
+    public NoticeResponse getNoticeById(Long id) {
+        Notice notice = noticeRepository.findById(id)
+                .orElse(null);
+        
+        if (notice == null) {
+            return null;
+        }
+        
+        return convertToResponse(notice);
     }
 
     private NoticeResponse convertToResponse(Notice notice) {

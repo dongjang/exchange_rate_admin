@@ -1,4 +1,4 @@
-package com.example.controller;
+package com.example.controller.admin;
 
 import com.example.dto.DefaultRemittanceLimitRequest;
 import com.example.dto.DefaultRemittanceLimitResponse;
@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/admin/default-remittance-limit")
 @RequiredArgsConstructor
-public class DefaultRemittanceLimitController {
+public class AdminDefaultRemittanceLimitController {
     
     private final DefaultRemittanceLimitService defaultRemittanceLimitService;
     

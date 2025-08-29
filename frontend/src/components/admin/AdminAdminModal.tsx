@@ -1,5 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useAtom, useSetAtom } from 'jotai';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
+import { adminInfoAtom, setAdminAuthAtom } from '../../store/adminStore';
 import './AdminAdminModal.css';
 import Swal from 'sweetalert2';
 
@@ -11,6 +14,9 @@ interface AdminAdminModalProps {
 }
 
 function AdminAdminModal({ isOpen, onClose, adminId, onAdminUpdated }: AdminAdminModalProps) {
+  const [adminInfo] = useAtom(adminInfoAtom);
+  const [, setAdminAuthState] = useAtom(setAdminAuthAtom);
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     adminId: '',
     password: '',
@@ -33,6 +39,9 @@ function AdminAdminModal({ isOpen, onClose, adminId, onAdminUpdated }: AdminAdmi
     hasUpper: false,
     hasLower: false
   });
+
+  // 현재 로그인한 관리자가 본인 정보를 수정하는지 확인
+  const isEditingSelf = adminId === adminInfo?.id;
 
   // 비밀번호 유효성 검사 함수
   const validatePassword = (password: string) => {
@@ -197,17 +206,45 @@ function AdminAdminModal({ isOpen, onClose, adminId, onAdminUpdated }: AdminAdmi
         await api.createAdmin(formData);
       }
       
-      handleClose();
-      onAdminUpdated();
-      await Swal.fire({
-        icon: 'success',
-        title: '완료',
-        text: isEditMode ? '관리자 정보가 성공적으로 수정되었습니다.' : '관리자가 성공적으로 등록되었습니다.',
-        confirmButtonColor: '#3b82f6',
-        customClass: {
-          popup: 'swal2-popup-high-zindex'
+      // 비밀번호가 변경되었고, 본인 정보를 수정한 경우 로그아웃 처리
+      if (isEditMode && isEditingSelf && formData.password) {
+        await Swal.fire({
+          icon: 'info',
+          title: '비밀번호 변경 완료',
+          text: '비밀번호가 변경되었습니다. 다시 로그인해 주세요.',
+          confirmButtonColor: '#3b82f6',
+          customClass: {
+            popup: 'swal2-popup-high-zindex'
+          }
+        });
+        
+        // 로그아웃 처리
+        try {
+          await api.adminLogout();
+          setAdminAuthState({
+            isAuthenticated: false,
+            isLoading: false,
+          });
+          navigate('/admin');
+        } catch (error) {
+          console.error('Logout failed:', error);
         }
-      });
+      } else {
+        // 일반적인 성공 메시지 표시
+        await Swal.fire({
+          icon: 'success',
+          title: '완료',
+          text: isEditMode ? '관리자 정보가 성공적으로 수정되었습니다.' : '관리자가 성공적으로 등록되었습니다.',
+          confirmButtonColor: '#3b82f6',
+          customClass: {
+            popup: 'swal2-popup-high-zindex'
+          }
+        });
+        
+        // 메시지 확인 후 모달 닫기와 콜백 실행
+        handleClose();
+        onAdminUpdated();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to save admin');
       Swal.fire({
@@ -312,6 +349,7 @@ function AdminAdminModal({ isOpen, onClose, adminId, onAdminUpdated }: AdminAdmi
                 className="admin-modal-input"
                 autoComplete='off'
                 style={{ flex: 1 }}
+                maxLength={20}
               />
                              {!isEditMode && (
                  <button
@@ -359,6 +397,7 @@ function AdminAdminModal({ isOpen, onClose, adminId, onAdminUpdated }: AdminAdmi
               required={!isEditMode}
               className="admin-modal-input"
               autoComplete='off'
+              maxLength={10}
             />
                          {formData.password && (
                <div style={{ marginTop: '8px', fontSize: '12px' }}>
@@ -394,6 +433,7 @@ function AdminAdminModal({ isOpen, onClose, adminId, onAdminUpdated }: AdminAdmi
                  required={formData.password ? true : false}
                  className="admin-modal-input"
                  autoComplete='off'
+                 maxLength={10}
                />
                {confirmPassword && (
                  <div style={{
@@ -437,15 +477,16 @@ function AdminAdminModal({ isOpen, onClose, adminId, onAdminUpdated }: AdminAdmi
 
           <div className="form-group">
             <label htmlFor="role">권한 *</label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              required
-              className="admin-modal-input"
-            >
-              <option value="ADMIN">관리자</option>
+                         <select
+               id="role"
+               name="role"
+               value={formData.role}
+               onChange={handleChange}
+               required
+               className="admin-modal-input"
+               disabled={adminId === adminInfo?.id && adminInfo?.role !== 'SUPER_ADMIN'}
+             >
+              <option value="ADMIN">일반 관리자</option>
               <option value="SUPER_ADMIN">최고 관리자</option>
             </select>
           </div>
@@ -453,14 +494,15 @@ function AdminAdminModal({ isOpen, onClose, adminId, onAdminUpdated }: AdminAdmi
           {isEditMode && (
             <div className="form-group">
               <label htmlFor="status">상태 *</label>
-              <select
-                id="status"
-                name="status"
-                value={formData.status}
-                onChange={handleChange}
-                required
-                className="admin-modal-input"
-              >
+                             <select
+                 id="status"
+                 name="status"
+                 value={formData.status}
+                 onChange={handleChange}
+                 required
+                 className="admin-modal-input"
+                 disabled={adminId === adminInfo?.id && adminInfo?.role !== 'SUPER_ADMIN'}
+               >
                 <option value="ACTIVE">활성</option>
                 <option value="INACTIVE">비활성</option>
               </select>

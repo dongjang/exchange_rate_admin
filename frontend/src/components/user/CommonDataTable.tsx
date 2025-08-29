@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 
 interface Column {
   key: string;
@@ -23,6 +23,15 @@ const CommonDataTable: React.FC<CommonDataTableProps> = ({
   onRowClick,
   isLoading = false
 }) => {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   const getColumnStyle = (column: Column) => ({
     textAlign: column.align || 'left' as const,
     width: column.width || 'auto'
@@ -31,21 +40,21 @@ const CommonDataTable: React.FC<CommonDataTableProps> = ({
   return (
     <div style={{
       background: 'white',
-      borderRadius: '16px',
-      padding: '24px',
+      borderRadius: isMobile ? '12px' : '16px',
+      padding: isMobile ? '16px' : '24px',
       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-      marginBottom: '24px'
+      marginBottom: isMobile ? '16px' : '24px'
     }}>
       {/* 헤더 */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: columns.map(col => col.width || '1fr').join(' '),
-        gap: '16px',
-        padding: '16px 0',
+        gap: isMobile ? '12px' : '16px',
+        padding: isMobile ? '12px 0' : '16px 0',
         borderBottom: '2px solid #e2e8f0',
         fontWeight: '600',
         color: '#374151',
-        fontSize: '14px'
+        fontSize: isMobile ? '12px' : '14px'
       }}>
         {columns.map((column) => (
           <div key={column.key} style={getColumnStyle(column)}>
@@ -58,18 +67,18 @@ const CommonDataTable: React.FC<CommonDataTableProps> = ({
       {isLoading ? (
         <div style={{
           textAlign: 'center',
-          padding: '60px 20px',
+          padding: isMobile ? '40px 16px' : '60px 20px',
           color: '#6b7280',
-          fontSize: '16px'
+          fontSize: isMobile ? '14px' : '16px'
         }}>
           로딩 중...
         </div>
       ) : data.length === 0 ? (
         <div style={{
           textAlign: 'center',
-          padding: '60px 20px',
+          padding: isMobile ? '40px 16px' : '60px 20px',
           color: '#6b7280',
-          fontSize: '16px'
+          fontSize: isMobile ? '14px' : '16px'
         }}>
           {emptyMessage}
         </div>
@@ -80,12 +89,13 @@ const CommonDataTable: React.FC<CommonDataTableProps> = ({
             style={{
               display: 'grid',
               gridTemplateColumns: columns.map(col => col.width || '1fr').join(' '),
-              gap: '16px',
-              padding: '16px 0',
+              gap: isMobile ? '12px' : '16px',
+              padding: isMobile ? '12px 0' : '16px 0',
               borderBottom: '1px solid #f1f5f9',
               alignItems: 'center',
               cursor: onRowClick ? 'pointer' : 'default',
-              transition: 'background-color 0.2s ease'
+              transition: 'background-color 0.2s ease',
+              fontSize: isMobile ? '12px' : '14px'
             }}
             onMouseEnter={(e) => {
               if (onRowClick) {

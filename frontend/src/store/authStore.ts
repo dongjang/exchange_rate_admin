@@ -2,13 +2,13 @@ import { atom } from 'jotai';
 import type { AuthUser } from '../services/api';
 
 export interface AuthState {
-  isAuthenticated: boolean;
+  isAuthenticated: boolean | 'unknown';
   isLoading: boolean;
 }
 
 export const authAtom = atom<AuthState>({
-  isAuthenticated: false,
-  isLoading: true,
+  isAuthenticated: 'unknown', // 초기 상태를 'unknown'으로 설정
+  isLoading: false,
 });
 
 export const setAuthAtom = atom(

@@ -14,6 +14,8 @@
             rb.name as receiverBankName,
             r.receiver_name as receiverName,
             r.amount,
+            r.exchange_rate as exchangeRate,
+            r.converted_amount as convertedAmount,
             CASE
                 WHEN r.status = 'COMPLETED' THEN '완료'
                 WHEN r.status = 'WAITTING' THEN '대기'
@@ -105,28 +107,58 @@
         </where>
     </select>
 
-    <select id="selectUserRemittanceLimit" resultType="UserRemittanceLimitResponse">
-        <!-- 사용자 송금 한도 조회 (없으면 기본 한도 사용) -->
-        SELECT 
-            IFNULL(ul.daily_limit, dl.daily_limit) as dailyLimit,
-            IFNULL(ul.monthly_limit, dl.monthly_limit) as monthlyLimit,
-            IFNULL(ul.single_limit, dl.single_limit) as singleLimit,
-            CASE 
-                WHEN ul.id IS NOT NULL THEN 'USER_LIMIT'
-                ELSE 'DEFAULT_LIMIT'
-            END as limitType
-        FROM user u
-        LEFT JOIN user_remittance_limit ul ON u.id = ul.user_id
-        LEFT JOIN default_remittance_limit dl ON dl.is_active = true
-        WHERE u.id = #{userId}
-    </select>
-
     <select id="existsUserRemittanceLimit" resultType="boolean">
         <!-- 사용자 송금 한도 존재 여부 확인 -->
         SELECT EXISTS(
             SELECT 1 FROM user_remittance_limit 
             WHERE user_id = #{userId}
         )
+    </select>
+
+    <select id="getDailyLimit" resultType="BigDecimal">
+        <!-- 일일 한도 체크 -->
+        SELECT IFNULL(url.daily_limit, def.daily_limit) - IFNULL(SUM(r.amount), 0) AS daily_limit
+        FROM default_remittance_limit def
+        LEFT JOIN user_remittance_limit url ON url.user_id = #{userId}
+        LEFT JOIN remittance r ON r.user_id = #{userId}
+            AND r.created_at BETWEEN 
+            CASE 
+                WHEN DATE(url.updated_at) = CURDATE() THEN url.updated_at
+                ELSE CURDATE()
+            END
+            AND CONCAT(CURDATE(), ' 23:59:59')
+        WHERE def.is_active = true
+    </select>
+
+    <select id="getMonthlyLimit" resultType="BigDecimal">
+        <!-- 월 한도 체크 -->
+        SELECT IFNULL(url.monthly_limit, def.monthly_limit) - IFNULL(SUM(r.amount), 0) AS monthly_limit
+        FROM default_remittance_limit def
+        LEFT JOIN user_remittance_limit url ON url.user_id = #{userId}
+        LEFT JOIN remittance r ON r.user_id = #{userId}
+            AND r.created_at BETWEEN 
+            CASE 
+                WHEN DATE_FORMAT(url.updated_at, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')
+                THEN url.updated_at
+                ELSE DATE_FORMAT(CURDATE(), '%Y-%m-01')
+            END
+            AND CONCAT(LAST_DAY(CURDATE()), ' 23:59:59')
+        WHERE def.is_active = true
+    </select>
+
+    <select id="getUserLimits" resultType="UserLimitsResponse">
+        <!-- 사용자별 한도 조회 -->
+        SELECT 
+            IFNULL(url.daily_limit, def.daily_limit) AS dailyLimit,
+            IFNULL(url.monthly_limit, def.monthly_limit) AS monthlyLimit,
+            IFNULL(url.single_limit, def.single_limit) AS singleLimit,
+            CASE
+                WHEN url.daily_limit IS NULL THEN 'DEFAULT_LIMIT'
+                ELSE 'USER_LIMIT'
+            END AS limitType
+        FROM default_remittance_limit def
+        LEFT JOIN user_remittance_limit url ON url.user_id = #{userId}
+        WHERE def.is_active = true
     </select>
 
 </mapper> 

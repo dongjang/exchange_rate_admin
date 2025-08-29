@@ -1,34 +1,31 @@
 import { useEffect } from 'react';
-import { useAtom } from 'jotai';
-import { setAuthAtom } from '../../store/authStore';
-import { api } from '../../services/api';
+import { useNavigate } from 'react-router-dom';
 
-const AuthSuccess =()=> {
-  const [, setAuthState] = useAtom(setAuthAtom);
+interface AuthSuccessProps {
+  handleUserAuthSuccess: () => Promise<boolean>;
+}
 
+const AuthSuccess = ({ handleUserAuthSuccess }: AuthSuccessProps) => {
+  const navigate = useNavigate();
+  
   const handleAuthSuccess = async () => {
     try {
-      const successResult = await api.authSuccess();
-
-      if (successResult.success && successResult.user) {
-        setAuthState({
-          isAuthenticated: true,
-          user: successResult.user,
-          isLoading: false,
-        });
-        window.location.href = '/';
+      const success = await handleUserAuthSuccess();
+      if (success) {
+        navigate('/');
       } else {
-        window.location.href = '/';
+        navigate('/');
       }
     } catch (error) {
       console.error('Auth success handling failed:', error);
-      window.location.href = '/';
+      navigate('/');
     }
   };
-
+  
   useEffect(() => {
     handleAuthSuccess();
-  }, [setAuthState]);
+  }, [handleUserAuthSuccess]);
+  
 
   return (
     <div className="auth-success">

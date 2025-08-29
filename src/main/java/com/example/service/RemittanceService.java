@@ -45,6 +45,14 @@ public class RemittanceService {
             throw new RuntimeException("LIMIT_EXCEEDED:" + limitCheck.getExceededType() + ":" + limitCheck.getMessage());
         }
 
+        // 환율과 변환된 금액이 설정되지 않은 경우 기본값 설정
+        if (remittance.getExchangeRate() == null) {
+            remittance.setExchangeRate(BigDecimal.ZERO);
+        }
+        if (remittance.getConvertedAmount() == null) {
+            remittance.setConvertedAmount(BigDecimal.ZERO);
+        }
+
         remittance.setCreatedAt(LocalDateTime.now());
         return remittanceRepository.save(remittance);
     }
@@ -57,10 +65,7 @@ public class RemittanceService {
         BigDecimal availableDailyLimit = userLimit.getDailyLimit();
         BigDecimal availableMonthlyLimit = userLimit.getMonthlyLimit();
         BigDecimal originalDailyLimit = userLimit.getOriginalDailyLimit();
-        BigDecimal originalMonthlyLimit = userLimit.getOriginalMonthlyLimit();
-        BigDecimal todayAmount = userLimit.getTodayAmount();
-        BigDecimal monthAmount = userLimit.getMonthAmount();
-        
+        BigDecimal originalMonthlyLimit = userLimit.getOriginalMonthlyLimit();        
         boolean dailyExceeded = amount.compareTo(availableDailyLimit) > 0;
         boolean monthlyExceeded = amount.compareTo(availableMonthlyLimit) > 0;
         
@@ -75,8 +80,6 @@ public class RemittanceService {
                 .monthlyLimit(availableMonthlyLimit)
                 .dailyExceededAmount(amount.subtract(availableDailyLimit))
                 .monthlyExceededAmount(amount.subtract(availableMonthlyLimit))
-                .todayAmount(todayAmount)
-                .monthAmount(monthAmount)
                 .build();
         } else if (dailyExceeded) {
             return RemittanceLimitCheckResponse.builder()
@@ -89,8 +92,6 @@ public class RemittanceService {
                 .monthlyLimit(availableMonthlyLimit)
                 .dailyExceededAmount(amount.subtract(availableDailyLimit))
                 .monthlyExceededAmount(BigDecimal.ZERO)
-                .todayAmount(todayAmount)
-                .monthAmount(monthAmount)
                 .build();
         } else if (monthlyExceeded) {
             return RemittanceLimitCheckResponse.builder()
@@ -103,8 +104,6 @@ public class RemittanceService {
                 .monthlyLimit(availableMonthlyLimit)
                 .dailyExceededAmount(BigDecimal.ZERO)
                 .monthlyExceededAmount(amount.subtract(availableMonthlyLimit))
-                .todayAmount(todayAmount)
-                .monthAmount(monthAmount)
                 .build();
         } else {
             return RemittanceLimitCheckResponse.builder()
@@ -113,8 +112,6 @@ public class RemittanceService {
                 .requestedAmount(amount)
                 .dailyLimit(availableDailyLimit)
                 .monthlyLimit(availableMonthlyLimit)
-                .todayAmount(todayAmount)
-                .monthAmount(monthAmount)
                 .build();
         }
     }
@@ -245,8 +242,10 @@ public class RemittanceService {
                 .receiverAccount((String) result[5])
                 .receiverName((String) result[7])
                 .amount((BigDecimal) result[8])
-                .status((String) result[9])
-                .createdAt((LocalDateTime) result[10])
+                .exchangeRate((BigDecimal) result[9])
+                .convertedAmount((BigDecimal) result[10])
+                .status((String) result[11])
+                .createdAt((LocalDateTime) result[12])
                 .build())
             .collect(Collectors.toList());
         
@@ -363,8 +362,10 @@ public class RemittanceService {
                 .receiverAccount((String) result[5])
                 .receiverName((String) result[7])
                 .amount((BigDecimal) result[8])
-                .status((String) result[9])
-                .createdAt((LocalDateTime) result[10])
+                .exchangeRate((BigDecimal) result[9])
+                .convertedAmount((BigDecimal) result[10])
+                .status((String) result[11])
+                .createdAt((LocalDateTime) result[12])
                 .build())
             .collect(Collectors.toList());
             

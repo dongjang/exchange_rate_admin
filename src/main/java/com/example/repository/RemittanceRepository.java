@@ -24,6 +24,8 @@ public interface RemittanceRepository extends JpaRepository<Remittance, Long>, J
            "rb.name as receiverBank, " +
            "r.receiverName, " +
            "r.amount, " +
+           "r.exchangeRate, " +
+           "r.convertedAmount, " +
            "r.status, " +
            "r.createdAt " +
            "FROM Remittance r " +
@@ -64,6 +66,8 @@ public interface RemittanceRepository extends JpaRepository<Remittance, Long>, J
            "rb.name as receiverBank, " +
            "r.receiverName, " +
            "r.amount, " +
+           "r.exchangeRate, " +
+           "r.convertedAmount, " +
            "r.status, " +
            "r.createdAt " +
            "FROM Remittance r " +

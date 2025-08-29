@@ -177,14 +177,12 @@
 }
 
 .rates-list {
-  display: flex;
   flex-direction: column;
   gap: 0;
   padding: 24px;
 }
 
 .rate-item {
-  display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px;
@@ -209,18 +207,22 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  align-items: flex-end;
+  text-align: right;
 }
 
 .currency {
   font-weight: 600;
   color: #374151;
   font-size: 14px;
+  text-align: right;
 }
 
 .rate {
   font-size: 16px;
   font-weight: 700;
   color: #1f2937;
+  text-align: right;
 }
 
 .favorite-rates-grid {
@@ -231,7 +233,6 @@
 }
 
 .favorite-rate-item {
-  display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 16px;
@@ -250,14 +251,18 @@
 
 .favorite-rate-item .rate-info {
   color: #374151;
+  align-items: flex-end;
+  text-align: right;
 }
 
 .favorite-rate-item .currency {
   color: #374151;
+  text-align: right;
 }
 
 .favorite-rate-item .rate {
   color: #1f2937;
+  text-align: right;
 }
 
 .remittance-list {
@@ -270,13 +275,14 @@
 .remittance-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   padding: 16px;
   background: #f8fafc;
   border-radius: 12px;
   transition: all 0.2s;
   border: 1px solid #e0e7ef;
   margin-bottom: 8px;
+  position: relative;
 }
 
 .remittance-item:last-child {
@@ -305,6 +311,30 @@
   justify-content: space-between;
   align-items: center;
   gap: 8px;
+}
+
+.amount-status-row {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.amount-status-row .amount {
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 16px;
+  text-align: right;
+}
+
+.receiver-currency-row .amount {
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 16px;
+  text-align: right;
+  margin-left: auto;
+  min-width: fit-content;
 }
 
 .receiver-name {
@@ -342,6 +372,27 @@
   background: rgba(245, 158, 11, 0.1);
   color: #d97706;
   border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.remittance-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.remittance-right .amount {
+  font-weight: 700;
+  color: #1f2937;
+  font-size: 16px;
+  text-align: right;
+}
+
+.remittance-right .status {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
 }
 
 .info-grid {
@@ -390,6 +441,7 @@
   font-weight: 600;
   color: #374151;
   font-size: 14px;
+  text-align: left;
 }
 
 .title.important {

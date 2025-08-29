@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.example.context.SessionContext;
+import com.example.domain.Admin;
 import com.example.domain.File;
 import com.example.domain.Qna;
 import com.example.domain.User;
@@ -15,6 +17,7 @@ import com.example.dto.QnaResponse;
 import com.example.dto.QnaSearchRequest;
 import com.example.dto.QnaSearchResult;
 import com.example.mapper.QnaMapper;
+import com.example.repository.AdminRepository;
 import com.example.repository.QnaRepository;
 import com.example.repository.UserRepository;
 import com.example.dto.QnaAnswerRequest;
@@ -29,10 +32,12 @@ public class QnaService {
     private final UserRepository userRepository;
     private final FileService fileService;
     private final QnaMapper qnaMapper;
+    private final AdminRepository adminRepository;
     
     @Transactional(readOnly = true)
-    public QnaSearchResult searchQna(QnaSearchRequest request, Long userId) {
+    public QnaSearchResult searchQna(QnaSearchRequest request) {
         // 검색 조건 설정
+        Long userId = SessionContext.getCurrentUserId();
         request.setUserId(userId);
         request.setExcludeCanceled(true);
                 
@@ -52,7 +57,8 @@ public class QnaService {
     }
     
     @Transactional
-    public QnaResponse createQna(QnaRequest request, Long userId) {
+    public QnaResponse createQna(QnaRequest request) {
+        Long userId = SessionContext.getCurrentUserId();
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
         
@@ -78,14 +84,11 @@ public class QnaService {
     }
     
     @Transactional
-    public QnaResponse updateQna(Long qnaId, QnaRequest request, Long userId) {
+    public QnaResponse updateQna(Long qnaId, QnaRequest request) {
         Qna qna = qnaRepository.findById(qnaId)
                 .orElseThrow(() -> new RuntimeException("Q&A를 찾을 수 없습니다."));
         
-        // 본인의 Q&A만 수정 가능
-        if (!qna.getUser().getId().equals(userId)) {
-            throw new RuntimeException("본인의 Q&A만 수정할 수 있습니다.");
-        }
+        Long userId = SessionContext.getCurrentUserId();
         
         // PENDING 상태가 아니면 수정 불가
         if (qna.getStatus() != Qna.QnaStatus.PENDING) {
@@ -122,15 +125,11 @@ public class QnaService {
     }
     
     @Transactional
-    public void cancelQna(Long qnaId, Long userId) {
+    public void cancelQna(Long qnaId) {
+
         Qna qna = qnaRepository.findById(qnaId)
                 .orElseThrow(() -> new RuntimeException("Q&A를 찾을 수 없습니다."));
-        
-        // 본인의 Q&A만 취소 가능
-        if (!qna.getUser().getId().equals(userId)) {
-            throw new RuntimeException("본인의 Q&A만 취소할 수 있습니다.");
-        }
-        
+                
         // PENDING 상태가 아니면 취소 불가
         if (qna.getStatus() != Qna.QnaStatus.PENDING) {
             throw new RuntimeException("답변이 완료된 Q&A는 취소할 수 없습니다.");
@@ -140,7 +139,7 @@ public class QnaService {
     }
     
     @Transactional
-    public QnaResponse answerQna(Long qnaId, QnaAnswerRequest request, Long answerUserId) {
+    public QnaResponse answerQna(Long qnaId, QnaAnswerRequest request) {
         Qna qna = qnaRepository.findById(qnaId)
                 .orElseThrow(() -> new RuntimeException("Q&A를 찾을 수 없습니다."));
         
@@ -149,11 +148,10 @@ public class QnaService {
             throw new RuntimeException("이미 답변이 완료된 Q&A입니다.");
         }
         
-        User answerUser = userRepository.findById(answerUserId)
-                .orElseThrow(() -> new RuntimeException("답변자를 찾을 수 없습니다."));
+        Long answerUserId = SessionContext.getCurrentAdminId();
         
         qna.setAnswerContent(request.getAnswerContent());
-        qna.setAnswerUser(answerUser);
+        qna.setAnswerUserId(answerUserId);
         qna.setStatus(Qna.QnaStatus.ANSWERED);
         qna.setAnsweredAt(LocalDateTime.now());
         
@@ -172,14 +170,21 @@ public class QnaService {
         response.setAnsweredAt(qna.getAnsweredAt());
         response.setAnswerContent(qna.getAnswerContent());
         
+        if (qna.getUser() != null) {
+            response.setUserId(qna.getUser().getId());
+            response.setUserName(qna.getUser().getName());
+        }
+        
         if (qna.getFile() != null) {
             response.setFileId(qna.getFile().getId());
             response.setFileName(qna.getFile().getOriginalName());
         }
         
-        if (qna.getAnswerUser() != null) {
-            response.setAnswerUserId(qna.getAnswerUser().getId());
-            response.setAnswerUserName(qna.getAnswerUser().getName());
+        if (qna.getAnswerUserId() != null) {
+            response.setAnswerUserId(qna.getAnswerUserId());
+            Admin answerUser = adminRepository.findById(qna.getAnswerUserId())
+                    .orElseThrow(() -> new RuntimeException("답변자를 찾을 수 없습니다."));
+            response.setAnswerUserName(answerUser.getName());
         }
         
         return response;
@@ -188,5 +193,17 @@ public class QnaService {
     @Transactional(readOnly = true)
     public int getPendingCount() {
         return qnaRepository.countByStatus(Qna.QnaStatus.PENDING);
+    }
+    
+    @Transactional(readOnly = true)
+    public QnaResponse getQnaById(Long qnaId) {
+        Qna qna = qnaRepository.findById(qnaId)
+                .orElse(null);
+        
+        if (qna == null) {
+            return null;
+        }
+        
+        return convertToResponse(qna);
     }
 } 

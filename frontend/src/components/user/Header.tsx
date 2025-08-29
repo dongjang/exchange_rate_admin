@@ -4,7 +4,8 @@ import Swal from 'sweetalert2';
 import { api } from '../../services/api';
 import type { User } from '../../store/userStore';
 import { selectedUserAtom } from '../../store/userStore';
-import { useSetAtom } from 'jotai';
+import { useSetAtom, useAtom } from 'jotai';
+import { setAuthAtom } from '../../store/authStore';
 import './Header.css';
 import { Link } from 'react-router-dom';
 import { UserModal } from './UserModal';
@@ -17,6 +18,7 @@ interface HeaderProps {
 function Header({ user, onUserUpdated }: HeaderProps) {
   const navigate = useNavigate();
   const setSelectedUser = useSetAtom(selectedUserAtom);
+  const [, setAuthState] = useAtom(setAuthAtom);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMenuAnimating, setIsMenuAnimating] = useState(false);
@@ -35,18 +37,31 @@ function Header({ user, onUserUpdated }: HeaderProps) {
       showCancelButton: true,
       confirmButtonText: '로그아웃',
       cancelButtonText: '취소',
-      confirmButtonColor: '#3b82f6',
+      confirmButtonColor: '#dc3545',
       cancelButtonColor: '#d1d5db',
     });
     if (!result.isConfirmed) return;
     try {
+      // 사용자 로그아웃 (Redis 세션 + OAuth2 세션 정리)
       await api.logout();
-      // 로그아웃 후 인증 상태 초기화를 위해 페이지 새로고침
-      window.location.href = '/';
+      
+      // 사용자 인증 상태 초기화
+      setAuthState({ isAuthenticated: false, isLoading: false });
+      
+      // 구글 관련 쿠키 삭제 (현재 도메인만)
+      document.cookie.split(";").forEach(function(c) { 
+        const cookie = c.trim();
+        if (cookie.startsWith('JSESSIONID') || cookie.includes('google') || cookie.includes('oauth')) {
+          document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"); 
+        }
+      });
+      
+      navigate('/');
     } catch (error) {
       console.error('Logout failed:', error);
       // 에러가 발생해도 로그아웃 처리
-      window.location.href = '/';
+      setAuthState({ isAuthenticated: false, isLoading: false });
+      navigate('/');
     }
   };
 
@@ -59,7 +74,7 @@ function Header({ user, onUserUpdated }: HeaderProps) {
       pictureUrl: user.pictureUrl,
       status: user.status,
     });
-    console.log(user);
+
     setIsModalOpen(true);
   };
 
@@ -127,8 +142,8 @@ function Header({ user, onUserUpdated }: HeaderProps) {
         {isMobile ? (
           <>
             {/* 모바일 레이아웃 */}
-            <div className="mobile-header-left">
-              <Link to="/" className="home-button-mobile" onClick={handleMenuClose}>
+            <div className="user-mobile-header-left">
+              <Link to="/" className="home-button-mobile" onClick={isMenuOpen ? handleMenuClose : undefined}>
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                   <polyline points="9,22 9,12 15,12 15,22"/>
@@ -136,7 +151,7 @@ function Header({ user, onUserUpdated }: HeaderProps) {
               </Link>
             </div>
             
-            <div className="mobile-header-center">
+            <div className="user-mobile-header-center">
               {user && (
                 <div className="user-info-mobile" onClick={handleUserNameClick}>
                   {user.pictureUrl && (
@@ -151,16 +166,17 @@ function Header({ user, onUserUpdated }: HeaderProps) {
                   </span>
                 </div>
               )}
-            </div>
-            
-            <div className="mobile-header-right">
               <button onClick={handleLogout} className="logout-button-mobile">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                   <polyline points="16,17 21,12 16,7"/>
                   <line x1="21" y1="12" x2="9" y2="12"/>
                 </svg>
+                <span>로그아웃</span>
               </button>
+            </div>
+            
+            <div className="user-mobile-header-right">
               <button className={`mobile-menu-btn ${isMenuOpen ? 'close' : ''}`} onClick={handleMenuToggle}>
                 <span className="mobile-menu-icon" />
               </button>
@@ -170,14 +186,13 @@ function Header({ user, onUserUpdated }: HeaderProps) {
           <>
             {/* 데스크톱 레이아웃 */}
             <div className="header-left">
-              <Link to="/" className="home-button" onClick={handleMenuClose}>
+              <Link to="/" className="home-button" onClick={isMenuOpen ? handleMenuClose : undefined}>
                 <div className="home-icon">
                   <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                     <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
                     <polyline points="9,22 9,12 15,12 15,22"/>
                   </svg>
                 </div>
-                <span className="home-text">홈</span>
               </Link>
             </div>
 
@@ -224,21 +239,20 @@ function Header({ user, onUserUpdated }: HeaderProps) {
 
             <div className="header-right">
               {user && (
-                <div className="user-section" onClick={handleUserNameClick}>
+                <div className="desktop-user-section" onClick={handleUserNameClick}>
                   {user.pictureUrl && (
                     <img
                       src={user.pictureUrl}
                       alt={user.name || user.email}
-                      className="user-avatar"
+                      className="desktop-user-avatar"
                     />
                   )}
-                  <div className="user-info">
-                    <span className="user-name">{user.name || user.email}</span>
-                    <span className="user-role">사용자</span>
+                  <div className="desktop-user-info">
+                    <span className="desktop-user-name">{user.name || user.email}</span>
                   </div>
                 </div>
               )}
-              <button onClick={handleLogout} className="logout-button">
+              <button onClick={handleLogout} className="desktop-logout-button">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                   <polyline points="16,17 21,12 16,7"/>

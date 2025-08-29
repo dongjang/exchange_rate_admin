@@ -16,8 +16,6 @@ interface RemittanceLimit {
   // 추가된 필드들
   originalDailyLimit?: number;
   originalMonthlyLimit?: number;
-  todayAmount?: number;
-  monthAmount?: number;
 }
 
 interface RemittanceLimitRequest {
@@ -162,43 +160,52 @@ const RemittanceLimitDisplay: React.FC<RemittanceLimitDisplayProps> = ({ refresh
             </div>
           </div>
           
-          {/* 새로고침 버튼 */}
-          
-          
-          {/* 기본 한도 사용자이고 대기중인 요청이 없을 때만 신청 버튼 표시 */}
-          {(limit.limitType === 'DEFAULT_LIMIT' && !pendingRequest) && (
-            <button
-              onClick={() => setShowLimitModal(true)}
-              className="remittance-limit-upgrade-btn"
-            >
-              <FaEdit style={{ fontSize: '12px' }} />
-              한도 변경 신청
-            </button>
-          )}
-          
-          {/* 개인 한도 사용자이거나 대기중인 요청이 있을 때 상세 버튼 표시 */}
-          {(limit.limitType === 'USER_LIMIT' || pendingRequest) && (
-            <div style={{ display: 'flex', gap: '8px' }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>          
+            {/* 기본 한도 사용자이고 대기중인 요청이 없을 때만 신청 버튼 표시 */}
+            {(limit.limitType === 'DEFAULT_LIMIT' && !pendingRequest) && (
               <button
-                onClick={() => setShowHistoryModal(true)}
-                className="remittance-limit-status-btn"
+                onClick={() => setShowLimitModal(true)}
+                className="remittance-limit-upgrade-btn"
               >
-                <FaEye style={{ fontSize: '12px' }} />
-                한도 변경 신청 상세
+                <FaEdit style={{ fontSize: '12px' }} />
+                한도 변경 신청
               </button>
-                           
-              {/* 승인된 사용자에게만 재신청 버튼 표시 */}
-              {limit.limitType === 'USER_LIMIT' && !pendingRequest && (
+            )}
+            
+            {/* 개인 한도 사용자이거나 대기중인 요청이 있을 때 상세 버튼 표시 */}
+            {(limit.limitType === 'USER_LIMIT' || pendingRequest) && (
+              <>
                 <button
-                  onClick={() => setShowLimitModal(true)}
-                  className="remittance-limit-rerequest-btn"
+                  onClick={() => setShowHistoryModal(true)}
+                  className="remittance-limit-status-btn"
                 >
-                  <FaEdit style={{ fontSize: '12px' }} />
-                  한도 재변경 신청
+                  <FaEye style={{ fontSize: '12px' }} />
+                  한도 변경 신청 상세
                 </button>
-              )}
-            </div>
-          )}
+                             
+                {/* 승인된 사용자에게만 재신청 버튼 표시 */}
+                {limit.limitType === 'USER_LIMIT' && !pendingRequest && (
+                  <button
+                    onClick={() => setShowLimitModal(true)}
+                    className="remittance-limit-rerequest-btn"
+                  >
+                    <FaEdit style={{ fontSize: '12px' }} />
+                    한도 재변경 신청
+                  </button>
+                )}
+              </>
+            )}
+                         {/* 새로고침 버튼 */}
+            <button
+              onClick={fetchData}
+              className="remittance-limit-refresh-btn"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M23 4v6h-6M1 20v-6h6M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/>
+              </svg>
+              새로고침
+            </button>
+          </div>
         </div>
         
         <div className="remittance-limit-cards">
@@ -209,71 +216,32 @@ const RemittanceLimitDisplay: React.FC<RemittanceLimitDisplayProps> = ({ refresh
             <div className={`remittance-limit-card-value ${limit.dailyLimit === 0 ? 'zero' : ''}`}>
               {formatCurrency(limit.dailyLimit)}
             </div>
-            {limit.originalDailyLimit && limit.todayAmount !== undefined && (
+            {limit.originalDailyLimit !== undefined && (
               <div className="remittance-limit-card-original">
                 일일 한도: {formatCurrency(limit.originalDailyLimit)}
               </div>
             )}
           </div>
           
-          <div 
-            className="remittance-limit-card monthly"
-            style={{
-              background: 'white',
-              borderRadius: '6px',
-              padding: '12px',
-              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-              border: '1px solid #dbeafe',
-              transition: 'box-shadow 0.2s ease',
-              flex: '1'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1)';
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-              <div style={{ fontSize: '11px', fontWeight: '500', color: '#6b7280' }}>월 사용 가능 한도</div>
+          <div className="remittance-limit-card monthly">
+            <div className="remittance-limit-card-header">
+              <div className="remittance-limit-card-label">월 사용 가능 한도</div>
             </div>
-                          <div style={{ 
-                fontSize: '16px', 
-                fontWeight: 'bold', 
-                color: limit.monthlyLimit === 0 ? '#dc2626' : '#1f2937', 
-                marginBottom: '4px' 
-              }}>
-                {formatCurrency(limit.monthlyLimit)}
-              </div>
-            {limit.originalMonthlyLimit && limit.monthAmount !== undefined && (
-              <div style={{ fontSize: '10px', color: '#6b7280' }}>
+            <div className={`remittance-limit-card-value ${limit.monthlyLimit === 0 ? 'zero' : ''}`}>
+              {formatCurrency(limit.monthlyLimit)}
+            </div>
+            {limit.originalMonthlyLimit !== undefined && (
+              <div className="remittance-limit-card-original">
                 월 한도: {formatCurrency(limit.originalMonthlyLimit)}
               </div>
             )}
           </div>
           
-          <div 
-            className="remittance-limit-card single"
-            style={{
-              background: 'white',
-              borderRadius: '6px',
-              padding: '12px',
-              boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
-              border: '1px solid #dbeafe',
-              transition: 'box-shadow 0.2s ease',
-              flex: '1'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1)';
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
-              <div style={{ fontSize: '11px', fontWeight: '500', color: '#6b7280' }}>1회 한도</div>
+          <div className="remittance-limit-card single">
+            <div className="remittance-limit-card-header">
+              <div className="remittance-limit-card-label">1회 한도</div>
             </div>
-            <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#1f2937' }}>
+            <div className="remittance-limit-card-value">
               {formatCurrency(limit.singleLimit)}
             </div>
           </div>

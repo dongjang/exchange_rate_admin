@@ -49,10 +49,8 @@ const CommonPageLayout: React.FC<CommonPageLayoutProps> = ({
 }) => {
   return (
     <div style={{
-      maxWidth: '1200px',
-      margin: '0 auto',
-      padding: '20px',
-      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'
+      maxWidth: '650px',
+      margin: '0.9rem auto 2.5rem'
     }}>
       <CommonPageHeader
         title={title}

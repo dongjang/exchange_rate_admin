@@ -108,7 +108,6 @@ const DefaultRemittanceLimitModal: React.FC<DefaultRemittanceLimitModalProps> = 
         monthlyLimit,
         singleLimit,
         description: formData.description,
-        adminId: userInfo?.id
       });
 
       await Swal.fire({

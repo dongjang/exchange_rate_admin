@@ -3,10 +3,10 @@ import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import { api } from '../../services/api';
 import { userInfoAtom } from '../../store/userStore';
+import AdminNoticeModal from '../user/AdminNoticeModal';
+import NoticeSearchForm from '../user/NoticeSearchForm';
 import AdminLayout from './AdminLayout';
 import AdminTable from './AdminTable';
-import NoticeSearchForm from '../user/NoticeSearchForm';
-import NoticeModal from '../user/NoticeModal';
 
 interface Notice {
   id: number;
@@ -22,6 +22,7 @@ interface Notice {
   updatedAt: string;
   createdUserId: number;
   createdUserName: string;
+  updatedUserName?: string;
 }
 
 interface NoticeSearchRequest {
@@ -51,8 +52,8 @@ const AdminNotices: React.FC = () => {
     content: '',
     priority: 'NORMAL',
     status: 'ACTIVE',
-    noticeStartAt: null as Date | null,
-    noticeEndAt: null as Date | null
+    noticeStartAt: null,
+    noticeEndAt:  null
   });
 
   const priorityOptions = [
@@ -182,17 +183,25 @@ const AdminNotices: React.FC = () => {
     }
   };
 
-  const handleEdit = (notice: Notice) => {
-    setEditingNotice(notice);
-    setFormData({
-      title: notice.title,
-      content: notice.content,
-      priority: notice.priority,
-      status: notice.status,
-      noticeStartAt: notice.noticeStartAt ? new Date(notice.noticeStartAt) : null,
-      noticeEndAt: notice.noticeEndAt ? new Date(notice.noticeEndAt) : null
-    });
-    setIsModalOpen(true);
+  const handleEdit = async (notice: Notice) => {
+    try {
+      // 개별 API 호출로 최신 데이터 가져오기
+      const noticeDetail = await api.getAdminNoticeById(notice.id);
+      setEditingNotice(noticeDetail);
+      
+      setFormData({
+        title: noticeDetail.title,
+        content: noticeDetail.content,
+        priority: noticeDetail.priority,
+        status: noticeDetail.status,
+        noticeStartAt: noticeDetail.noticeStartAt ? noticeDetail.noticeStartAt.split('T')[0] : null,
+        noticeEndAt: noticeDetail.noticeEndAt ? noticeDetail.noticeEndAt.split('T')[0] : null
+      });
+      setIsModalOpen(true);
+    } catch (error) {
+      console.error('공지사항 상세 정보 조회 실패:', error);
+      Swal.fire('오류', '공지사항 상세 정보를 가져오는데 실패했습니다.', 'error');
+    }
   };
 
   const handleDelete = async (id: number) => {
@@ -236,6 +245,10 @@ const AdminNotices: React.FC = () => {
     { 
       key: 'title', 
       label: '제목', 
+      minWidth: '120px',
+      maxWidth: '330px',
+      flex: 1.2,
+      align: 'left' as const,
       render: (value: any, notice: Notice) => (
         <span 
           style={{ 
@@ -253,7 +266,10 @@ const AdminNotices: React.FC = () => {
     { 
       key: 'priority', 
       label: '중요도', 
-      width: '100px',
+      minWidth: '80px',
+      maxWidth: '100px',
+      flex: 0.6,
+      align: 'center' as const,
       render: (value: any, notice: Notice) => {
         const priority = priorityOptions.find(p => p.value === notice.priority);
         return priority ? priority.label : notice.priority;
@@ -262,18 +278,44 @@ const AdminNotices: React.FC = () => {
     { 
       key: 'status', 
       label: '상태', 
-      width: '100px',
+      minWidth: '80px',
+      flex: 0.6,
+      align: 'center' as const,
       render: (value: any, notice: Notice) => {
         const status = statusOptions.find(s => s.value === notice.status);
         return status ? status.label : notice.status;
       }
     },
-    { key: 'viewCount', label: '조회수', width: '100px' },
-    { key: 'createdUserName', label: '작성자', width: '120px' },
+    { 
+      key: 'viewCount', 
+      label: '조회수', 
+      minWidth: '80px',
+      flex: 0.6,
+      align: 'right' as const
+    },
+    { 
+      key: 'createdUserName', 
+      label: '작성자', 
+      minWidth: '100px',
+      flex: 0.8,
+      align: 'center' as const
+    },
+    { 
+      key: 'updatedUserName', 
+      label: '수정자', 
+      minWidth: '100px',
+      flex: 0.8,
+      align: 'center' as const,
+      render: (value: any, notice: Notice) => {
+        return notice.updatedUserName || '-';
+      }
+    },
     { 
       key: 'modalDisplayDate', 
       label: '모달 표시 기간', 
-      width: '150px',
+      minWidth: '200px',
+      flex: 1.5,
+      align: 'center' as const,
       render: (value: any, notice: Notice) => {
         if (notice.priority === 'HIGH' && notice.noticeStartAt) {
           const startDate = new Date(notice.noticeStartAt);
@@ -290,9 +332,9 @@ const AdminNotices: React.FC = () => {
               month: '2-digit',
               day: '2-digit'
             }).replace(/\./g, '.').replace(/,/g, '');
-            return `${startDateStr} ~ ${endDateStr}`;
+            return `${startDateStr} 오전 00:00 ~ ${endDateStr} 오후 23:59`;
           } else {
-            return `${startDateStr} ~`;
+            return '-';
           }
         }
         return '-';
@@ -301,7 +343,10 @@ const AdminNotices: React.FC = () => {
     { 
       key: 'createdAt', 
       label: '작성일', 
-      width: '150px',
+      minWidth: '140px',
+      maxWidth: '200px',
+      flex: 1,
+      align: 'center' as const,
       render: (value: any, notice: Notice) => {
         const date = new Date(notice.createdAt);
         return date.toLocaleDateString('ko-KR', {
@@ -314,9 +359,29 @@ const AdminNotices: React.FC = () => {
       }
     },
     { 
+      key: 'updatedAt', 
+      label: '수정일', 
+      minWidth: '140px',
+      maxWidth: '200px',
+      flex: 1,
+      align: 'center' as const,
+      render: (value: any, notice: Notice) => {
+        const date = new Date(notice.updatedAt);
+        return date.toLocaleDateString('ko-KR', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit'
+        }).replace(/\./g, '.').replace(/,/g, '');
+      }
+    },
+    { 
       key: 'actions', 
       label: '관리', 
-      width: '100px',
+      minWidth: '100px',
+      flex: 0.8,
+      align: 'center' as const,
       render: (value: any, notice: Notice) => (
         <button
           onClick={() => handleDelete(notice.id)}
@@ -378,7 +443,7 @@ const AdminNotices: React.FC = () => {
         </div>
       </div>
 
-      <NoticeModal
+      <AdminNoticeModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSubmit={handleSubmit}

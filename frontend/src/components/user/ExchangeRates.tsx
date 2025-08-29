@@ -19,9 +19,11 @@ import ExchangeRatesPaging from './ExchangeRatesPaging';
 import { RemitSimulationModal } from './RemitSimulationModal';
 
 interface User {
-  id: number;
-  name: string;
+  id: number; 
   email: string;
+  name?: string;
+  pictureUrl?: string;
+  status?: string;
 }
 
 const PAGE_SIZE_OPTIONS = [5, 10, 20];
@@ -64,7 +66,7 @@ export function ExchangeRates({ user }: { user: User | null }) {
   // 관심 환율 목록 조회
   const getUserFavoriteCurrencyList = async () => {
     try {
-      await updateFavoriteCurrencies(user?.id || 0);
+      await updateFavoriteCurrencies();
     } catch {
       console.error('관심 환율 조회 실패');
     }
@@ -83,7 +85,7 @@ export function ExchangeRates({ user }: { user: User | null }) {
           currency_code: currency,
         });
         // atom 업데이트
-        await updateFavoriteCurrencies(user?.id || 0);
+        await updateFavoriteCurrencies();
       } else {
         await api.saveFavoriteCurrency({
           type: 'ADD',
@@ -91,7 +93,7 @@ export function ExchangeRates({ user }: { user: User | null }) {
           currency_code: currency,
         });
         // atom 업데이트
-        await updateFavoriteCurrencies(user?.id || 0);
+        await updateFavoriteCurrencies();
       }
     } catch (error) {
       console.error('관심 환율 처리 중 오류:', error);

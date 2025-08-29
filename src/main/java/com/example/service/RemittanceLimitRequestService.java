@@ -1,5 +1,6 @@
 package com.example.service;
 
+import com.example.context.SessionContext;
 import com.example.domain.RemittanceLimitRequest;
 import com.example.dto.RemittanceLimitRequestResponse;
 import com.example.dto.RemittanceLimitRequestWithFilesResponse;
@@ -262,14 +263,14 @@ public class RemittanceLimitRequestService {
     
     // 관리자 승인/반려 처리
     @Transactional
-    public void processRequest(Long requestId, 
-                             RemittanceLimitRequest.RequestStatus status, 
-                             Long adminId, 
-                             String adminComment,
-                             Long userId,
-                             BigDecimal dailyLimit,
-                             BigDecimal monthlyLimit,   
-                             BigDecimal singleLimit) {
+    public void processRequest(Long requestId, Map<String, Object> request) {
+        RemittanceLimitRequest.RequestStatus status = RemittanceLimitRequest.RequestStatus.valueOf(request.get("status").toString().toUpperCase());
+        Long adminId = SessionContext.getCurrentAdminId();
+        String adminComment = request.get("adminComment").toString();
+        Long userId = Long.parseLong(request.get("userId").toString());
+        BigDecimal dailyLimit = new BigDecimal(request.get("dailyLimit").toString());
+        BigDecimal monthlyLimit = new BigDecimal(request.get("monthlyLimit").toString());
+        BigDecimal singleLimit = new BigDecimal(request.get("singleLimit").toString());
         remittanceLimitRequestMapper.updateRemittanceLimitRequestStatus(requestId, status.name(), adminId, adminComment);
         //승인일 때만 추가
         if(RemittanceLimitRequest.RequestStatus.APPROVED.equals(status)){
@@ -283,9 +284,9 @@ public class RemittanceLimitRequestService {
             // userId가 null인 경우 요청 ID로부터 조회
             Long targetUserId = userId;
             if (targetUserId == null) {
-                RemittanceLimitRequestResponse request = remittanceLimitRequestMapper.selectRemittanceLimitRequestById(requestId);
-                if (request != null) {
-                    targetUserId = request.getUserId();
+                RemittanceLimitRequestResponse requestResponse = remittanceLimitRequestMapper.selectRemittanceLimitRequestById(requestId);
+                if (requestResponse != null) {
+                    targetUserId = requestResponse.getUserId();
                 }
             }
             

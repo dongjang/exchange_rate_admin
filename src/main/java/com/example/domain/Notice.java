@@ -46,6 +46,9 @@ public class Notice {
     @Column(name = "created_user_id", nullable = false)
     private Long createdUserId;
     
+    @Column(name = "updated_user_id")
+    private Long updatedUserId;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();

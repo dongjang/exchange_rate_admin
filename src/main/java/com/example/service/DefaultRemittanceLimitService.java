@@ -1,5 +1,6 @@
 package com.example.service;
 
+import com.example.context.SessionContext;
 import com.example.domain.DefaultRemittanceLimit;
 import com.example.dto.DefaultRemittanceLimitRequest;
 import com.example.dto.DefaultRemittanceLimitResponse;
@@ -28,12 +29,13 @@ public class DefaultRemittanceLimitService {
      */
     @Transactional
     public void updateDefaultLimit(DefaultRemittanceLimitRequest request) {
+        Long adminId = SessionContext.getCurrentAdminId();
         DefaultRemittanceLimit defaultLimit = DefaultRemittanceLimit.builder()
                 .dailyLimit(request.getDailyLimit())
                 .monthlyLimit(request.getMonthlyLimit())
                 .singleLimit(request.getSingleLimit())
                 .description(request.getDescription())
-                .adminId(request.getAdminId())
+                .adminId(adminId)
                 .isActive(true)
                 .build();
         

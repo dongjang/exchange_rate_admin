@@ -412,6 +412,11 @@
   overflow-x: auto;
 }
 
+.table-list-container {
+  overflow-x: auto;
+  min-width: 100%;
+}
+
 .loading-state {
   display: flex;
   flex-direction: column;
@@ -469,19 +474,21 @@
 }
 
 .table-list-header {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  display: flex;
   background: #f9fafb;
   border-bottom: 1px solid #e5e7eb;
   font-weight: 600;
   color: #374151;
   font-size: 14px;
+  min-width: 100%;
 }
 
 .table-header-cell {
   padding: 16px 12px;
   text-align: left;
   border-right: 1px solid #e5e7eb;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .table-header-cell:last-child {
@@ -489,10 +496,10 @@
 }
 
 .table-list-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  display: flex;
   border-bottom: 1px solid #f3f4f6;
   transition: background-color 0.2s;
+  min-width: 100%;
 }
 
 .table-list-row:hover {
@@ -508,6 +515,10 @@
   display: flex;
   align-items: center;
   justify-content: flex-start;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .table-cell:last-child {
@@ -755,8 +766,61 @@
   }
   
   .table-list-container {
-    overflow-x: auto;
-  }
+  overflow-x: auto;
+  width: 100%;
+}
+
+.table-list-header {
+  display: flex;
+  background: #f9fafb;
+  border-bottom: 1px solid #e5e7eb;
+  font-weight: 600;
+  color: #374151;
+  font-size: 14px;
+  width: 100%;
+  min-width: 100%;
+}
+
+.table-header-cell {
+  padding: 16px 12px;
+  text-align: left;
+  border-right: 1px solid #e5e7eb;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table-header-cell:last-child {
+  border-right: none;
+}
+
+.table-list-row {
+  display: flex;
+  border-bottom: 1px solid #f3f4f6;
+  transition: background-color 0.2s;
+  width: 100%;
+  min-width: 100%;
+}
+
+.table-cell {
+  padding: 16px 12px;
+  text-align: left;
+  border-right: 1px solid #f3f4f6;
+  font-size: 14px;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.table-cell:last-child {
+  border-right: none;
+}
   
   .table-list-header,
   .table-list-row {

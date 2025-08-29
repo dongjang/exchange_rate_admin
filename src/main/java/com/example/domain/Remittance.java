@@ -46,6 +46,12 @@ public class Remittance {
     @Column(length = 20, nullable = false)
     private String status = "COMPLETED";
 
+    @Column(name = "exchange_rate", precision = 10, scale = 6)
+    private BigDecimal exchangeRate;
+
+    @Column(name = "converted_amount", precision = 18, scale = 2)
+    private BigDecimal convertedAmount;
+
     @Column(name = "created_at", columnDefinition = "TIMESTAMP")
     private LocalDateTime createdAt;
 

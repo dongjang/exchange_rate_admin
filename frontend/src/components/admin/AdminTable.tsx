@@ -5,6 +5,9 @@ export interface AdminTableColumn {
   key: string;
   label: string;
   width?: string;
+  minWidth?: string;
+  maxWidth?: string;
+  flex?: number;
   align?: 'left' | 'center' | 'right';
   render?: (value: any, row?: any) => React.ReactNode;
 }
@@ -28,6 +31,8 @@ interface AdminTableProps {
   onSortOrderChange?: (sortOrder: string) => void;
   sortOptions?: { value: string; label: string }[];
   pageSizeOptions?: number[];
+  tableLayout?: 'auto' | 'fixed' | 'responsive';
+  enableHorizontalScroll?: boolean;
 }
 
 const AdminTable: React.FC<AdminTableProps> = ({
@@ -51,7 +56,9 @@ const AdminTable: React.FC<AdminTableProps> = ({
     { value: "latest", label: "최신순" },
     { value: "oldest", label: "과거순" }
   ],
-  pageSizeOptions = [10, 20, 50, 100]
+  pageSizeOptions = [10, 20, 50, 100],
+  tableLayout = 'responsive',
+  enableHorizontalScroll = true
 }) => {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('ko-KR').format(amount) + ' 원';
@@ -115,7 +122,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
             <p>데이터를 불러오는 중...</p>
           </div>
         ) : data && data.length > 0 ? (
-          <div className="table-list-container">
+          <>
             {/* 헤더 */}
             <div className="table-list-header">
               {columns.map((column) => (
@@ -123,7 +130,10 @@ const AdminTable: React.FC<AdminTableProps> = ({
                   key={column.key} 
                   className="table-header-cell"
                   style={{ 
-                    width: column.width,
+                    width: column.width || 'auto',
+                    minWidth: column.minWidth || column.width || '120px',
+                    maxWidth: column.maxWidth || 'none',
+                    flex: column.flex || (column.width ? 'none' : 1),
                     textAlign: column.align || 'left'
                   }}
                 >
@@ -140,7 +150,10 @@ const AdminTable: React.FC<AdminTableProps> = ({
                     key={column.key} 
                     className="table-cell"
                     style={{ 
-                      width: column.width,
+                      width: column.width || 'auto',
+                      minWidth: column.minWidth || column.width || '120px',
+                      maxWidth: column.maxWidth || 'none',
+                      flex: column.flex || (column.width ? 'none' : 1),
                       textAlign: column.align || 'left',
                       justifyContent: column.align === 'center' ? 'center' : 
                                    column.align === 'right' ? 'flex-end' : 'flex-start'
@@ -154,7 +167,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
                 ))}
               </div>
             ))}
-          </div>
+          </>
         ) : (
           <div className="empty-state">
             <div className="empty-icon">{emptyIcon}</div>

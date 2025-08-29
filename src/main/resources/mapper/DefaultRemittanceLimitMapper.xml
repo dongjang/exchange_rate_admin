@@ -10,12 +10,12 @@
             drl.monthly_limit as monthlyLimit,
             drl.single_limit as singleLimit,
             drl.description,
-            u.name as adminName,
+            a.name as adminName,
             drl.is_active as isActive,
             drl.created_at as createdAt,
             drl.updated_at as updatedAt
         FROM default_remittance_limit drl
-        LEFT JOIN user u ON drl.admin_id = u.id
+        LEFT JOIN admin a ON drl.admin_id = a.id
     </select>
 
     <update id="updateDefaultLimit" parameterType="DefaultRemittanceLimit">
@@ -28,6 +28,7 @@
             description = #{description},
             admin_id = #{adminId},
             updated_at = NOW()
+        WHERE is_active = true
     </update>
 
 </mapper> 

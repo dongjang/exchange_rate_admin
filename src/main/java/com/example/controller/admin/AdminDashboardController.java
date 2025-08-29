@@ -1,4 +1,4 @@
-package com.example.controller;
+package com.example.controller.admin;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/admin/dashboard")
 @RequiredArgsConstructor
-public class DashboardController {
+public class AdminDashboardController {
     
     private final DashboardService dashboardService;
     
