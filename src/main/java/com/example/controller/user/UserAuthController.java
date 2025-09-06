@@ -109,10 +109,16 @@ public class UserAuthController {
                 session.removeAttribute("userSessionId");
             }
             
-            // OAuth2 관련 속성만 제거 (전체 세션 무효화하지 않음)
-            session.removeAttribute("SPRING_SECURITY_CONTEXT");
+            // OAuth2 관련 속성만 제거 (관리자 세션 보존)
             session.removeAttribute("oauth2_authorization_request");
             session.removeAttribute("oauth2_authorization_request_uri");
+            
+            // 관리자 세션이 있는지 확인
+            String adminSessionId = (String) session.getAttribute("adminSessionId");
+            if (adminSessionId == null) {
+                // 관리자 세션이 없을 때만 SPRING_SECURITY_CONTEXT 제거
+                session.removeAttribute("SPRING_SECURITY_CONTEXT");
+            }
         }
         
         // 사용자 전용 SecurityContext만 정리 (관리자 영향 없음)

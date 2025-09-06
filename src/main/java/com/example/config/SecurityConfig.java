@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -32,11 +33,9 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
-                // 공개 API
                 .requestMatchers("/api/users/auth/**").permitAll()
-                .requestMatchers("/api/users/notices/**").permitAll() // 공지사항은 공개
-                .requestMatchers("/api/users/exchange-rates/**").permitAll() // 환율 정보는 공개
-                // 인증 필요 API
+                .requestMatchers("/api/users/notices/**").authenticated()
+                .requestMatchers("/api/users/exchange-rates/**").authenticated()
                 .requestMatchers("/api/users/remittance/**").authenticated()
                 .requestMatchers("/api/users/qna/**").authenticated()
                 .requestMatchers("/api/users/**").authenticated()

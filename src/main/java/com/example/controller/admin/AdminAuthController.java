@@ -5,11 +5,16 @@ import com.example.service.AdminService;
 import com.example.service.RedisService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -45,6 +50,23 @@ public class AdminAuthController {
                 sessionData.put("adminStatus", admin.getStatus());
                 
                 redisService.setAdminSession(adminSessionId, sessionData);
+                
+                // Spring Security 인증 컨텍스트 설정
+                List<SimpleGrantedAuthority> authorities = List.of(
+                    new SimpleGrantedAuthority("ROLE_" + admin.getRole())
+                );
+                
+                Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    admin.getEmail(), // principal
+                    null, // credentials
+                    authorities
+                );
+                
+                // SecurityContext를 세션에 저장
+                org.springframework.security.core.context.SecurityContext securityContext = 
+                    SecurityContextHolder.getContext();
+                securityContext.setAuthentication(authentication);
+                session.setAttribute("SPRING_SECURITY_CONTEXT", securityContext);
                 
                 Map<String, Object> response = new HashMap<>();
                 response.put("success", true);
@@ -106,6 +128,16 @@ public class AdminAuthController {
             redisService.deleteAdminSession(adminSessionId);
             // HttpSession에서 관리자 세션 ID만 제거
             session.removeAttribute("adminSessionId");
+        }
+        
+        // Spring Security 인증 컨텍스트 클리어
+        SecurityContextHolder.clearContext();
+        
+        // 사용자 세션이 있는지 확인
+        String userSessionId = (String) session.getAttribute("userSessionId");
+        if (userSessionId == null) {
+            // 사용자 세션이 없을 때만 SPRING_SECURITY_CONTEXT 제거
+            session.removeAttribute("SPRING_SECURITY_CONTEXT");
         }
         
         Map<String, Object> response = new HashMap<>();
