@@ -39,7 +39,6 @@ public class SecurityConfig {
                 // 인증 필요 API
                 .requestMatchers("/api/users/remittance/**").authenticated()
                 .requestMatchers("/api/users/qna/**").authenticated()
-                .requestMatchers("/api/users/profile/**").authenticated()
                 .requestMatchers("/api/users/**").authenticated()
                 .anyRequest().permitAll()
             )
@@ -69,21 +68,17 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
-                // 관리자 인증 API
                 .requestMatchers("/api/admin/auth/**").permitAll()
-                // 대시보드 API (인증된 관리자만)
-                .requestMatchers("/api/admin/dashboard/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
-                // 사용자 관리 API (인증된 관리자만)
-                .requestMatchers("/api/admin/users/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
-                .requestMatchers("/api/admin/remittance/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
-                .requestMatchers("/api/admin/remittance-limits/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
-                .requestMatchers("/api/admin/notices/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
-                .requestMatchers("/api/admin/qna/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
-                .requestMatchers("/api/admin/countries/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
-                .requestMatchers("/api/admin/banks/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
-                // 관리자 관리 API (최고 관리자만)
-                .requestMatchers("/api/admin/admins/**").hasRole("SUPER_ADMIN")
-                .requestMatchers("/api/admin/**").hasAnyRole("ADMIN", "SUPER_ADMIN")
+                .requestMatchers("/api/admin/dashboard/**").authenticated()
+                .requestMatchers("/api/admin/users/**").authenticated()
+                .requestMatchers("/api/admin/remittance/**").authenticated()
+                .requestMatchers("/api/admin/remittance-limits/**").authenticated()
+                .requestMatchers("/api/admin/notices/**").authenticated()
+                .requestMatchers("/api/admin/qna/**").authenticated()
+                .requestMatchers("/api/admin/countries/**").authenticated()
+                .requestMatchers("/api/admin/banks/**").authenticated()
+                .requestMatchers("/api/admin/admins/**").authenticated()
+                .requestMatchers("/api/admin/**").authenticated()
                 .anyRequest().denyAll()
             );
         
@@ -97,13 +92,9 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
-                // 파일 다운로드 (인증된 사용자만)
                 .requestMatchers("/api/files/*/download").authenticated()
                 .requestMatchers("/api/files/*/base64").authenticated()
-                // 파일 정보 조회 (인증된 사용자만)
                 .requestMatchers("/api/files/*/info").authenticated()
-                // 파일 업로드 (관리자만)
-                .requestMatchers("/api/files/upload").hasAnyRole("ADMIN", "SUPER_ADMIN")
                 .requestMatchers("/api/files/**").authenticated()
                 .anyRequest().denyAll()
             );
