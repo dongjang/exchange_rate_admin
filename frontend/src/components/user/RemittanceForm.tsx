@@ -384,13 +384,14 @@ function RemittanceForm({ onSubmit, refreshKey = 0 }: RemittanceFormProps) {
         status: 'COMPLETED'
       };
 
-      await api.createRemittance(remittanceData);
+      const result = await api.createRemittance(remittanceData);
       
+      console.log(result);
       await Swal.fire({
-        icon: 'success',
-        title: '송금 신청 완료',
-        text: '송금이 성공적으로 신청되었습니다.',
-        confirmButtonColor: '#2563eb',
+        icon: result.success ? 'success' : 'error',
+        title: result.success ?  '송금 신청 완료' : '송금 신청 실패',
+        text: result.message,
+        confirmButtonColor: result.success ? '#2563eb' : '#dc2626',
       });
 
       // 송금 완료 후 한도 정보 새로고침

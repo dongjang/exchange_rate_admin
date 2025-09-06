@@ -16,10 +16,7 @@
             r.amount,
             r.exchange_rate as exchangeRate,
             r.converted_amount as convertedAmount,
-            CASE
-                WHEN r.status = 'COMPLETED' THEN '완료'
-                WHEN r.status = 'WAITTING' THEN '대기'
-		    END AS status,
+            r.status,
             r.created_at as createdAt
         FROM remittance r
         LEFT JOIN bank sb ON r.sender_bank = sb.bank_code
@@ -121,12 +118,13 @@
         FROM default_remittance_limit def
         LEFT JOIN user_remittance_limit url ON url.user_id = #{userId}
         LEFT JOIN remittance r ON r.user_id = #{userId}
-            AND r.created_at BETWEEN 
-            CASE 
-                WHEN DATE(url.updated_at) = CURDATE() THEN url.updated_at
-                ELSE CURDATE()
-            END
-            AND CONCAT(CURDATE(), ' 23:59:59')
+        AND r.status = 'COMPLETED'
+        AND r.created_at BETWEEN 
+        CASE 
+            WHEN DATE(url.updated_at) = CURDATE() THEN url.updated_at
+            ELSE CURDATE()
+        END
+        AND CONCAT(CURDATE(), ' 23:59:59')
         WHERE def.is_active = true
     </select>
 
@@ -136,13 +134,14 @@
         FROM default_remittance_limit def
         LEFT JOIN user_remittance_limit url ON url.user_id = #{userId}
         LEFT JOIN remittance r ON r.user_id = #{userId}
-            AND r.created_at BETWEEN 
-            CASE 
-                WHEN DATE_FORMAT(url.updated_at, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')
-                THEN url.updated_at
-                ELSE DATE_FORMAT(CURDATE(), '%Y-%m-01')
-            END
-            AND CONCAT(LAST_DAY(CURDATE()), ' 23:59:59')
+        AND r.status = 'COMPLETED'
+        AND r.created_at BETWEEN 
+        CASE 
+            WHEN DATE_FORMAT(url.updated_at, '%Y-%m') = DATE_FORMAT(CURDATE(), '%Y-%m')
+            THEN url.updated_at
+            ELSE DATE_FORMAT(CURDATE(), '%Y-%m-01')
+        END
+        AND CONCAT(LAST_DAY(CURDATE()), ' 23:59:59')
         WHERE def.is_active = true
     </select>
 

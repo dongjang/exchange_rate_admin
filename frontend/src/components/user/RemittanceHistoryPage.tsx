@@ -219,8 +219,16 @@ function RemittanceHistoryPage() {
     setCurrentPage(1);
   };
 
-  const handleRemittanceClick = (remittance: RemittanceHistory) => {
-    setSelectedRemittance(remittance);
+  const handleRemittanceClick = async (remittance: RemittanceHistory) => {
+    try {
+      // DB에서 최신 송금 상세 정보 조회 (실패 사유 포함)
+      const detailRemittance = await api.getRemittanceDetail(remittance.id);
+      setSelectedRemittance(detailRemittance);
+    } catch (error) {
+      console.error('송금 상세 조회 실패:', error);
+      // 실패 시 기존 데이터로 표시
+      setSelectedRemittance(remittance);
+    }
   };
 
   return (

@@ -256,6 +256,14 @@ export const api = {
     return response.data;
   },
 
+  // 송금 상세 조회
+  async getRemittanceDetail(remittanceId: number): Promise<any> {
+    const response = await axios.get(`${API_BASE_URL}/users/remittances/detail/${remittanceId}`, {
+      withCredentials: true
+    });
+    return response.data;
+  },
+
   // 송금 이력 검색 (페이징 포함)
   async searchRemittanceHistory(params: {
     userId: number;

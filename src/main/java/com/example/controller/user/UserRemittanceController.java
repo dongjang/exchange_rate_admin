@@ -2,6 +2,7 @@ package com.example.controller.user;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,11 +41,42 @@ public class UserRemittanceController {
     private final UserRemittanceLimitService userRemittanceLimitService;
     private final RemittanceLimitRequestService remittanceLimitRequestService;
     
-    // 송금 신청
+    // 송금 신청 (비동기 처리)
     @PostMapping
-    public ResponseEntity<Remittance> createRemittance(@RequestBody Remittance remittance) {
-        Remittance saved = remittanceService.create(remittance);
-        return ResponseEntity.ok(saved);
+    public ResponseEntity<Map<String, Object>> createRemittance(@RequestBody Remittance remittance) {
+        try {
+            // 통합된 서비스 메서드 호출 (한도 체크 + 저장 + 비동기 처리)
+            Map<String, Object> result = remittanceService.createRemittanceWithAsyncProcessing(remittance);
+            
+            // 결과에 따라 응답 반환
+            if ((Boolean) result.get("success")) {
+                return ResponseEntity.ok(result);
+            } else {
+                return ResponseEntity.badRequest().body(result);
+            }
+            
+        } catch (Exception e) {
+            // 예외 발생 시 에러 응답
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("success", false);
+            errorResponse.put("error", "PROCESSING_ERROR");
+            errorResponse.put("message", "송금 신청 처리 중 오류가 발생했습니다: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    // 송금 상세 조회
+    @GetMapping("/detail/{remittanceId}")
+    public ResponseEntity<Remittance> getRemittanceDetail(@PathVariable Long remittanceId) {
+        try {
+            Remittance remittance = remittanceService.findById(remittanceId);
+            if (remittance == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(remittance);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     // 송금 한도 체크

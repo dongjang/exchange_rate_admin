@@ -31,6 +31,8 @@ const getStatusText = (status: string) => {
       return '완료';
     case 'WAITING':
       return '대기';
+    case 'FAILED':
+      return '실패';
     default:
       return status;
   }

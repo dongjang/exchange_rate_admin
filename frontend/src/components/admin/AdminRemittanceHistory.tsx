@@ -160,7 +160,7 @@ const AdminRemittanceHistory: React.FC<AdminRemittanceHistoryProps> = ({
 
   const getStatusBadge = (status: string) => {
     const statusMap: { [key: string]: { text: string; className: string } } = {
-      'SUCCESS': { text: '성공', className: 'status-success' },
+      'COMPLETED': { text: '성공', className: 'status-success' },
       'PENDING': { text: '대기', className: 'status-pending' },
       'FAILED': { text: '실패', className: 'status-failed' }
     };

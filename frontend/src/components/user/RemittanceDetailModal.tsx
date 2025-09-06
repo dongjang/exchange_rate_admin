@@ -19,6 +19,7 @@ interface RemittanceDetailModalProps {
     exchangeRate?: number;
     convertedAmount?: number;
     status: string;
+    failureReason?: string;
     createdAt: string;
     updatedAt: string;
   } | null;
@@ -206,7 +207,7 @@ const RemittanceDetailModal: React.FC<RemittanceDetailModalProps> = ({
                 </div>
               </>
             )}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.8rem' }}>
               <span style={{ color: '#64748b', fontSize: '0.9rem', fontWeight: 500 }}>상태</span>
               <span style={{ 
                 fontWeight: 600, 
@@ -220,6 +221,23 @@ const RemittanceDetailModal: React.FC<RemittanceDetailModalProps> = ({
                 {getStatusText(remittance.status)}
               </span>
             </div>
+            {remittance.failureReason && (
+              <div style={{ 
+                background: '#fef2f2', 
+                border: '1px solid #fecaca', 
+                borderRadius: 8, 
+                padding: '0.8rem', 
+                marginTop: '0.8rem' 
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.4rem' }}>
+                  <span style={{ fontSize: '1rem' }}>⚠️</span>
+                  <span style={{ color: '#dc2626', fontSize: '0.85rem', fontWeight: 600 }}>실패 사유</span>
+                </div>
+                <div style={{ color: '#991b1b', fontSize: '0.8rem', lineHeight: 1.4 }}>
+                  {remittance.failureReason}
+                </div>
+              </div>
+            )}
           </div>
           {/* 날짜 정보 */}
           <div style={{ 
