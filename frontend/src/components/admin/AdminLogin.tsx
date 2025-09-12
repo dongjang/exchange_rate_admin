@@ -51,7 +51,6 @@ const AdminLogin = () => {
       const response = await api.adminLogin(formData);
       
       if (response.success) {
-
         // 관리자 정보 설정
         setAdminInfo(response.admin);
         setAdminAuth({ isAuthenticated: true, isLoading: false });

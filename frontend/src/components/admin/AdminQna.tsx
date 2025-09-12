@@ -166,6 +166,7 @@ const AdminQna: React.FC = () => {
     {
       key: 'title',
       label: '제목',
+      minWidth: '300px',
       render: (value: any, qna: Qna) => {
         if (!qna || !qna.title) return '-';
         return (
@@ -186,6 +187,7 @@ const AdminQna: React.FC = () => {
     {
       key: 'userName',
       label: '사용자명',
+      minWidth: '150px',
       render: (value: any, qna: Qna) => {
         if (!qna) return '-';
         return qna.userName || '알 수 없음';
@@ -195,6 +197,7 @@ const AdminQna: React.FC = () => {
     {
       key: 'status',
       label: '상태',
+      minWidth: '230px',
       render: (value: any, qna: Qna) => {
         if (!qna || !qna.status) return '-';
         return (
@@ -215,6 +218,7 @@ const AdminQna: React.FC = () => {
     {
       key: 'fileName',
       label: '첨부파일',
+      minWidth: '230px',
       render: (value: any, qna: Qna) => {
         if (!qna) return '-';
         return getFileLabel(qna.fileName);
@@ -224,6 +228,7 @@ const AdminQna: React.FC = () => {
     {
       key: 'createdAt',
       label: '등록일',
+      minWidth: '300px',
       render: (value: any, qna: Qna) => {
         if (!qna || !qna.createdAt) return '-';
         try {
@@ -244,6 +249,7 @@ const AdminQna: React.FC = () => {
     {
       key: 'answeredAt',
       label: '처리일',
+      minWidth: '300px',
       render: (value: any, qna: Qna) => {
         if (!qna || !qna.answeredAt) return '-';
         try {

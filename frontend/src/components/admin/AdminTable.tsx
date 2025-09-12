@@ -60,6 +60,35 @@ const AdminTable: React.FC<AdminTableProps> = ({
   tableLayout = 'responsive',
   enableHorizontalScroll = true
 }) => {
+  // 컬럼 너비를 고정값으로 설정하는 함수
+  const getColumnWidth = (column: AdminTableColumn) => {
+    // 컬럼별 고정 너비 설정 (더 큰 너비로 조정)
+    switch (column.key) {
+      case 'title':
+      case 'content':
+        return '300px';  // 제목은 더 넓게
+      case 'status':
+      case 'priority':
+        return '120px';  // 상태는 조금 더 넓게
+      case 'views':
+      case 'id':
+        return '100px';  // ID는 조금 더 넓게
+      case 'createdAt':
+      case 'updatedAt':
+      case 'modalDisplayPeriod':
+      case 'answeredAt':
+        return '180px';  // 날짜는 더 넓게
+      case 'username':
+      case 'userName':
+        return '150px';  // 사용자명은 더 넓게
+      case 'attachedFile':
+      case 'attachment':
+      case 'fileName':
+        return '120px';  // 첨부파일은 더 넓게
+      default:
+        return '200px'; // 기본 너비를 더 크게
+    }
+  };
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('ko-KR').format(amount) + ' 원';
   };
@@ -130,10 +159,10 @@ const AdminTable: React.FC<AdminTableProps> = ({
                   key={column.key} 
                   className="table-header-cell"
                   style={{ 
-                    width: column.width || 'auto',
-                    minWidth: column.minWidth || column.width || '120px',
-                    maxWidth: column.maxWidth || 'none',
-                    flex: column.flex || (column.width ? 'none' : 1),
+                    width: column.width || getColumnWidth(column),
+                    minWidth: column.minWidth || getColumnWidth(column),
+                    maxWidth: column.maxWidth || getColumnWidth(column),
+                    flex: 'none', // 모든 컬럼이 고정 너비 유지
                     textAlign: column.align || 'left'
                   }}
                 >
@@ -143,17 +172,17 @@ const AdminTable: React.FC<AdminTableProps> = ({
             </div>
             
             {/* 리스트 */}
-            {data.map((row, index) => (
-              <div key={index} className="table-list-row">
-                {columns.map((column) => (
+            {data.map((row, rowIndex) => (
+              <div key={rowIndex} className="table-list-row">
+                {columns.map((column, colIndex) => (
                   <div 
                     key={column.key} 
                     className="table-cell"
                     style={{ 
-                      width: column.width || 'auto',
-                      minWidth: column.minWidth || column.width || '120px',
-                      maxWidth: column.maxWidth || 'none',
-                      flex: column.flex || (column.width ? 'none' : 1),
+                      width: column.width || getColumnWidth(column),
+                      minWidth: column.minWidth || getColumnWidth(column),
+                      maxWidth: column.maxWidth || getColumnWidth(column),
+                      flex: 'none', // 모든 컬럼이 고정 너비 유지
                       textAlign: column.align || 'left',
                       justifyContent: column.align === 'center' ? 'center' : 
                                    column.align === 'right' ? 'flex-end' : 'flex-start'

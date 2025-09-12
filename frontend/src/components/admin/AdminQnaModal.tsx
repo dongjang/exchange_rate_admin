@@ -198,15 +198,22 @@ const AdminQnaModal: React.FC<AdminQnaModalProps> = ({
           <div style={{ 
             flex: 1,
             display: 'flex',
+            flexDirection: 'column',
             overflow: 'hidden'
           }}>
-            {/* 좌측: Q&A 정보 */}
-            <div style={{
+            {/* 데스크톱: 좌우 분할 레이아웃 */}
+            <div className="qna-modal-desktop-layout" style={{
               flex: 1,
-              padding: '32px',
-              overflowY: 'auto',
-              borderRight: '1px solid #f1f5f9'
+              display: 'flex',
+              overflow: 'hidden'
             }}>
+              {/* 좌측: Q&A 정보 */}
+              <div className="qna-modal-content" style={{
+                flex: 1,
+                padding: '32px',
+                overflowY: 'auto',
+                borderRight: '1px solid #f1f5f9'
+              }}>
               {/* 기본 정보 */}
               <div style={{ marginBottom: '32px' }}>
                 <h3 style={{
@@ -220,7 +227,7 @@ const AdminQnaModal: React.FC<AdminQnaModalProps> = ({
                   기본 정보
                 </h3>
                 
-                <div style={{
+                <div className="qna-modal-grid" style={{
                   display: 'grid',
                   gridTemplateColumns: '1fr 1fr',
                   gap: '16px'
@@ -495,25 +502,97 @@ const AdminQnaModal: React.FC<AdminQnaModalProps> = ({
               )}
             </div>
 
-            {/* 우측: 첨부파일 미리보기 */}
+              {/* 우측: 첨부파일 미리보기 (데스크톱) */}
+              {qna.fileId && qna.fileName && (
+                <div className="qna-modal-desktop-attachment" style={{
+                  width: '600px',
+                  borderLeft: '1px solid #f1f5f9',
+                  display: 'flex',
+                  flexDirection: 'column'
+                }}>
+                  <div style={{
+                    padding: '20px 24px',
+                    borderBottom: '1px solid #f1f5f9',
+                    background: '#f8fafc',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center'
+                  }}>
+                    <div>
+                      <h3 style={{
+                        fontSize: '18px',
+                        fontWeight: '600',
+                        color: '#1e293b',
+                        margin: 0
+                      }}>
+                        첨부파일 미리보기
+                      </h3>
+                      <p style={{
+                        fontSize: '14px',
+                        color: '#6b7280',
+                        margin: '6px 0 0 0'
+                      }}>
+                        {qna.fileName}
+                      </p>
+                    </div>
+                    <button
+                      onClick={handleDownloadFile}
+                      style={{
+                        padding: '8px 16px',
+                        background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: '13px',
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                        e.currentTarget.style.boxShadow = '0 4px 8px rgba(59, 130, 246, 0.3)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    >
+                      📥 다운로드
+                    </button>
+                  </div>
+                  <div style={{
+                    flex: 1,
+                    padding: '20px',
+                    overflow: 'hidden'
+                  }}>
+                    <FilePreview fileId={qna.fileId} fileName={qna.fileName} fileSize={qna.fileSize} />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 모바일: 첨부파일 미리보기 (하단) - 첨부파일이 있을 때만 */}
             {qna.fileId && qna.fileName && (
-              <div style={{
-                width: '600px',
-                borderLeft: '1px solid #f1f5f9',
+              <div className="qna-modal-mobile-layout" style={{
+                borderTop: '1px solid #f1f5f9',
+                background: '#f8fafc',
+                maxHeight: '300px',
                 display: 'flex',
                 flexDirection: 'column'
               }}>
                 <div style={{
-                  padding: '20px 24px',
-                  borderBottom: '1px solid #f1f5f9',
-                  background: '#f8fafc',
+                  padding: '16px 20px',
+                  borderBottom: '1px solid #e2e8f0',
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center'
                 }}>
                   <div>
                     <h3 style={{
-                      fontSize: '18px',
+                      fontSize: '16px',
                       fontWeight: '600',
                       color: '#1e293b',
                       margin: 0
@@ -521,9 +600,9 @@ const AdminQnaModal: React.FC<AdminQnaModalProps> = ({
                       첨부파일 미리보기
                     </h3>
                     <p style={{
-                      fontSize: '14px',
+                      fontSize: '12px',
                       color: '#6b7280',
-                      margin: '6px 0 0 0'
+                      margin: '4px 0 0 0'
                     }}>
                       {qna.fileName}
                     </p>
@@ -531,18 +610,18 @@ const AdminQnaModal: React.FC<AdminQnaModalProps> = ({
                   <button
                     onClick={handleDownloadFile}
                     style={{
-                      padding: '8px 16px',
+                      padding: '6px 12px',
                       background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
                       color: 'white',
                       border: 'none',
                       borderRadius: '6px',
-                      fontSize: '13px',
+                      fontSize: '12px',
                       fontWeight: '600',
                       cursor: 'pointer',
                       transition: 'all 0.2s ease',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '6px'
+                      gap: '4px'
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = 'translateY(-1px)';
@@ -558,8 +637,9 @@ const AdminQnaModal: React.FC<AdminQnaModalProps> = ({
                 </div>
                 <div style={{
                   flex: 1,
-                  padding: '20px',
-                  overflow: 'hidden'
+                  padding: '16px',
+                  overflow: 'hidden',
+                  minHeight: '200px'
                 }}>
                   <FilePreview fileId={qna.fileId} fileName={qna.fileName} fileSize={qna.fileSize} />
                 </div>
@@ -713,12 +793,56 @@ const FilePreview: React.FC<{ fileId: number; fileName: string; fileSize?: numbe
   );
 };
 
-// CSS 애니메이션 추가
+// CSS 애니메이션 및 반응형 스타일 추가
 const style = document.createElement('style');
 style.textContent = `
   @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+  }
+  
+  /* 반응형 스타일 */
+  @media (max-width: 768px) {
+    .qna-modal-desktop-layout {
+      display: flex !important;
+      flex-direction: column !important;
+    }
+    
+    .qna-modal-desktop-layout .qna-modal-content {
+      border-right: none !important;
+    }
+    
+    .qna-modal-desktop-attachment {
+      display: none !important;
+    }
+    
+    .qna-modal-mobile-layout {
+      display: flex !important;
+    }
+    
+    .qna-modal-content {
+      padding: 16px !important;
+    }
+    
+    .qna-modal-grid {
+      grid-template-columns: 1fr !important;
+      gap: 12px !important;
+    }
+  }
+  
+  @media (min-width: 769px) {
+    .qna-modal-desktop-layout {
+      display: flex !important;
+      flex-direction: row !important;
+    }
+    
+    .qna-modal-desktop-attachment {
+      display: flex !important;
+    }
+    
+    .qna-modal-mobile-layout {
+      display: none !important;
+    }
   }
 `;
 document.head.appendChild(style);

@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -15,20 +16,21 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.dto.UserResponse;
 import com.example.dto.UserSearchRequest;
-import com.example.service.UserService;
+import com.example.service.AdminUserService;
+
 
 @RestController
 @RequestMapping("/api/admin/users")
 public class AdminUserManagementController {
 
     @Autowired
-    private UserService userService;
+    private AdminUserService adminUserService;
 
     @PostMapping("/search")
     public ResponseEntity<Map<String, Object>> searchUsers(@RequestBody UserSearchRequest searchRequest) {
-        int count = userService.getUserCount(searchRequest);
+        int count = adminUserService.getUserCount(searchRequest);
         if(count > 0){
-            List<UserResponse> result = userService.searchUsers(searchRequest);
+            List<UserResponse> result = adminUserService.searchUsers(searchRequest);
             Map<String, Object> response = new HashMap<>();
             response.put("totalElements", count);
             response.put("content", result);
@@ -43,10 +45,16 @@ public class AdminUserManagementController {
         }
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id) {
+        UserResponse user = adminUserService.getUserById(id);
+        return ResponseEntity.ok(user);
+    }
+
     @PutMapping("/{id}/status")
     public ResponseEntity<Map<String, String>> updateUserStatus(@PathVariable Long id, @RequestBody Map<String, String> request) {
         String status = request.get("status");
-        userService.updateUserStatus(id, status);
+        adminUserService.updateUserStatus(id, status);
         Map<String, String> response = new HashMap<>();
         response.put("message", "사용자 상태가 성공적으로 업데이트되었습니다.");
         return ResponseEntity.ok(response);

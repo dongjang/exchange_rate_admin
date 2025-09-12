@@ -245,8 +245,6 @@ const AdminNotices: React.FC = () => {
     { 
       key: 'title', 
       label: '제목', 
-      minWidth: '120px',
-      maxWidth: '330px',
       flex: 1.2,
       align: 'left' as const,
       render: (value: any, notice: Notice) => (
@@ -266,8 +264,6 @@ const AdminNotices: React.FC = () => {
     { 
       key: 'priority', 
       label: '중요도', 
-      minWidth: '80px',
-      maxWidth: '100px',
       flex: 0.6,
       align: 'center' as const,
       render: (value: any, notice: Notice) => {
@@ -289,7 +285,8 @@ const AdminNotices: React.FC = () => {
     { 
       key: 'viewCount', 
       label: '조회수', 
-      minWidth: '80px',
+      minWidth: '50px',
+      maxWidth: '100px',
       flex: 0.6,
       align: 'right' as const
     },
@@ -313,7 +310,7 @@ const AdminNotices: React.FC = () => {
     { 
       key: 'modalDisplayDate', 
       label: '모달 표시 기간', 
-      minWidth: '200px',
+      minWidth: '350px',
       flex: 1.5,
       align: 'center' as const,
       render: (value: any, notice: Notice) => {
@@ -379,7 +376,7 @@ const AdminNotices: React.FC = () => {
     { 
       key: 'actions', 
       label: '관리', 
-      minWidth: '100px',
+      minWidth: '80px',
       flex: 0.8,
       align: 'center' as const,
       render: (value: any, notice: Notice) => (

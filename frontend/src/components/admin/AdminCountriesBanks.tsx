@@ -382,6 +382,7 @@ const AdminCountriesBanks: React.FC = () => {
     {
       key: 'countryName',
       label: '국가명',
+      minWidth: '25%',
       render: (value: any, country: Country) => {
         return (
           <span 
@@ -402,18 +403,21 @@ const AdminCountriesBanks: React.FC = () => {
     {
       key: 'codeName',
       label: '통화명',
+      minWidth: '25%',
       render: (value: any, country: Country) => country.codeName,
       align: 'left' as const
     },
     {
       key: 'code',
       label: '통화',
+      minWidth: '25%',
       render: (value: any, country: Country) => country.code,
       align: 'center' as const
     },
     {
       key: 'actions',
       label: '관리',
+      minWidth: '25%',
       render: (value: any, country: Country) => {
         return (
           <button
@@ -450,6 +454,7 @@ const AdminCountriesBanks: React.FC = () => {
     {
       key: 'name',
       label: '은행명',
+      minWidth: '400px',
       render: (value: any, bank: Bank) => {
         return (
           <span 
@@ -470,24 +475,28 @@ const AdminCountriesBanks: React.FC = () => {
     {
       key: 'countryName',
       label: '국가명',
+      minWidth: '300px',
       render: (value: any, bank: Bank) => bank.countryName,
       align: 'left' as const
     },
     {
       key: 'codeName',
       label: '통화명',
+      minWidth: '300px',
       render: (value: any, bank: Bank) => bank.codeName,
       align: 'left' as const
     },
     {
       key: 'currencyCode',
       label: '통화',
+      minWidth: '275px',
       render: (value: any, bank: Bank) => bank.currencyCode,
       align: 'center' as const
     },
     {
       key: 'actions',
       label: '관리',
+      minWidth: '250px',
       render: (value: any, bank: Bank) => {
         return (
           <button

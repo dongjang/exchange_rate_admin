@@ -11,7 +11,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +27,7 @@ public class AdminAuthController {
     private RedisService redisService;
 
     @PostMapping("/login")
-    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> loginRequest, HttpServletRequest request, HttpSession session) {
+    public ResponseEntity<Map<String, Object>> login(@RequestBody Map<String, String> loginRequest, HttpSession session) {
         String adminId = loginRequest.get("adminId");
         String password = loginRequest.get("password");
         
@@ -36,7 +35,7 @@ public class AdminAuthController {
             AdminResponse admin = adminService.authenticateAdmin(adminId, password);
             System.out.println("admin: " + admin);
             if (admin != null) {
-                // 관리자 전용 세션 ID 생성 (사용자와 분리)
+                // 관리자 세션 ID 생성
                 String adminSessionId = "admin_" + session.getId() + "_" + System.currentTimeMillis();
                 
                 // HttpSession에 관리자 세션 ID 저장
@@ -46,14 +45,13 @@ public class AdminAuthController {
                 sessionData.put("adminId", admin.getId());
                 sessionData.put("adminEmail", admin.getEmail());
                 sessionData.put("adminName", admin.getName());
-                sessionData.put("adminRole", admin.getRole());
                 sessionData.put("adminStatus", admin.getStatus());
                 
                 redisService.setAdminSession(adminSessionId, sessionData);
                 
                 // Spring Security 인증 컨텍스트 설정
                 List<SimpleGrantedAuthority> authorities = List.of(
-                    new SimpleGrantedAuthority("ROLE_" + admin.getRole())
+                    new SimpleGrantedAuthority("ROLE_ADMIN")
                 );
                 
                 Authentication authentication = new UsernamePasswordAuthenticationToken(
@@ -91,54 +89,53 @@ public class AdminAuthController {
     public ResponseEntity<Map<String, Object>> getCurrentAdmin(HttpSession session) {
         String adminSessionId = (String) session.getAttribute("adminSessionId");
         
-        if (adminSessionId != null) {
-            try {
-                Object sessionData = redisService.getAdminSession(adminSessionId);
-                if (sessionData != null) {
-                    @SuppressWarnings("unchecked")
-                    Map<String, Object> data = (Map<String, Object>) sessionData;
-                    Long adminId = ((Number) data.get("adminId")).longValue();
-                    AdminResponse admin = adminService.getAdminById(adminId);
-                    
-                    Map<String, Object> response = new HashMap<>();
-                    response.put("success", true);
-                    response.put("admin", admin);
-                    return ResponseEntity.ok(response);
-                }
-            } catch (Exception e) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("success", false);
-                response.put("message", "관리자 정보 조회 실패");
-                return ResponseEntity.ok(response);
-            }
+        if (adminSessionId == null) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "로그인되지 않은 관리자");
+            return ResponseEntity.ok(response);
         }
         
-        Map<String, Object> response = new HashMap<>();
-        response.put("success", false);
-        response.put("message", "로그인되지 않은 관리자");
-        return ResponseEntity.ok(response);
+        try {
+            Object sessionData = redisService.getAdminSession(adminSessionId);
+            if (sessionData == null) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("success", false);
+                response.put("message", "세션이 만료되었습니다");
+                return ResponseEntity.ok(response);
+            }
+            
+            @SuppressWarnings("unchecked")
+            Map<String, Object> data = (Map<String, Object>) sessionData;
+            Long adminId = ((Number) data.get("adminId")).longValue();
+            AdminResponse admin = adminService.getAdminById(adminId);
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("admin", admin);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", false);
+            response.put("message", "관리자 정보 조회 실패");
+            return ResponseEntity.ok(response);
+        }
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<Map<String, Object>> logout(HttpServletRequest request, HttpSession session) {
+    public ResponseEntity<Map<String, Object>> logout(HttpSession session) {
         // HttpSession에서 관리자 세션 ID 가져오기
         String adminSessionId = (String) session.getAttribute("adminSessionId");
         if (adminSessionId != null) {
-            // Redis에서 관리자 세션만 삭제
+            // Redis에서 관리자 세션 삭제
             redisService.deleteAdminSession(adminSessionId);
-            // HttpSession에서 관리자 세션 ID만 제거
+            // HttpSession에서 관리자 세션 ID 제거
             session.removeAttribute("adminSessionId");
         }
         
         // Spring Security 인증 컨텍스트 클리어
         SecurityContextHolder.clearContext();
-        
-        // 사용자 세션이 있는지 확인
-        String userSessionId = (String) session.getAttribute("userSessionId");
-        if (userSessionId == null) {
-            // 사용자 세션이 없을 때만 SPRING_SECURITY_CONTEXT 제거
-            session.removeAttribute("SPRING_SECURITY_CONTEXT");
-        }
+        session.removeAttribute("SPRING_SECURITY_CONTEXT");
         
         Map<String, Object> response = new HashMap<>();
         response.put("success", true);

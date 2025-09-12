@@ -62,7 +62,6 @@ function RemittanceHistoryPage() {
 
       // 백엔드 API 호출 (페이징 포함)
       const response = await api.searchRemittanceHistory({
-        userId: userInfo.id,
         recipient: filters.recipient,
         currency: filters.currency,
         status: filters.status,
@@ -174,7 +173,6 @@ function RemittanceHistoryPage() {
         }
 
         const response = await api.searchRemittanceHistory({
-          userId: userInfo.id,
           recipient: newFilters.recipient,
           currency: newFilters.currency,
           status: newFilters.status,

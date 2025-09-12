@@ -81,7 +81,7 @@ export const api = {
     return response.data;
   },
 
-  // 특정 사용자 조회
+  // 관리자 페이지에서 특정 사용자 조회
   async getUserById(id: number): Promise<any> {
     const response = await axios.get(`${API_BASE_URL}/users/users/${id}`, { withCredentials: true });
     return response.data;
@@ -179,7 +179,7 @@ export const api = {
   },
 
   // 관심 환율 등록
-  async saveFavoriteCurrency(params: { type: string; user_id: number; currency_code: string }): Promise<void> {
+  async saveFavoriteCurrency(params: { type: string; currency_code: string }): Promise<void> {
     await axios.post(`${API_BASE_URL}/users/exchange/saveFavoriteRates`, params, { withCredentials: true });
   },
 
@@ -195,9 +195,15 @@ export const api = {
     return response.data;
   },
 
+  // 관리자 페이지 국가/통화 리스트 조회
+  async getAllCountriesForAdmin(): Promise<Country[]> {
+    const response = await axios.get(`${API_BASE_URL}/admin/countries/all`, { withCredentials: true });
+    return response.data;
+  },
+
   // 송금 가능 국가 리스트 조회
   async getRemittanceCountries(): Promise<Country[]> {
-    const response = await axios.get(`${API_BASE_URL}/users/countries/remittance`, { withCredentials: true });
+    const response = await axios.get(`${API_BASE_URL}/admin/countries/remittance`, { withCredentials: true });
     return response.data;
   },
 
@@ -211,9 +217,9 @@ export const api = {
     },
 
   // 내 은행/계좌 정보 조회
-  async getMyBankAccount(userId: number): Promise<MyBankAccount | null> {
+  async getMyBankAccount(): Promise<MyBankAccount | null> {
     try {
-      const response = await axios.get(`${API_BASE_URL}/users/banks/${userId}`, { withCredentials: true });
+      const response = await axios.get(`${API_BASE_URL}/users/banks`, { withCredentials: true });
       return response.data;
     } catch (e) {
       return null;
@@ -221,7 +227,7 @@ export const api = {
   },
 
   // 내 은행/계좌 정보 저장/수정
-  async saveMyBankAccount(params: { userId: number,bankCode:string, accountNumber:string }): Promise<void> {
+  async saveMyBankAccount(params: { bankCode:string, accountNumber:string }): Promise<void> {
     await axios.post(`${API_BASE_URL}/users/banks`, params, { withCredentials: true });
   },
 
@@ -266,7 +272,6 @@ export const api = {
 
   // 송금 이력 검색 (페이징 포함)
   async searchRemittanceHistory(params: {
-    userId: number;
     recipient?: string;
     currency?: string;
     status?: string;
@@ -313,7 +318,7 @@ export const api = {
   // 기본 송금 한도 관련 API
   async getDefaultRemittanceLimit(): Promise<any> {
     try {
-      const response = await axios.get(`${API_BASE_URL}/admin/default-remittance-limit`, { withCredentials: true });
+      const response = await axios.get(`${API_BASE_URL}/admin/remittances/default-remittance-limit`, { withCredentials: true });
       return response.data;
     } catch (error) {
       console.error('기본 한도 조회 실패:', error);
@@ -323,16 +328,16 @@ export const api = {
 
   async updateDefaultRemittanceLimit(data: any): Promise<void> {
     try {
-      await axios.put(`${API_BASE_URL}/admin/default-remittance-limit`, data, { withCredentials: true });
+      await axios.put(`${API_BASE_URL}/admin/remittances/default-remittance-limit/update`, data, { withCredentials: true });
     } catch (error) {
       console.error('기본 한도 업데이트 실패:', error);
       throw error;
     }
   },
 
-  async getUserRemittanceLimit(userId: number): Promise<any> {
+  async getUserRemittanceLimit(): Promise<any> {
     try {
-      const response = await axios.get(`${API_BASE_URL}/users/remittances?userId=${userId}`, { withCredentials: true });
+      const response = await axios.get(`${API_BASE_URL}/users/remittances/user-limit`, { withCredentials: true });
       return response.data;
     } catch (error) {
       console.error('사용자 송금 한도 조회 실패:', error);
@@ -341,27 +346,27 @@ export const api = {
   },
 
   // 한도 변경 신청 API
-  async createRemittanceLimitRequest(userId: number, data: FormData): Promise<any> {
-    const response = await axios.post(`${API_BASE_URL}/users/remittances/${userId}`, data, {
+  async createRemittanceLimitRequest(data: FormData): Promise<any> {
+    const response = await axios.post(`${API_BASE_URL}/users/remittances/limit-requests`, data, {
       headers: { 'Content-Type': 'multipart/form-data' },
       withCredentials: true,
     });
     return response.data;
   },
 
-  async updateRemittanceLimitRequest(userId: number, requestId: number, data: FormData, isRerequest: boolean = false): Promise<any> {
+  async updateRemittanceLimitRequest(requestId: number, data: FormData, isRerequest: boolean = false): Promise<any> {
     // isRerequest 파라미터를 FormData에 추가
     data.append('isRerequest', isRerequest.toString());
     
-    const response = await axios.put(`${API_BASE_URL}/users/remittances/${userId}/${requestId}`, data, {
+    const response = await axios.put(`${API_BASE_URL}/users/remittances/${requestId}`, data, {
       headers: { 'Content-Type': 'multipart/form-data' },
       withCredentials: true,
     });
     return response.data;
   },
 
-  async getUserRemittanceLimitRequests(userId: number): Promise<any[]> {
-    const response = await axios.get(`${API_BASE_URL}/users/remittances/${userId}`, { withCredentials: true });
+  async getUserRemittanceLimitRequests(): Promise<any[]> {
+    const response = await axios.get(`${API_BASE_URL}/users/remittances/limit-requests-info`, { withCredentials: true });
     return response.data;
   },
 
@@ -374,7 +379,7 @@ export const api = {
     sortOrder?: string;
   }): Promise<{list: any[], count: number}> {
     try {
-      const response = await axios.post(`${API_BASE_URL}/admin/remittance-limit-requests/search`, params, {
+      const response = await axios.post(`${API_BASE_URL}/admin/remittances/remittance-limit-requests/search`, params, {
         withCredentials: true
       });
       return response.data;
@@ -396,7 +401,7 @@ export const api = {
     try {
       console.log('API 호출 데이터:', { requestId, data });
       
-      await axios.put(`${API_BASE_URL}/admin/remittance-limit-requests/${requestId}/process`, data, {
+      await axios.put(`${API_BASE_URL}/admin/remittances/remittance-limit-requests/${requestId}/process`, data, {
         withCredentials: true
       });
       
@@ -408,9 +413,9 @@ export const api = {
   },
 
   // 신청 취소
-  async cancelRemittanceLimitRequest(userId: number, requestId: number): Promise<void> {
+  async cancelRemittanceLimitRequest(requestId: number): Promise<void> {
     try {
-      await axios.delete(`${API_BASE_URL}/users/remittances/${userId}/${requestId}`, {
+      await axios.delete(`${API_BASE_URL}/users/remittances/${requestId}`, {
         withCredentials: true
       });
     } catch (error) {
@@ -420,10 +425,9 @@ export const api = {
   },
 
   // 송금 한도 체크
-  async checkRemittanceLimit(userId: number, amount: number): Promise<any> {
+  async checkRemittanceLimit( amount: number): Promise<any> {
     try {
       const response = await axios.post(`${API_BASE_URL}/users/remittances/check-limit`, {
-        userId,
         amount
       }, {
         withCredentials: true
@@ -812,12 +816,19 @@ export const api = {
   },
 
   async getCurrentAdmin(): Promise<any> {
-    const response = await axios.get(`${API_BASE_URL}/admin/current`, { withCredentials: true });
+    const adminSessionId = localStorage.getItem('adminSessionId');
+    const headers: any = { withCredentials: true };
+    if (adminSessionId) {
+      headers.headers = { 'X-Admin-Session-Id': adminSessionId };
+    }
+    const response = await axios.get(`${API_BASE_URL}/admin/current`, headers);
     return response.data;
   },
 
   async adminLogout(): Promise<any> {
     const response = await axios.post(`${API_BASE_URL}/admin/logout`, {}, { withCredentials: true });
+    // 로그아웃 시 localStorage에서 admin 세션 ID 제거
+    localStorage.removeItem('adminSessionId');
     return response.data;
   },
 }; 

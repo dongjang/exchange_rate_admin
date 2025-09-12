@@ -18,7 +18,7 @@ import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
-public class NoticeService {
+public class AdminNoticeService {
     
     private final NoticeRepository noticeRepository;
     private final NoticeMapper noticeMapper;
@@ -30,7 +30,7 @@ public class NoticeService {
     public int getNoticeCount(NoticeSearchRequest request) {
         return noticeMapper.getNoticeCount(request);
     }
-    
+
     // 공지사항 조회수 TOP5 조회 (MyBatis 사용)
     @Transactional(readOnly = true)
     public List<NoticeResponse> getTop5Notices() {
@@ -98,12 +98,7 @@ public class NoticeService {
         
         noticeRepository.delete(notice);
     }
-    
-    @Transactional
-    public void incrementViewCount(Long noticeId) {
-        noticeRepository.incrementViewCount(noticeId);
-    }
-    
+        
     @Transactional(readOnly = true)
     public NoticeResponse getNoticeById(Long id) {
         Notice notice = noticeRepository.findById(id)

@@ -175,7 +175,7 @@ const AdminAdminManagement: React.FC = () => {
     {
       key: 'email',
       label: '이메일',
-      minWidth: '200px',
+      minWidth: '300px',
       flex: 1.5,
       render: (value: any, admin: Admin) => admin.email,
       align: 'left' as const
@@ -221,14 +221,14 @@ const AdminAdminManagement: React.FC = () => {
     {
       key: 'lastLoginAt',
       label: '최근 로그인',
-      width: '150px',
+      width: '200px',
       render: (value: any, admin: Admin) => admin.lastLoginAt ? formatDate(admin.lastLoginAt) : '-',
       align: 'center' as const
     },
     {
       key: 'createdAt',
       label: '생성일',
-      width: '150px',
+      width: '200px',
       render: (value: any, admin: Admin) => formatDate(admin.createdAt),
       align: 'center' as const
     },

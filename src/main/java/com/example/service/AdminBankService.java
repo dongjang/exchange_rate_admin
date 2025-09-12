@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class BankService {
+public class AdminBankService {
     
     private final BankMapper bankMapper;
     

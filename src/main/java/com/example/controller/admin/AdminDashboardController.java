@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.dto.DashboardStatsResponse;
-import com.example.service.DashboardService;
+import com.example.service.AdminDashboardService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,7 +15,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AdminDashboardController {
     
-    private final DashboardService dashboardService;
+    private final AdminDashboardService dashboardService;
     
     /**
      * 대시보드 통합 통계 조회

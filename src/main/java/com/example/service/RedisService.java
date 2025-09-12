@@ -111,7 +111,7 @@ public class RedisService {
      */
     public void setAdminSession(String adminId, Object sessionData) {
         String key = "admin:session:" + adminId;
-        set(key, sessionData, 30, TimeUnit.MINUTES); // 30분 TTL
+        set(key, sessionData, 24, TimeUnit.HOURS); // 24시간 TTL
     }
 
     /**

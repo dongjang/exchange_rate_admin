@@ -41,7 +41,7 @@ const AdminUserDetailModal: React.FC<AdminUserDetailModalProps> = ({
   const fetchUserDetail = async () => {
     try {
       setLoading(true);
-      const userData = await api.getUserById(userId!);
+      const userData = await api.getAdminUserById(userId!);
       setUser(userData);
       setStatus(userData.status);
     } catch (error) {

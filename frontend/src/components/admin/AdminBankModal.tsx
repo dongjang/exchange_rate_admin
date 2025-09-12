@@ -65,7 +65,7 @@ const AdminBankModal: React.FC<AdminBankModalProps> = ({
 
   const fetchCountries = async () => {
     try {
-      const response = await api.getAllCountries();
+      const response = await api.getAllCountriesForAdmin();
       setCountries(response);
       setCountriesLoaded(true);
     } catch (error) {

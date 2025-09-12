@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class CountryService {
+public class AdminCountryService {
     
     private final CountryMapper countryMapper;
     private final CountryRepository countryRepository;
@@ -41,10 +41,6 @@ public class CountryService {
         return countries.stream()
                 .map(this::convertToResponse)
                 .collect(Collectors.toList());
-    }
-    
-    public List<CountryResponse> getRemittanceCountries() {
-        return countryRepository.findRemittanceCountries();
     }
     
     @Transactional
@@ -80,5 +76,9 @@ public class CountryService {
                 .codeName(country.getCodeName())
                 .countryName(country.getCountryName())
                 .build();
+    }
+
+    public List<CountryResponse> getRemittanceCountries() {
+        return countryRepository.findRemittanceCountries();
     }
 }

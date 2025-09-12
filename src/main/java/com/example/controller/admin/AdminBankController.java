@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.dto.BankRequest;
 import com.example.dto.BankResponse;
 import com.example.dto.BankSearchRequest;
-import com.example.service.BankService;
+import com.example.service.AdminBankService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AdminBankController {
     
-    private final BankService bankService;
+    private final AdminBankService bankService;
     
     @PostMapping("/search")
     public ResponseEntity<Map<String, Object>> searchBanks(@RequestBody BankSearchRequest searchRequest) {

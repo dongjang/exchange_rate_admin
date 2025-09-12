@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FaExchangeAlt, FaSignOutAlt, FaBars, FaTimes, FaChartLine, FaUsers, FaBullhorn, FaComments, FaChevronLeft, FaChevronRight, FaAngleDoubleLeft, FaAngleDoubleRight, FaGlobe } from 'react-icons/fa';
+import { FaExchangeAlt, FaSignOutAlt, FaBars, FaTimes, FaChartLine, FaUsers, FaBullhorn, FaComments, FaAngleDoubleLeft, FaAngleDoubleRight, FaGlobe } from 'react-icons/fa';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import { api } from '../../services/api';
@@ -13,7 +13,7 @@ interface AdminLayoutProps {
   admin?: any;
 }
 
-const AdminLayout: React.FC<AdminLayoutProps> = ({ children, admin }) => {
+const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [isMenuAnimating, setIsMenuAnimating] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -59,12 +59,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, admin }) => {
       try {
         await api.adminLogout();
         clearAdminAuth();
-        navigate('/admin');
+        navigate('/');
       } catch (error) {
         console.error('관리자 로그아웃 실패:', error);
         // 에러가 발생해도 클라이언트 상태는 초기화
         clearAdminAuth();
-        navigate('/admin');
+        navigate('/');
       }
     }
   };
@@ -135,12 +135,12 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, admin }) => {
 
   const getActiveNavItem = () => {
     const path = location.pathname;
-    if (path === '/admin') return 'dashboard';
-    if (path === '/admin/remittance') return 'remittance';
-    if (path === '/admin/countries-banks') return 'countries-banks';
-    if (path === '/admin/users') return 'users';
-    if (path === '/admin/notices') return 'notices';
-    if (path === '/admin/qna') return 'qna';
+    if (path === '/') return 'dashboard';
+    if (path === '/remittance') return 'remittance';
+    if (path === '/countries-banks') return 'countries-banks';
+    if (path === '/users') return 'users';
+    if (path === '/notices') return 'notices';
+    if (path === '/qna') return 'qna';
     return 'dashboard';
   };
 
@@ -161,7 +161,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, admin }) => {
               !sidebarCollapsed ? <FaAngleDoubleLeft /> : <FaAngleDoubleRight />
             )}
           </button>
-          <h1 className="admin-title" onClick={() => navigate('/admin')} style={{ cursor: 'pointer' }}>대시보드</h1>
+          <h1 className="admin-title" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>대시보드</h1>
         </div>
         
         {/* 데스크톱 헤더 우측 */}
@@ -322,7 +322,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, admin }) => {
               className={`nav-item ${activeNavItem === 'dashboard' ? 'active' : ''}`} 
               title="대시보드" 
               onClick={() => {
-                navigate('/admin');
+                navigate('/');
                 if (isMobile) setSidebarCollapsed(true);
               }}
             >
@@ -333,7 +333,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, admin }) => {
                className={`nav-item ${activeNavItem === 'remittance' ? 'active' : ''}`} 
                title="송금 관리"
                onClick={() => {
-                 navigate('/admin/remittance');
+                 navigate('/remittance');
                  if (isMobile) setSidebarCollapsed(true);
                }}
              >
@@ -345,7 +345,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, admin }) => {
                className={`nav-item ${activeNavItem === 'countries-banks' ? 'active' : ''}`} 
                title="국가/은행 관리"
                onClick={() => {
-                 navigate('/admin/countries-banks');
+                 navigate('/countries-banks');
                  if (isMobile) setSidebarCollapsed(true);
                }}
              >
@@ -353,11 +353,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, admin }) => {
                <span className="nav-text">국가/은행 관리</span>
              </div>
 
-             <div 
-               className={`nav-item ${activeNavItem === 'users' ? 'active' : ''}`}  
+            <div 
+              className={`nav-item ${activeNavItem === 'users' ? 'active' : ''}`}  
               title="계정 관리"
               onClick={() => {
-                navigate('/admin/users');
+                navigate('/users');
                 if (isMobile) setSidebarCollapsed(true);
               }}
             >
@@ -368,7 +368,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, admin }) => {
               className={`nav-item ${activeNavItem === 'notices' ? 'active' : ''}`} 
               title="공지사항"
               onClick={() => {
-                navigate('/admin/notices');
+                navigate('/notices');
                 if (isMobile) setSidebarCollapsed(true);
               }}
             >
@@ -379,7 +379,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, admin }) => {
               className={`nav-item ${activeNavItem === 'qna' ? 'active' : ''}`} 
               title="Q&A"
               onClick={() => {
-                navigate('/admin/qna');
+                navigate('/qna');
                 if (isMobile) setSidebarCollapsed(true);
               }}
             >

@@ -136,8 +136,8 @@ function AdminHeader({ user, onUserUpdated }: AdminHeaderProps) {
               </svg>
             </a>
             <div className="admin-header-nav">
-              <Link to="/admin/remittance" className="admin-nav-link">송금 이력 관리</Link>
-              <Link to="/admin/remittance-limits" className="admin-nav-link">송금 한도 관리</Link>
+              <Link to="/remittance" className="admin-nav-link">송금 이력 관리</Link>
+              <Link to="/remittance-limits" className="admin-nav-link">송금 한도 관리</Link>
             </div>
             <div className="admin-header-user">
               {user && (

@@ -11,7 +11,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class DashboardService {
+public class AdminDashboardService {
 
     private final DashboardMapper dashboardMapper;
 

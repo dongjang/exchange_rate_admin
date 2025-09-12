@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.dto.CountryRequest;
 import com.example.dto.CountryResponse;
 import com.example.dto.CountrySearchRequest;
-import com.example.service.CountryService;
+import com.example.service.AdminCountryService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,13 +26,13 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AdminCountryController {
     
-    private final CountryService countryService;
+    private final AdminCountryService AdmincountryService;
     
     @PostMapping("/search")
     public ResponseEntity<Map<String, Object>> searchCountries(@RequestBody CountrySearchRequest searchRequest) {
-        int count = countryService.getCountryCount(searchRequest);
+        int count = AdmincountryService.getCountryCount(searchRequest);
         if(count > 0){
-            List<CountryResponse> result = countryService.searchCountries(searchRequest);
+            List<CountryResponse> result = AdmincountryService.searchCountries(searchRequest);
             Map<String, Object> response = new HashMap<>();
             response.put("totalElements", count);
             response.put("content", result);
@@ -49,7 +49,7 @@ public class AdminCountryController {
     
     @GetMapping("/{code}")
     public ResponseEntity<CountryResponse> getCountryByCode(@PathVariable String code) {
-        CountryResponse country = countryService.getCountryByCode(code);
+        CountryResponse country = AdmincountryService.getCountryByCode(code);
         if (country == null) {
             return ResponseEntity.notFound().build();
         }
@@ -58,26 +58,31 @@ public class AdminCountryController {
     
     @PostMapping
     public ResponseEntity<Void> createCountry(@RequestBody CountryRequest request) {
-        countryService.createCountry(request);
+        AdmincountryService.createCountry(request);
         return ResponseEntity.ok().build();
     }
     
     @PutMapping("/{code}")
     public ResponseEntity<Void> updateCountry(@PathVariable String code, @RequestBody CountryRequest request) {
-        countryService.updateCountry(code, request);
+        AdmincountryService.updateCountry(code, request);
         return ResponseEntity.ok().build();
     }
     
     @DeleteMapping("/{code}")
     public ResponseEntity<Void> deleteCountry(@PathVariable String code) {
-        countryService.deleteCountry(code);
+        AdmincountryService.deleteCountry(code);
         return ResponseEntity.ok().build();
     }
     
     @GetMapping("/all")
     public ResponseEntity<List<CountryResponse>> getAllCountries() {
-        List<CountryResponse> countries = countryService.getAllCountries();
+        List<CountryResponse> countries = AdmincountryService.getAllCountries();
         return ResponseEntity.ok(countries);
     }
     
+    @GetMapping("/remittance")
+    public ResponseEntity<List<CountryResponse>> getRemittanceCountries() {
+        List<CountryResponse> countries = AdmincountryService.getRemittanceCountries();
+        return ResponseEntity.ok(countries);
+    }
 } 

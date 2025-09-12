@@ -81,7 +81,6 @@ export function ExchangeRates({ user }: { user: User | null }) {
       if (isFavorite) {
         await api.saveFavoriteCurrency({
           type: 'DEL',
-          user_id: user?.id || 0,
           currency_code: currency,
         });
         // atom 업데이트
@@ -89,7 +88,6 @@ export function ExchangeRates({ user }: { user: User | null }) {
       } else {
         await api.saveFavoriteCurrency({
           type: 'ADD',
-          user_id: user?.id || 0,
           currency_code: currency,
         });
         // atom 업데이트

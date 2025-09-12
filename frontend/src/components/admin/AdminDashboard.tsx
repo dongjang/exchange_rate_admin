@@ -34,8 +34,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin }) => {
       try {
         setLoading(true);
         setError(null);
-                 const data = await api.getDashboardStats();
-         setDashboardData(data);
+        const data = await api.getDashboardStats();
+        setDashboardData(data);
       } catch (err) {
         console.error('대시보드 데이터 조회 실패:', err);
         setError('대시보드 데이터를 불러오는데 실패했습니다.');
@@ -44,8 +44,11 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin }) => {
       }
     };
 
-    fetchDashboardData();
-  }, []);
+    // admin이 존재할 때만 데이터 조회
+    if (admin) {
+      fetchDashboardData();
+    }
+  }, [admin]);
 
   // 송금 통계 데이터 (API에서 가져온 데이터 사용)
   const remittanceStats = dashboardData?.remittanceStats || {

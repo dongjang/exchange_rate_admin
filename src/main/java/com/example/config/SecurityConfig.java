@@ -10,7 +10,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
@@ -23,60 +22,19 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    private final CustomOAuth2UserService customOAuth2UserService;
     private final Environment env;
 
-    @Bean
-    public SecurityFilterChain userFilterChain(HttpSecurity http, ClientRegistrationRepository clientRegistrationRepository) throws Exception {
-        http
-            .securityMatcher("/api/users/**", "/oauth2/**", "/login/**")
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(authz -> authz
-                .requestMatchers("/api/users/auth/**").permitAll()
-                .requestMatchers("/api/users/notices/**").authenticated()
-                .requestMatchers("/api/users/exchange-rates/**").authenticated()
-                .requestMatchers("/api/users/remittance/**").authenticated()
-                .requestMatchers("/api/users/qna/**").authenticated()
-                .requestMatchers("/api/users/**").authenticated()
-                .anyRequest().permitAll()
-            )
-            .oauth2Login(oauth2 -> oauth2
-                .defaultSuccessUrl(getFrontendUrl() + "/auth/success", true)
-                .failureUrl(getFrontendUrl() + "/auth/failure")
-                .userInfoEndpoint(userInfo -> userInfo
-                    .userService(customOAuth2UserService)
-                )
-                .authorizationEndpoint(authorization -> authorization
-                    .authorizationRequestResolver(
-                        new CustomAuthorizationRequestResolver(
-                            clientRegistrationRepository,
-                            "/oauth2/authorization"
-                        )
-                    )
-                )
-            );
-        
-        return http.build();
-    }
 
     @Bean
+    @Order(1)
     public SecurityFilterChain adminFilterChain(HttpSecurity http) throws Exception {
         http
-            .securityMatcher("/api/admin/**")
+            .securityMatcher("/api/admin/**", "/api/admin/login/**", "/api/admin/auth/**")
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
+                .requestMatchers("/api/admin/login/**").permitAll()
                 .requestMatchers("/api/admin/auth/**").permitAll()
-                .requestMatchers("/api/admin/dashboard/**").authenticated()
-                .requestMatchers("/api/admin/users/**").authenticated()
-                .requestMatchers("/api/admin/remittance/**").authenticated()
-                .requestMatchers("/api/admin/remittance-limits/**").authenticated()
-                .requestMatchers("/api/admin/notices/**").authenticated()
-                .requestMatchers("/api/admin/qna/**").authenticated()
-                .requestMatchers("/api/admin/countries/**").authenticated()
-                .requestMatchers("/api/admin/banks/**").authenticated()
-                .requestMatchers("/api/admin/admins/**").authenticated()
                 .requestMatchers("/api/admin/**").authenticated()
                 .anyRequest().denyAll()
             );
@@ -85,6 +43,7 @@ public class SecurityConfig {
     }
 
     @Bean
+    @Order(2)
     public SecurityFilterChain fileFilterChain(HttpSecurity http) throws Exception {
         http
             .securityMatcher("/api/files/**")
@@ -102,6 +61,7 @@ public class SecurityConfig {
     }
 
     @Bean
+    @Order(3)
     public SecurityFilterChain publicFilterChain(HttpSecurity http) throws Exception {
         http
             .securityMatcher("/api/public/**", "/health/**", "/actuator/**")
@@ -114,6 +74,21 @@ public class SecurityConfig {
                 .requestMatchers("/api/public/**").permitAll()
                 // 운영 환경에서만 actuator 허용 (개발 환경에서는 비활성화)
                 .requestMatchers("/actuator/**").denyAll()
+                .anyRequest().denyAll()
+            );
+        
+        return http.build();
+    }
+
+    @Bean
+    @Order(4)
+    public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
+        http
+            .securityMatcher("/**")
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(authz -> authz
+                .requestMatchers("/", "/remittance", "/countries-banks", "/users", "/notices", "/qna").permitAll() // 프론트엔드 라우팅 허용
                 .anyRequest().denyAll()
             );
         
@@ -143,21 +118,6 @@ public class SecurityConfig {
         return source;
     }
 
-    /**
-     * 환경별 프론트엔드 URL 반환
-     */
-    private String getFrontendUrl() {
-        String profile = env.getActiveProfiles().length > 0 ? env.getActiveProfiles()[0] : "dev";
-        
-        switch (profile) {
-            case "prod":
-                return ""; // 운영 도메인
-            case "staging":
-                return ""; // 스테이징 도메인
-            default:
-                return "http://localhost:5173"; // 개발 환경
-        }
-    }
 
     /**
      * 환경별 CORS 허용 origin 설정

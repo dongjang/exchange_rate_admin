@@ -99,7 +99,6 @@ const Dashboard: React.FC<DashboardProps> = ({ user }) => {
       if (!userInfo?.id) return;
       
       const response = await api.searchRemittanceHistory({
-        userId: userInfo.id,
         recipient: '',
         currency: '',
         status: '',

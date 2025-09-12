@@ -54,7 +54,7 @@ function AccountModal({ open, initialBank, initialAccount, onSave, isEdit, onClo
 
   return (
     <div
-      style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(30,41,59,0.48)', zIndex: 12000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+      style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', background: 'rgba(30,41,59,0.48)', zIndex: 10000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       onMouseDown={e => {
         if (e.target === e.currentTarget) onClose();
       }}

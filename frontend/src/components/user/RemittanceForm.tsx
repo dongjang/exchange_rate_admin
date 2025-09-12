@@ -133,8 +133,7 @@ function RemittanceForm({ onSubmit, refreshKey = 0 }: RemittanceFormProps) {
   }, [senderBankOptions, myBankAccount, form.senderBank]);
 
   useEffect(() => {
-    if (!userInfo?.id) return;
-    api.getMyBankAccount(userInfo.id).then(data => {
+    api.getMyBankAccount().then(data => {
       if (data && data.bankCode && data.accountNumber) {
         setForm(prev => ({ ...prev, senderBank: data.bankCode, senderAccount: data.accountNumber }));
         setMyBankAccount(data);
@@ -146,9 +145,17 @@ function RemittanceForm({ onSubmit, refreshKey = 0 }: RemittanceFormProps) {
   }, [userInfo, setMyBankAccount]);
 
   const handleAccountSave = async (bank: string, account: string) => {
-    if (!userInfo?.id) return;
     if (!bank || !account) {
-      Swal.fire({ icon: 'warning', title: '정보를 모두 입력해 주세요.', customClass: { popup: 'swal2-z-top', container: 'swal2-z-top' } });
+      Swal.fire({ 
+        icon: 'warning', 
+        title: '정보를 모두 입력해 주세요.', 
+        customClass: { 
+          popup: 'swal2-z-top', 
+          container: 'swal2-z-top',
+          backdrop: 'swal2-z-top'
+        },
+        zIndex: 99999
+      });
       return;
     }
     const isEdit = !!myBankAccount && myBankAccount.bankCode && myBankAccount.accountNumber;
@@ -157,14 +164,19 @@ function RemittanceForm({ onSubmit, refreshKey = 0 }: RemittanceFormProps) {
       title: isEdit ? '내 은행/계좌 정보 수정' : '내 은행/계좌 정보 등록',
       text: isEdit ? '내 은행/계좌 정보를 수정하시겠습니까?' : '내 은행/계좌 정보를 등록하시겠습니까?',
       showCancelButton: true,
+      customClass: { 
+        popup: 'swal2-z-top', 
+        container: 'swal2-z-top',
+        backdrop: 'swal2-z-top'
+      },
+      zIndex: 99999,
       confirmButtonText: isEdit ? '수정' : '등록',
       cancelButtonText: '취소',
       confirmButtonColor: '#3b82f6',
       cancelButtonColor: '#d1d5db',
-      customClass: { popup: 'swal2-z-top', container: 'swal2-z-top' },
     });
     if (!result.isConfirmed) return;
-    await api.saveMyBankAccount({ userId: userInfo.id, bankCode: bank, accountNumber: account });
+    await api.saveMyBankAccount({ bankCode: bank, accountNumber: account });
     setForm(prev => ({ ...prev, senderBank: bank, senderAccount: account }));
     setMyBankAccount({ bankCode: bank, accountNumber: account });
     setShowAccountModal(false);
@@ -175,7 +187,12 @@ function RemittanceForm({ onSubmit, refreshKey = 0 }: RemittanceFormProps) {
       width: 420,
       timer: 1300,
       showConfirmButton: false,
-      customClass: { popup: 'swal2-z-top', container: 'swal2-z-top' }
+      customClass: { 
+        popup: 'swal2-z-top', 
+        container: 'swal2-z-top',
+        backdrop: 'swal2-z-top'
+      },
+      zIndex: 99999
     });
   };
 
@@ -305,7 +322,7 @@ function RemittanceForm({ onSubmit, refreshKey = 0 }: RemittanceFormProps) {
 
     try {
       // 한도 체크
-      const limitCheck = await api.checkRemittanceLimit(userInfo?.id || 0, cleanAmount);
+      const limitCheck = await api.checkRemittanceLimit(cleanAmount);
       
       if (!limitCheck.success) {
         // 한도 초과 시 상세 메시지 표시
@@ -370,7 +387,6 @@ function RemittanceForm({ onSubmit, refreshKey = 0 }: RemittanceFormProps) {
 
       // 송금 API 호출
       const remittanceData = {
-        userId: userInfo?.id || 0,
         senderBank: form.senderBank,
         senderAccount: form.senderAccount,
         receiverBank: form.receiverBank,
@@ -610,7 +626,12 @@ function RemittanceForm({ onSubmit, refreshKey = 0 }: RemittanceFormProps) {
             await Swal.fire({
               icon: 'warning',
               title: '정보를 모두 입력해 주세요.',
-              customClass: { popup: 'swal2-z-top', container: 'swal2-z-top' },
+              customClass: { 
+                popup: 'swal2-z-top', 
+                container: 'swal2-z-top',
+                backdrop: 'swal2-z-top'
+              },
+              zIndex: 99999
             });
             return;
           }
