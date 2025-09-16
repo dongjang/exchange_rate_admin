@@ -700,13 +700,6 @@ export const api = {
     return response.data;
   },
 
-  // getRemittanceCountries: async () => {
-  //   const response = await axios.get(`${API_BASE_URL}/countries/remittance`, {
-  //     withCredentials: true
-  //   });
-  //   return response.data;
-  // },
-
   // Notice API
   getNoticeById: async (id: number) => {
     const response = await axios.get(`${API_BASE_URL}/users/notices/${id}`, {

@@ -104,7 +104,7 @@ const AdminLimitRequests: React.FC = () => {
     <div className="dashboard-card">
       <div className="admin-card-header">
         <h3>📋 한도 변경 신청</h3>
-        <button className="more-button" onClick={() => navigate('/admin/remittance', { state: { activeTab: 'limits' } })}>
+        <button className="more-button" onClick={() => navigate('/remittance', { state: { activeTab: 'limits' } })}>
           더보기
         </button>
       </div>

@@ -84,7 +84,7 @@ const AdminAdminManagement: React.FC = () => {
           isAuthenticated: false,
           isLoading: false,
         });
-        navigate('/admin');
+        navigate('/');
       } catch (error) {
         console.error('Logout failed:', error);
       }

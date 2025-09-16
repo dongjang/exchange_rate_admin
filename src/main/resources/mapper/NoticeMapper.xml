@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.mapper.NoticeMapper">
+<mapper namespace="com.example.support.mapper.NoticeMapper">
 
     <select id="getNoticeList" parameterType="NoticeSearchRequest" resultType="NoticeResponse">
         SELECT 
@@ -32,11 +32,6 @@
             </if>
             <if test="priority != null and priority != ''">
                 AND n.priority = #{priority}
-            </if>
-            <!-- 사용자용 검색일 때만 현재 날짜가 공지 기간 내에 있는 공지사항만 조회 -->
-            <if test="isUserSearch == true">
-                AND (n.notice_start_at IS NULL OR n.notice_start_at &lt;= NOW())
-                AND (n.notice_end_at IS NULL OR n.notice_end_at &gt;= NOW())
             </if>
         </where>
         <choose>
@@ -73,11 +68,6 @@
             </if>
             <if test="priority != null and priority != ''">
                 AND n.priority = #{priority}
-            </if>
-            <!-- 사용자용 검색일 때만 현재 날짜가 공지 기간 내에 있는 공지사항만 조회 -->
-            <if test="isUserSearch == true">
-                AND (n.notice_start_at IS NULL OR n.notice_start_at &lt;= NOW())
-                AND (n.notice_end_at IS NULL OR n.notice_end_at &gt;= NOW())
             </if>
         </where>
     </select>

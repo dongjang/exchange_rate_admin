@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.mapper.RemittanceLimitRequestMapper">
+<mapper namespace="com.example.remittance.mapper.RemittanceLimitRequestMapper">
 
 
     <select id="selectRemittanceLimitRequests" resultType="RemittanceLimitRequestResponse">
@@ -112,34 +112,6 @@
         WHERE rlr.id = #{id}
     </select>
 
-    <insert id="insertRemittanceLimitRequest" parameterType="RemittanceLimitRequest" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO remittance_limit_request (
-            user_id,
-            daily_limit,
-            monthly_limit,
-            single_limit,
-            reason,
-            income_file_id,
-            bankbook_file_id,
-            business_file_id,
-            status,
-            created_at,
-            updated_at
-        ) VALUES (
-            #{userId},
-            #{dailyLimit},
-            #{monthlyLimit},
-            #{singleLimit},
-            #{reason},
-            #{incomeFileId},
-            #{bankbookFileId},
-            #{businessFileId},
-            #{status},
-            NOW(),
-            NOW()
-        )
-    </insert>
-
     <update id="updateRemittanceLimitRequest" parameterType="RemittanceLimitRequest">
         UPDATE remittance_limit_request
         SET 
@@ -165,16 +137,6 @@
             admin_id = #{adminId},
             admin_comment = #{adminComment},
             processed_at = NOW(),
-            updated_at = NOW()
-        WHERE id = #{id}
-    </update>
-
-    <update id="clearFileIds">
-        UPDATE remittance_limit_request
-        SET 
-            income_file_id = NULL,
-            bankbook_file_id = NULL,
-            business_file_id = NULL,
             updated_at = NOW()
         WHERE id = #{id}
     </update>

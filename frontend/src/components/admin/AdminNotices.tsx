@@ -3,8 +3,8 @@ import React, { useEffect, useState } from 'react';
 import Swal from 'sweetalert2';
 import { api } from '../../services/api';
 import { userInfoAtom } from '../../store/userStore';
-import AdminNoticeModal from '../user/AdminNoticeModal';
-import NoticeSearchForm from '../user/NoticeSearchForm';
+import AdminNoticeModal from './AdminNoticeModal';
+import NoticeSearchForm from './NoticeSearchForm';
 import AdminLayout from './AdminLayout';
 import AdminTable from './AdminTable';
 

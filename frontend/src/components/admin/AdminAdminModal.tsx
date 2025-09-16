@@ -225,7 +225,7 @@ function AdminAdminModal({ isOpen, onClose, adminId, onAdminUpdated }: AdminAdmi
             isAuthenticated: false,
             isLoading: false,
           });
-          navigate('/admin');
+          navigate('/');
         } catch (error) {
           console.error('Logout failed:', error);
         }

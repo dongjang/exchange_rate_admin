@@ -292,7 +292,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin }) => {
           <div className="dashboard-card">
             <div className="admin-card-header">
               <h3>👥 사용자 통계</h3>
-              <button className="more-button" onClick={() => navigate('/admin/users')}>더보기</button>
+              <button className="more-button" onClick={() => navigate('/users')}>더보기</button>
             </div>
             <div className="card-content">
               <div className="stats-grid">
@@ -362,7 +362,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin }) => {
           <div className="dashboard-card">
             <div className="admin-card-header">
               <h3>❓ Q&A 미답변</h3>
-              <button className="more-button" onClick={() => navigate('/admin/qna', { state: { fromDashboard: true } })}>더보기</button>
+              <button className="more-button" onClick={() => navigate('/qna', { state: { fromDashboard: true } })}>더보기</button>
             </div>
             <div className="card-content">
               {qnaStats.pendingCount > 0 ? (

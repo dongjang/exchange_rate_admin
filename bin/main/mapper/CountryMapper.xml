@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.mapper.CountryMapper">
+<mapper namespace="com.example.common.mapper.CountryMapper">
 
     <select id="getCountryList" parameterType="CountrySearchRequest" resultType="Country">
         SELECT 
@@ -64,7 +64,7 @@
         </where>
     </select>
 
-    <select id="getCountryByCode" parameterType="string" resultType="com.example.domain.Country">
+    <select id="getCountryByCode" parameterType="string" resultType="Country">
         SELECT 
             code,
             code_name,
@@ -73,12 +73,12 @@
         WHERE code = #{code}
     </select>
 
-    <insert id="insertCountry" parameterType="com.example.domain.Country">
+    <insert id="insertCountry" parameterType="Country">
         INSERT INTO country (code, code_name, country_name)
         VALUES (#{code}, #{codeName}, #{countryName})
     </insert>
 
-    <update id="updateCountry" parameterType="com.example.domain.Country">
+    <update id="updateCountry" parameterType="Country">
         UPDATE country
         SET code_name = #{codeName},
             country_name = #{countryName}

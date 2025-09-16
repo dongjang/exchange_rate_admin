@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../../services/api';
 import './AdminRemittanceHistory.css';
-import RemittanceHistoryFilter from '../user/RemittanceHistoryFilter';
+import RemittanceHistoryFilter from './RemittanceHistoryFilter';
 import AdminTable from './AdminTable';
 
 interface Remittance {

@@ -59,11 +59,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
       try {
         await api.adminLogout();
         clearAdminAuth();
+        // localStorage에서 인증 상태 제거
+        localStorage.removeItem('adminAuthenticated');
         navigate('/');
       } catch (error) {
         console.error('관리자 로그아웃 실패:', error);
         // 에러가 발생해도 클라이언트 상태는 초기화
         clearAdminAuth();
+        // localStorage에서 인증 상태 제거
+        localStorage.removeItem('adminAuthenticated');
         navigate('/');
       }
     }
@@ -252,7 +256,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                           <div 
                 className={`mobile-nav-item ${activeNavItem === 'dashboard' ? 'active' : ''}`}
                 onClick={() => {
-                  navigate('/admin');
+                  navigate('/');
                   handleMenuClose();
                 }}
               >
@@ -262,7 +266,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                              <div 
                  className={`mobile-nav-item ${activeNavItem === 'remittance' ? 'active' : ''}`}
                  onClick={() => {
-                   navigate('/admin/remittance');
+                   navigate('/remittance');
                    handleMenuClose();
                  }}
                >
@@ -272,7 +276,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                <div 
                  className={`mobile-nav-item ${activeNavItem === 'countries-banks' ? 'active' : ''}`}
                  onClick={() => {
-                   navigate('/admin/countries-banks');
+                   navigate('/countries-banks');
                    handleMenuClose();
                  }}
                >
@@ -282,7 +286,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
                <div 
                  className={`mobile-nav-item ${activeNavItem === 'users' ? 'active' : ''}`}
                 onClick={() => {
-                  navigate('/admin/users');
+                  navigate('/users');
                   handleMenuClose();
                 }}
               >
@@ -292,7 +296,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               <div 
                 className={`mobile-nav-item ${activeNavItem === 'notices' ? 'active' : ''}`}
                 onClick={() => {
-                  navigate('/admin/notices');
+                  navigate('/notices');
                   handleMenuClose();
                 }}
               >
@@ -302,7 +306,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               <div 
                 className={`mobile-nav-item ${activeNavItem === 'qna' ? 'active' : ''}`}
                 onClick={() => {
-                  navigate('/admin/qna');
+                  navigate('/qna');
                   handleMenuClose();
                 }}
               >

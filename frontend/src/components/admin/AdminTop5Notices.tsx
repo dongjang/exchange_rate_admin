@@ -89,7 +89,7 @@ const AdminTop5Notices: React.FC = () => {
     <div className="dashboard-card">
       <div className="admin-card-header">
         <h3>📢 공지사항 조회수 TOP5</h3>
-        <button className="more-button" onClick={() => navigate('/admin/notices')}>
+        <button className="more-button" onClick={() => navigate('/notices')}>
           더보기
         </button>
       </div>

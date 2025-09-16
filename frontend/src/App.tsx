@@ -4,7 +4,7 @@ import { Route, BrowserRouter as Router, Routes, useLocation } from 'react-route
 import './App.css';
 import AdminDashboard from './components/admin/AdminDashboard';
 import AdminRemittanceManagement from './components/admin/AdminRemittanceManagement';
-import GlobalLoading from './components/user/GlobalLoading';
+import GlobalLoading from './components/admin/GlobalLoading';
 import { api } from './services/api';
 import { adminAuthAtom, setAdminAuthAtom, adminInfoAtom, setAdminInfoAtom } from './store/adminStore';
 import AdminNotices from './components/admin/AdminNotices';
@@ -12,7 +12,7 @@ import AdminQna from './components/admin/AdminQna';
 import AdminUsers from './components/admin/AdminUsers';
 import AdminCountriesBanks from './components/admin/AdminCountriesBanks';
 import AdminLogin from './components/admin/AdminLogin';
-import NotFound from './components/user/NotFound';
+import NotFound from './components/admin/NotFound';
 
 function AppContent() {
   const [adminAuth] = useAtom(adminAuthAtom);
@@ -36,20 +36,35 @@ function AppContent() {
       if (adminResult.success && adminResult.admin) {
         setAdminInfoState(adminResult.admin);
         setAdminAuthState({ isAuthenticated: true, isLoading: false });
+        // 세션 상태를 localStorage에 저장
+        localStorage.setItem('adminAuthenticated', 'true');
       } else {
         setAdminAuthState({ isAuthenticated: false, isLoading: false });
         setAdminInfoState(null);
+        // 인증 실패 시 localStorage에서 제거
+        localStorage.removeItem('adminAuthenticated');
       }
     } catch (error) {
       console.error('관리자 인증 확인 실패:', error);
       setAdminAuthState({ isAuthenticated: false, isLoading: false });
       setAdminInfoState(null);
+      // 에러 시 localStorage에서 제거
+      localStorage.removeItem('adminAuthenticated');
     }
   };
 
+  // 초기 로드 시 localStorage 확인
+  useEffect(() => {
+    const isStoredAuth = localStorage.getItem('adminAuthenticated') === 'true';
+    if (isStoredAuth && !adminAuth.isAuthenticated) {
+      checkAdminAuth();
+    }
+  }, []);
+
   useEffect(() => { 
     // 모든 페이지에서 관리자 인증 확인
-    if (!adminAuth.isAuthenticated && adminInfo) {
+    // 새로고침 시에도 인증 상태를 확인하도록 수정
+    if (!adminAuth.isAuthenticated) {
       checkAdminAuth();
     }
   }, [location.pathname, adminAuth.isAuthenticated]);

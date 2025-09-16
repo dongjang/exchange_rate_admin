@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.example.mapper.RemittanceMapper">
+<mapper namespace="com.example.remittance.mapper.RemittanceMapper">
 
     <select id="selectRemittanceHistory" parameterType="RemittanceHistorySearchRequest" resultType="RemittanceHistoryResponse">
         <!-- 송금 이력 조회 -->
@@ -104,14 +104,6 @@
         </where>
     </select>
 
-    <select id="existsUserRemittanceLimit" resultType="boolean">
-        <!-- 사용자 송금 한도 존재 여부 확인 -->
-        SELECT EXISTS(
-            SELECT 1 FROM user_remittance_limit 
-            WHERE user_id = #{userId}
-        )
-    </select>
-
     <select id="getDailyLimit" resultType="BigDecimal">
         <!-- 일일 한도 체크 -->
         SELECT IFNULL(url.daily_limit, def.daily_limit) - IFNULL(SUM(r.amount), 0) AS daily_limit
@@ -142,21 +134,6 @@
             ELSE DATE_FORMAT(CURDATE(), '%Y-%m-01')
         END
         AND CONCAT(LAST_DAY(CURDATE()), ' 23:59:59')
-        WHERE def.is_active = true
-    </select>
-
-    <select id="getUserLimits" resultType="UserLimitsResponse">
-        <!-- 사용자별 한도 조회 -->
-        SELECT 
-            IFNULL(url.daily_limit, def.daily_limit) AS dailyLimit,
-            IFNULL(url.monthly_limit, def.monthly_limit) AS monthlyLimit,
-            IFNULL(url.single_limit, def.single_limit) AS singleLimit,
-            CASE
-                WHEN url.daily_limit IS NULL THEN 'DEFAULT_LIMIT'
-                ELSE 'USER_LIMIT'
-            END AS limitType
-        FROM default_remittance_limit def
-        LEFT JOIN user_remittance_limit url ON url.user_id = #{userId}
         WHERE def.is_active = true
     </select>
 

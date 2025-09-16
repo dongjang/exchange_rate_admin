@@ -60,13 +60,13 @@ function AdminHeader({ user, onUserUpdated }: AdminHeaderProps) {
       name: user.name,
       pictureUrl: user.pictureUrl,
     });
-    setIsModalOpen(true);
+    //setIsModalOpen(true);
   };
 
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    onUserUpdated(); // App에서 user를 갱신하도록 콜백 호출
-  };
+  // const handleModalClose = () => {
+  //   setIsModalOpen(false);
+  //   onUserUpdated(); // App에서 user를 갱신하도록 콜백 호출
+  // };
 
   const handleMenuToggle = () => setIsMenuOpen((open) => !open);
   const handleMenuClose = () => setIsMenuOpen(false);
@@ -113,8 +113,8 @@ function AdminHeader({ user, onUserUpdated }: AdminHeaderProps) {
             {isMenuOpen && (
               <div className="admin-mobile-dropdown-overlay" onClick={handleMenuClose}>
                 <div className="admin-mobile-dropdown-menu" onClick={e => e.stopPropagation()}>
-                  <Link to="/admin/remittance" className="admin-nav-link" onClick={handleMenuClose}>송금 이력 관리</Link>
-                  <Link to="/admin/remittance-limits" className="admin-nav-link" onClick={handleMenuClose}>송금 한도 관리</Link>
+                  <Link to="/remittance" className="admin-nav-link" onClick={handleMenuClose}>송금 이력 관리</Link>
+                  <Link to="/remittance-limits" className="admin-nav-link" onClick={handleMenuClose}>송금 한도 관리</Link>
                   <button onClick={() => { handleLogout(); handleMenuClose(); }} className="admin-logout-button">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>

@@ -22,7 +22,7 @@ const AdminLogin = () => {
   // 이미 로그인된 관리자 체크
   useEffect(() => {
     if (adminAuth.isAuthenticated) {
-      navigate('/admin');
+      navigate('/');
     }
   }, [adminAuth.isAuthenticated, navigate]);
 
@@ -54,7 +54,7 @@ const AdminLogin = () => {
         // 관리자 정보 설정
         setAdminInfo(response.admin);
         setAdminAuth({ isAuthenticated: true, isLoading: false });
-        navigate('/admin');
+        navigate('/');
       } else {
         setError(response.message || '로그인에 실패했습니다.');
       }
