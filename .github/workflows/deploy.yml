@@ -108,15 +108,18 @@ jobs:
           # 애플리케이션 실행 (H2 인메모리 DB로 테스트)
           echo "애플리케이션 실행 (H2 인메모리 DB로 테스트)..."
           nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar \
-            --spring.datasource.url=jdbc:h2:mem:testdb \
+            --spring.datasource.url=jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1 \
             --spring.datasource.driver-class-name=org.h2.Driver \
             --spring.datasource.username=sa \
             --spring.datasource.password= \
             --spring.jpa.database-platform=org.hibernate.dialect.H2Dialect \
             --spring.jpa.hibernate.ddl-auto=create-drop \
+            --spring.jpa.show-sql=true \
             --spring.h2.console.enabled=true \
             --server.port=8080 \
-            --spring.cache.type=none > app.log 2>&1 &
+            --spring.cache.type=none \
+            --logging.level.org.hibernate.SQL=DEBUG \
+            --logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE > app.log 2>&1 &
           
           # 잠시 대기 (애플리케이션 시작 시간 확보)
           sleep 10
