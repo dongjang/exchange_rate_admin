@@ -108,8 +108,8 @@ jobs:
             nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
           fi
           
-          # 잠시 대기
-          sleep 5
+          # 잠시 대기 (애플리케이션 시작 시간 확보)
+          sleep 10
           
           # 상태 확인
           echo "=== 배포 완료 ==="
@@ -121,6 +121,15 @@ jobs:
           
           echo "로그 확인 (전체):"
           cat app.log
+          
+          echo "애플리케이션 상태 확인 (5초 후):"
+          sleep 5
+          echo "실행 중인 프로세스 재확인:"
+          ps aux | grep exProject | grep -v grep || echo "프로세스 없음"
+          echo "포트 8080 재확인:"
+          netstat -tlnp | grep :8080 || echo "포트 8080이 여전히 열려있지 않음"
+          echo "최신 로그 (마지막 20줄):"
+          tail -20 app.log
         EOF
         
     - name: Check deployment status
