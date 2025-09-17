@@ -28,24 +28,39 @@ jobs:
         ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts || true
         chmod 600 ~/.ssh/known_hosts
         
-    - name: Deploy to EC2
+    - name: Stop existing process
       run: |
         ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
           echo "현재 실행 중인 프로세스 중지..." &&
-          pkill -f exProject || true &&
+          pkill -f exProject || true
+        '
+        
+    - name: Clone/Update repository
+      run: |
+        ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
           echo "프로젝트 클론/업데이트..." &&
           if [ -d "exchange_rate_admin" ]; then
             cd exchange_rate_admin && git pull origin master
           else
             git clone https://github.com/${{ github.repository }}.git exchange_rate_admin && cd exchange_rate_admin
-          fi &&
+          fi
+        '
+        
+    - name: Build application
+      run: |
+        ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
+          cd exchange_rate_admin &&
           echo "애플리케이션 빌드..." &&
-          ./gradlew clean build -x test &&
+          ./gradlew clean build -x test
+        '
+        
+    - name: Start application
+      run: |
+        ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
+          cd exchange_rate_admin &&
           echo "애플리케이션 실행..." &&
           nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
-          echo "배포 완료!" &&
-          sleep 3 &&
-          ps aux | grep exProject | grep -v grep
+          echo "배포 완료!"
         '
         
     - name: Check deployment status
