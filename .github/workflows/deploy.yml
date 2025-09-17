@@ -18,9 +18,11 @@ jobs:
         mkdir -p ~/.ssh
         echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
+        chmod 700 ~/.ssh
         eval "$(ssh-agent -s)"
         ssh-add ~/.ssh/id_rsa
         ssh-add -l
+        echo "SSH 키 설정 완료"
         
     - name: Add EC2 to known hosts
       run: |
@@ -30,7 +32,10 @@ jobs:
         
     - name: Test SSH connection
       run: |
-        ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} 'echo "SSH 연결 성공!"'
+        echo "SSH 연결 테스트 시작..."
+        echo "Host: ${{ secrets.EC2_HOST }}"
+        echo "User: ${{ secrets.EC2_USER }}"
+        ssh -v -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} 'echo "SSH 연결 성공!"'
         
     - name: Stop existing process
       run: |
