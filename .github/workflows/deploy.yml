@@ -100,7 +100,9 @@ jobs:
           echo "애플리케이션 실행..."
           if [ -f ~/.env ]; then
             echo "환경변수 파일이 존재합니다. 환경변수로 실행..."
-            nohup env $(cat ~/.env | xargs) java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+            # 환경변수 파일을 source하여 export
+            export $(cat ~/.env | grep -v '^#' | grep -v '^$' | xargs)
+            nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
           else
             echo "환경변수 파일이 없습니다. 기본 설정으로 실행..."
             nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
