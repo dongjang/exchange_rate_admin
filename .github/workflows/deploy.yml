@@ -15,10 +15,12 @@ jobs:
       
     - name: Setup SSH
       run: |
-        echo "${{ secrets.EC2_PRIVATE_KEY }}" > private_key.pem
-        chmod 600 private_key.pem
+        mkdir -p ~/.ssh
+        echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+        chmod 600 ~/.ssh/id_rsa
         eval "$(ssh-agent -s)"
-        ssh-add private_key.pem
+        ssh-add ~/.ssh/id_rsa
+        ssh-add -l
         
     - name: Add EC2 to known hosts
       run: |
@@ -26,7 +28,7 @@ jobs:
         
     - name: Deploy to EC2
       run: |
-        ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
+        ssh -o StrictHostKeyChecking=no ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
           cd exAdmin &&
           echo "현재 실행 중인 프로세스 중지..." &&
           pkill -f exProject || true &&
@@ -43,7 +45,7 @@ jobs:
         
     - name: Check deployment status
       run: |
-        ssh ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
+        ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
           echo "애플리케이션 상태 확인..." &&
           curl -f http://localhost:8080/health || echo "헬스체크 실패" &&
           echo "로그 확인 (최근 10줄)..." &&
