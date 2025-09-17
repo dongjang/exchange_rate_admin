@@ -96,19 +96,27 @@ jobs:
           echo "환경변수 파일 내용:"
           cat ~/.env || echo "환경변수 파일이 없습니다"
           
-          # 애플리케이션 실행 (환경변수 포함)
-          echo "애플리케이션 실행..."
-          if [ -f ~/.env ]; then
-            echo "환경변수 파일이 존재합니다. 환경변수로 실행..."
-            # 환경변수 파일을 더 안전하게 로드
-            set -a  # 모든 변수를 자동으로 export
-            source ~/.env
-            set +a  # 자동 export 비활성화
-            nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
-          else
-            echo "환경변수 파일이 없습니다. 기본 설정으로 실행..."
-            nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
-          fi
+          # 데이터베이스 연결 테스트
+          echo "데이터베이스 연결 테스트..."
+          set -a
+          source ~/.env
+          set +a
+          echo "DB_URL: $DB_URL"
+          echo "DB_USERNAME: $DB_USERNAME"
+          echo "DB_PASSWORD: [HIDDEN]"
+          
+          # 애플리케이션 실행 (H2 인메모리 DB로 테스트)
+          echo "애플리케이션 실행 (H2 인메모리 DB로 테스트)..."
+          nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar \
+            --spring.datasource.url=jdbc:h2:mem:testdb \
+            --spring.datasource.driver-class-name=org.h2.Driver \
+            --spring.datasource.username=sa \
+            --spring.datasource.password= \
+            --spring.jpa.database-platform=org.hibernate.dialect.H2Dialect \
+            --spring.jpa.hibernate.ddl-auto=create-drop \
+            --spring.h2.console.enabled=true \
+            --server.port=8080 \
+            --spring.cache.type=none > app.log 2>&1 &
           
           # 잠시 대기 (애플리케이션 시작 시간 확보)
           sleep 10
