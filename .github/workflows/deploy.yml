@@ -71,9 +71,32 @@ jobs:
           echo "애플리케이션 빌드..."
           ./gradlew clean build -x test
           
-          # 애플리케이션 실행
+          # 환경변수 설정 (GitHub Secrets 사용)
+          echo "환경변수 설정..."
+          cat > ~/.env << 'ENVEOF'
+DB_URL=${{ secrets.DB_URL }}
+DB_USERNAME=${{ secrets.DB_USERNAME }}
+DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+
+REDIS_HOST=${{ secrets.REDIS_HOST }}
+REDIS_PORT=${{ secrets.REDIS_PORT }}
+
+GMAIL_USERNAME=${{ secrets.GMAIL_USERNAME }}
+GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}
+
+EXCHANGE_API_KEY=${{ secrets.EXCHANGE_API_KEY }}
+
+S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}
+AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+AWS_REGION=${{ secrets.AWS_REGION }}
+
+SPRING_PROFILES_ACTIVE=prod
+ENVEOF
+
+          # 애플리케이션 실행 (환경변수 포함)
           echo "애플리케이션 실행..."
-          nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
+          nohup env $(cat ~/.env | xargs) java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
           
           # 잠시 대기
           sleep 3
