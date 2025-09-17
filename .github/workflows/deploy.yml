@@ -19,10 +19,8 @@ jobs:
         echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         chmod 700 ~/.ssh
-        eval "$(ssh-agent -s)"
-        ssh-add ~/.ssh/id_rsa
-        ssh-add -l
         echo "SSH 키 설정 완료"
+        ls -la ~/.ssh/
         
     - name: Add EC2 to known hosts
       run: |
@@ -35,6 +33,9 @@ jobs:
         echo "SSH 연결 테스트 시작..."
         echo "Host: ${{ secrets.EC2_HOST }}"
         echo "User: ${{ secrets.EC2_USER }}"
+        echo "SSH 키 파일 확인:"
+        ls -la ~/.ssh/id_rsa
+        echo "SSH 연결 테스트:"
         ssh -i ~/.ssh/id_rsa -o ConnectTimeout=30 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} 'echo "SSH 연결 성공!"'
         
     - name: Stop existing process
