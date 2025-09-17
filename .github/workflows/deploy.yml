@@ -39,7 +39,7 @@ jobs:
           echo "애플리케이션 빌드..." &&
           ./gradlew clean build -x test &&
           echo "애플리케이션 실행..." &&
-          nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar > app.log 2>&1 & &&
+          nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
           echo "배포 완료!" &&
           sleep 3 &&
           ps aux | grep exProject | grep -v grep
