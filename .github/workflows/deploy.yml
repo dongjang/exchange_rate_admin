@@ -44,7 +44,7 @@ jobs:
         
     - name: Deploy application
       run: |
-        ssh -i ~/.ssh/id_rsa -o ConnectTimeout=30 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+        ssh -i ~/.ssh/id_rsa -o ConnectTimeout=60 -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
           echo "=== 배포 시작 ==="
           
           # 기존 프로세스 종료
@@ -105,21 +105,18 @@ jobs:
           echo "DB_USERNAME: $DB_USERNAME"
           echo "DB_PASSWORD: [HIDDEN]"
           
-          # 애플리케이션 실행 (H2 인메모리 DB로 테스트)
-          echo "애플리케이션 실행 (H2 인메모리 DB로 테스트)..."
+          # 애플리케이션 실행 (간단한 설정으로 테스트)
+          echo "애플리케이션 실행 (간단한 설정으로 테스트)..."
           nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar \
-            --spring.datasource.url=jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1 \
+            --spring.datasource.url=jdbc:h2:mem:testdb \
             --spring.datasource.driver-class-name=org.h2.Driver \
             --spring.datasource.username=sa \
             --spring.datasource.password= \
             --spring.jpa.database-platform=org.hibernate.dialect.H2Dialect \
             --spring.jpa.hibernate.ddl-auto=create-drop \
-            --spring.jpa.show-sql=true \
-            --spring.h2.console.enabled=true \
             --server.port=8080 \
             --spring.cache.type=none \
-            --logging.level.org.hibernate.SQL=DEBUG \
-            --logging.level.org.hibernate.type.descriptor.sql.BasicBinder=TRACE > app.log 2>&1 &
+            --spring.profiles.active=local > app.log 2>&1 &
           
           # 잠시 대기 (애플리케이션 시작 시간 확보)
           sleep 10
