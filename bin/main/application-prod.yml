@@ -14,8 +14,8 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: validate  # 운영환경에서는 validate 사용
-    show-sql: false
+      ddl-auto: update  # 테이블 자동 생성/업데이트
+    show-sql: true  # 디버깅을 위해 SQL 로그 활성화
     properties:
       hibernate:
         format_sql: false
