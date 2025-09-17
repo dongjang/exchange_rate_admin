@@ -1,0 +1,142 @@
+name: Simple Deploy (Personal Project)
+
+on:
+  push:
+    branches: [ main ]  # main 브랜치에만 배포
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  # 1. 테스트 및 빌드
+  test-and-build:
+    name: Test and Build
+    runs-on: ubuntu-latest
+    
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: testdb
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+      
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    # Java 17 설정
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
+    # Node.js 설정
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
+
+    # Frontend 의존성 설치 및 빌드
+    - name: Install and build frontend
+      run: |
+        cd frontend
+        npm ci
+        npm run lint
+        npm run build
+
+    # Backend 테스트
+    - name: Run backend tests
+      run: ./gradlew test
+      env:
+        DB_URL: jdbc:mysql://localhost:3306/testdb
+        DB_USERNAME: root
+        DB_PASSWORD: root
+        REDIS_HOST: localhost
+        REDIS_PORT: 6379
+
+    # Backend 빌드
+    - name: Build backend
+      run: ./gradlew build -x test
+
+    # 빌드 아티팩트 업로드
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: build-artifacts
+        path: |
+          build/libs/*.jar
+          frontend/dist/
+
+  # 2. Docker 빌드 및 배포
+  build-and-deploy:
+    name: Build Docker and Deploy
+    runs-on: ubuntu-latest
+    needs: test-and-build
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: build-artifacts
+
+    # Docker 빌드
+    - name: Build Docker image
+      run: |
+        docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} .
+        docker build -t ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest .
+
+    # Docker 이미지 푸시
+    - name: Push Docker image
+      run: |
+        echo ${{ secrets.GITHUB_TOKEN }} | docker login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+        docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+    # AWS 배포 (간단한 ECS 배포)
+    - name: Configure AWS credentials
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: ap-northeast-2
+
+    - name: Deploy to ECS
+      run: |
+        aws ecs update-service \
+          --cluster exadmin-cluster \
+          --service exadmin-service \
+          --force-new-deployment
+
+    # 배포 완료 알림 (선택사항)
+    - name: Notify deployment success
+      run: |
+        echo "✅ 배포 완료: ${{ github.sha }}"
+        echo "🚀 서비스 URL: https://your-domain.com"
+

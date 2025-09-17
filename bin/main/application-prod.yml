@@ -1,0 +1,115 @@
+spring:
+  datasource:
+    # AWS RDS MySQL 연결 정보
+    url: jdbc:mysql://${DB_HOST:exadmin-mysql.abc123.ap-northeast-2.rds.amazonaws.com}:${DB_PORT:3306}/${DB_NAME:exadmin}?useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+
+  jpa:
+    hibernate:
+      ddl-auto: validate  # 운영환경에서는 validate 사용
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.MySQLDialect
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+
+  data:
+    redis:
+      # AWS ElastiCache Redis 연결 정보
+      host: ${REDIS_HOST:exadmin-redis.abc123.cache.amazonaws.com}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000ms
+      password: ${REDIS_PASSWORD:}  # ElastiCache는 기본적으로 비밀번호 없음
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 4
+          min-idle: 2
+          max-wait: -1ms
+
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+      file-size-threshold: 2KB
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${GMAIL_USERNAME}
+    password: ${GMAIL_APP_PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+          debug: false  # 운영환경에서는 false
+
+  cache:
+    type: redis
+    redis:
+      time-to-live: 3600000  # 1시간
+      cache-null-values: false
+
+# 파일 업로드 설정 (S3 연동)
+file:
+  upload:
+    path: uploads
+    s3:
+      bucket-name: ${S3_BUCKET_NAME:exadmin-uploads-20241214}
+      region: ${AWS_REGION:ap-northeast-2}
+
+# Exchange API
+exchange:
+  api-key: ${EXCHANGE_API_KEY}
+
+# 로깅 설정 (운영환경)
+logging:
+  level:
+    com.example: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+    org.springframework.security: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: /app/logs/application.log
+
+# 애플리케이션 설정
+server:
+  port: 8080
+  servlet:
+    context-path: /
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+
+# 관리 엔드포인트 (운영환경에서는 제한적)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when-authorized
+

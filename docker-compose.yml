@@ -1,0 +1,76 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: exadmin-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: exadmin
+      MYSQL_USER: exadmin
+      MYSQL_PASSWORD: exadmin123
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - exadmin-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: exadmin-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - exadmin-network
+
+  # Application
+  app:
+    build: .
+    container_name: exadmin-app
+    ports:
+      - "8080:8080"
+    environment:
+      # Database
+      DB_URL: jdbc:mysql://mysql:3306/exadmin?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      DB_USERNAME: exadmin
+      DB_PASSWORD: exadmin123
+      
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      
+      # Application
+      SPRING_PROFILES_ACTIVE: docker
+      
+      # OAuth (환경변수로 설정 필요)
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}
+      
+      # Email (환경변수로 설정 필요)
+      GMAIL_USERNAME: ${GMAIL_USERNAME}
+      GMAIL_APP_PASSWORD: ${GMAIL_APP_PASSWORD}
+      
+      # Exchange API
+      EXCHANGE_API_KEY: ${EXCHANGE_API_KEY}
+    depends_on:
+      - mysql
+      - redis
+    volumes:
+      - ./uploads:/app/uploads
+    networks:
+      - exadmin-network
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  exadmin-network:
+    driver: bridge
+

@@ -1,0 +1,44 @@
+spring:
+  datasource:
+    url: ${DB_URL}&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false  # Docker에서는 로그 최소화
+    properties:
+      hibernate:
+        format_sql: false
+        dialect: org.hibernate.dialect.MySQLDialect
+  data:
+    redis:
+      host: ${REDIS_HOST:redis}
+      port: ${REDIS_PORT:6379}
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 4
+          min-idle: 2
+          max-wait: -1ms
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+      file-size-threshold: 2KB
+
+# 파일 업로드 설정 (Docker 볼륨 마운트)
+file:
+  upload:
+    path: uploads
+
+# Docker 환경에서 로깅 레벨 조정
+logging:
+  level:
+    com.example: INFO
+    org.springframework: WARN
+    org.hibernate: WARN
+
