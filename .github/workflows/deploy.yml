@@ -42,43 +42,72 @@ jobs:
         echo "SSH 연결 테스트:"
         ssh -i ~/.ssh/id_rsa -o ConnectTimeout=30 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} 'echo "SSH 연결 성공!"'
         
-    - name: Stop existing process
+    - name: Deploy application
       run: |
-        ssh -i ~/.ssh/id_rsa -o ConnectTimeout=30 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} 'pkill -f exProject 2>/dev/null || echo "종료할 프로세스 없음"'
-        
-    - name: Clone/Update repository
-      run: |
-        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
-          echo "프로젝트 클론/업데이트..." &&
-          if [ -d "exchange_rate_admin" ]; then
-            cd exchange_rate_admin && git pull origin master
+        ssh -i ~/.ssh/id_rsa -o ConnectTimeout=30 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          echo "=== 배포 시작 ==="
+          
+          # 기존 프로세스 종료
+          echo "기존 프로세스 확인 및 종료..."
+          if pgrep -f exProject > /dev/null; then
+            echo "실행 중인 프로세스 발견, 종료 중..."
+            pkill -f exProject
+            sleep 2
           else
-            git clone https://github.com/${{ github.repository }}.git exchange_rate_admin && cd exchange_rate_admin
+            echo "실행 중인 프로세스 없음"
           fi
-        '
-        
-    - name: Build application
-      run: |
-        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
-          cd exchange_rate_admin &&
-          echo "애플리케이션 빌드..." &&
+          
+          # 프로젝트 클론/업데이트
+          echo "프로젝트 클론/업데이트..."
+          if [ -d "exchange_rate_admin" ]; then
+            cd exchange_rate_admin
+            git pull origin master
+          else
+            git clone https://github.com/${{ github.repository }}.git exchange_rate_admin
+            cd exchange_rate_admin
+          fi
+          
+          # 애플리케이션 빌드
+          echo "애플리케이션 빌드..."
           ./gradlew clean build -x test
-        '
-        
-    - name: Start application
-      run: |
-        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
-          cd exchange_rate_admin &&
-          echo "애플리케이션 실행..." &&
+          
+          # 애플리케이션 실행
+          echo "애플리케이션 실행..."
           nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar > app.log 2>&1 &
-          echo "배포 완료!"
-        '
+          
+          # 잠시 대기
+          sleep 3
+          
+          # 상태 확인
+          echo "=== 배포 완료 ==="
+          echo "실행 중인 프로세스:"
+          ps aux | grep exProject | grep -v grep || echo "프로세스 없음"
+          
+          echo "로그 확인 (최근 5줄):"
+          tail -5 app.log
+        EOF
         
     - name: Check deployment status
       run: |
-        ssh -i ~/.ssh/id_rsa -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} '
-          echo "애플리케이션 상태 확인..." &&
-          curl -f http://localhost:8080/health || echo "헬스체크 실패" &&
-          echo "로그 확인 (최근 10줄)..." &&
+        ssh -i ~/.ssh/id_rsa -o ConnectTimeout=30 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          echo "=== 배포 상태 확인 ==="
+          
+          # 프로세스 확인
+          if pgrep -f exProject > /dev/null; then
+            echo "✅ 애플리케이션이 실행 중입니다"
+            ps aux | grep exProject | grep -v grep
+          else
+            echo "❌ 애플리케이션이 실행되지 않았습니다"
+          fi
+          
+          # 포트 확인
+          if netstat -tlnp | grep :8080 > /dev/null; then
+            echo "✅ 포트 8080이 열려있습니다"
+          else
+            echo "❌ 포트 8080이 열려있지 않습니다"
+          fi
+          
+          # 로그 확인
+          echo "최근 로그:"
           tail -10 exchange_rate_admin/app.log
-        '
+        EOF
