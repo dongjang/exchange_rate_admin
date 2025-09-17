@@ -1,7 +1,7 @@
 spring:
   datasource:
     # AWS RDS MySQL 연결 정보
-    url: jdbc:mysql://${DB_HOST:exadmin-mysql.abc123.ap-northeast-2.rds.amazonaws.com}:${DB_PORT:3306}/${DB_NAME:exadmin}?useSSL=true&allowPublicKeyRetrieval=true&serverTimezone=UTC
+    url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -28,10 +28,10 @@ spring:
   data:
     redis:
       # AWS ElastiCache Redis 연결 정보
-      host: ${REDIS_HOST:exadmin-redis.abc123.cache.amazonaws.com}
-      port: ${REDIS_PORT:6379}
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
       timeout: 2000ms
-      password: ${REDIS_PASSWORD:}  # ElastiCache는 기본적으로 비밀번호 없음
+      # password: # AWS ElastiCache는 기본적으로 비밀번호 없음
       lettuce:
         pool:
           max-active: 8
@@ -74,8 +74,8 @@ file:
   upload:
     path: uploads
     s3:
-      bucket-name: ${S3_BUCKET_NAME:exadmin-uploads-20241214}
-      region: ${AWS_REGION:ap-northeast-2}
+      bucket-name: ${S3_BUCKET_NAME}
+      region: ${AWS_REGION}
 
 # Exchange API
 exchange:
