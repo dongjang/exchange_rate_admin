@@ -50,7 +50,7 @@ jobs:
           ./gradlew clean build -x test
           
           # 환경변수 직접 설정
-          export DB_URL="jdbc:mysql://exchange-rate.cx4u82sc0s99.ap-northeast-2.rds.amazonaws.com:3306/exchange_rate?useSSL=false&allowPublicKeyRetrieval=true"
+          export DB_URL="${{ secrets.DB_URL }}"
           export DB_USERNAME="${{ secrets.DB_USERNAME }}"
           export DB_PASSWORD="${{ secrets.DB_PASSWORD }}"
           export REDIS_HOST="${{ secrets.REDIS_HOST }}"
