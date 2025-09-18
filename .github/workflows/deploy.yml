@@ -3,28 +3,36 @@ name: Deploy to EC2
 on:
   push:
     branches: [ master ]
-  workflow_dispatch:  # 수동 실행 가능
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Setup SSH
       run: |
         mkdir -p ~/.ssh
         echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/id_rsa
         chmod 600 ~/.ssh/id_rsa
         ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-      
+
     - name: Deploy application
       run: |
-        ssh -i ~/.ssh/id_rsa -o ConnectTimeout=60 -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+        ssh -i ~/.ssh/id_rsa \
+            -o ConnectTimeout=60 \
+            -o ServerAliveInterval=30 \
+            -o ServerAliveCountMax=3 \
+            -o StrictHostKeyChecking=no \
+            -o UserKnownHostsFile=/dev/null \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+          
           echo "=== 배포 시작 ==="
           
+          # 실행 중인 프로세스 종료
           if pgrep -f exProject > /dev/null; then
             echo "실행 중인 프로세스 발견, 종료 중..."
             pkill -f exProject
@@ -32,7 +40,8 @@ jobs:
           else
             echo "실행 중인 프로세스 없음"
           fi
-          
+
+          # 코드 가져오기
           if [ -d "exchange_rate_admin" ]; then
             cd exchange_rate_admin
             git pull origin master
@@ -40,32 +49,36 @@ jobs:
             git clone https://github.com/${{ github.repository }}.git exchange_rate_admin
             cd exchange_rate_admin
           fi
-          
+
+          # 빌드
           ./gradlew clean build -x test
-          
-          echo "DB_URL=${{ secrets.DB_URL }}" > ~/.env
-          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> ~/.env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> ~/.env
-          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> ~/.env
-          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> ~/.env
-          echo "GMAIL_USERNAME=${{ secrets.GMAIL_USERNAME }}" >> ~/.env
-          echo "GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}" >> ~/.env
-          echo "EXCHANGE_API_KEY=${{ secrets.EXCHANGE_API_KEY }}" >> ~/.env
-          echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> ~/.env
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> ~/.env
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> ~/.env
-          echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> ~/.env
-          echo "SPRING_PROFILES_ACTIVE=prod" >> ~/.env
-          
-          set -a
-          source ~/.env
-          set +a
-          
+
+          # 환경 변수 설정
+          cat > ~/.env << EOL
+DB_URL=${{ secrets.DB_URL }}
+DB_USERNAME=${{ secrets.DB_USERNAME }}
+DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+REDIS_HOST=${{ secrets.REDIS_HOST }}
+REDIS_PORT=${{ secrets.REDIS_PORT }}
+GMAIL_USERNAME=${{ secrets.GMAIL_USERNAME }}
+GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}
+EXCHANGE_API_KEY=${{ secrets.EXCHANGE_API_KEY }}
+S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}
+AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+AWS_REGION=${{ secrets.AWS_REGION }}
+SPRING_PROFILES_ACTIVE=prod
+EOL
+
+          # 환경 변수 적용
+          export $(grep -v '^#' ~/.env | xargs)
+
+          # 애플리케이션 실행
           nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar \
             --spring.profiles.active=prod > app.log 2>&1 &
-          
+
           sleep 15
-          
+
           echo "=== 배포 완료 ==="
           ps aux | grep exProject | grep -v grep || echo "프로세스 없음"
           netstat -tlnp | grep :8080 || echo "포트 8080이 열려있지 않음"
