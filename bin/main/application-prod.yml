@@ -102,6 +102,7 @@ cors:
 # 애플리케이션 설정
 server:
   port: 8080
+  address: 0.0.0.0
   servlet:
     context-path: /
   compression:
