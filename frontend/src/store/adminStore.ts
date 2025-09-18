@@ -19,11 +19,28 @@ export interface AdminAuthState {
   isLoading: boolean;
 }
 
+// localStorage에서 초기 인증 상태 가져오기
+const getInitialAuthState = (): AdminAuthState => {
+  const isStoredAuth = localStorage.getItem('adminAuthenticated') === 'true';
+  const hasSessionId = localStorage.getItem('adminSessionId') !== null;
+  
+  // adminSessionId가 없으면 인증 상태를 false로 설정
+  if (isStoredAuth && !hasSessionId) {
+    localStorage.removeItem('adminAuthenticated');
+    return {
+      isAuthenticated: false,
+      isLoading: false,
+    };
+  }
+  
+  return {
+    isAuthenticated: false, // 초기에는 항상 false로 시작 (API 확인 후 true로 변경)
+    isLoading: isStoredAuth && hasSessionId, // 인증 정보와 세션 ID가 모두 있으면 로딩 상태로 시작
+  };
+};
+
 // 관리자 인증 상태
-export const adminAuthAtom = atom<AdminAuthState>({
-  isAuthenticated: false,
-  isLoading: false,
-});
+export const adminAuthAtom = atom<AdminAuthState>(getInitialAuthState());
 
 // 관리자 정보
 export const adminInfoAtom = atom<Admin | null>(null);

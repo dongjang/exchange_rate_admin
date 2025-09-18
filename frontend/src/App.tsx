@@ -28,11 +28,29 @@ function AppContent() {
       return;
     }
     
+    // adminSessionId가 없으면 인증 확인 불가
+    const adminSessionId = localStorage.getItem('adminSessionId');
+    if (!adminSessionId) {
+      setAdminAuthState({ isAuthenticated: false, isLoading: false });
+      setAdminInfoState(null);
+      localStorage.removeItem('adminAuthenticated');
+      return;
+    }
+    
     // 로딩 상태를 true로 설정
     setAdminAuthState({ isAuthenticated: false, isLoading: true });
     
     try {
-      const adminResult = await api.getCurrentAdmin();
+      // 타임아웃 설정 (5초)
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('API 호출 타임아웃')), 5000);
+      });
+      
+      const adminResult = await Promise.race([
+        api.getCurrentAdmin(),
+        timeoutPromise
+      ]);
+      
       if (adminResult.success && adminResult.admin) {
         setAdminInfoState(adminResult.admin);
         setAdminAuthState({ isAuthenticated: true, isLoading: false });
@@ -43,32 +61,39 @@ function AppContent() {
         setAdminInfoState(null);
         // 인증 실패 시 localStorage에서 제거
         localStorage.removeItem('adminAuthenticated');
+        localStorage.removeItem('adminSessionId');
       }
     } catch (error) {
-      console.error('관리자 인증 확인 실패:', error);
       setAdminAuthState({ isAuthenticated: false, isLoading: false });
       setAdminInfoState(null);
-      // 에러 시 localStorage에서 모든 인증 정보 제거
-      localStorage.removeItem('adminAuthenticated');
-      localStorage.removeItem('adminSessionId');
+      
+      // 타임아웃이나 네트워크 에러 시에는 localStorage 유지
+      if (error?.message === 'API 호출 타임아웃') {
+        return;
+      }
+      
+      // 401 Unauthorized나 403 Forbidden 에러만 localStorage 정리
+      if (error?.response?.status === 401 || error?.response?.status === 403) {
+        localStorage.removeItem('adminAuthenticated');
+        localStorage.removeItem('adminSessionId');
+      }
     }
   };
 
-  // 초기 로드 시 localStorage 확인
+  // 초기 로드 시 인증 확인
   useEffect(() => {
-    const isStoredAuth = localStorage.getItem('adminAuthenticated') === 'true';
-    if (isStoredAuth && !adminAuth.isAuthenticated) {
+    // adminStore에서 이미 로딩 상태로 설정되어 있으면 checkAdminAuth 호출
+    if (adminAuth.isLoading) {
       checkAdminAuth();
     }
   }, []);
 
   useEffect(() => { 
-    // localStorage에 인증 정보가 있을 때만 인증 확인
-    const isStoredAuth = localStorage.getItem('adminAuthenticated') === 'true';
-    if (!adminAuth.isAuthenticated && isStoredAuth) {
+    // 페이지 변경 시 인증 상태 확인 (필요시에만)
+    if (adminAuth.isAuthenticated && adminAuth.isLoading) {
       checkAdminAuth();
     }
-  }, [location.pathname, adminAuth.isAuthenticated]);
+  }, [location.pathname]);
 
   // 로딩 중인 경우
   if (adminAuth.isLoading) {

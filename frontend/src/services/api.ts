@@ -399,13 +399,11 @@ export const api = {
     singleLimit?: number;
   }): Promise<void> {
     try {
-      console.log('API 호출 데이터:', { requestId, data });
       
       await axios.put(`${API_BASE_URL}/admin/remittances/remittance-limit-requests/${requestId}/process`, data, {
         withCredentials: true
       });
       
-      console.log('API 호출 성공');
     } catch (error) {
       console.error('한도 변경 신청 처리 실패:', error);
       throw error;
@@ -533,10 +531,8 @@ export const api = {
         });
         if (fileInfoResponse.data && fileInfoResponse.data.originalName) {
           filename = fileInfoResponse.data.originalName;
-          console.log('Filename from file info:', filename);
         }
       } catch (error) {
-        console.log('Could not get file info, will try from headers');
       }
       
       const response = await axios.get(`${API_BASE_URL}/files/${fileId}/download`, {
@@ -545,8 +541,6 @@ export const api = {
       });
       
       // 디버깅: 실제 헤더 확인
-      console.log('Response headers:', response.headers);
-      console.log('Content-Disposition:', response.headers['content-disposition']);
       
       // 파일 다운로드 처리
       const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -557,7 +551,6 @@ export const api = {
       const contentDisposition = response.headers['content-disposition'];
       
       if (contentDisposition && filename === 'download') {
-        console.log('Raw Content-Disposition:', contentDisposition);
         
         // 여러 패턴으로 파일명 추출 시도
         const patterns = [
@@ -569,16 +562,13 @@ export const api = {
         for (const pattern of patterns) {
           const match = contentDisposition.match(pattern);
           if (match && match[1]) {
-            console.log('Pattern matched:', pattern, 'Value:', match[1]);
             try {
               // URL 디코딩 시도
               filename = decodeURIComponent(match[1]);
-              console.log('Decoded filename:', filename);
               break;
             } catch (e) {
               // 디코딩 실패 시 원본 사용
               filename = match[1];
-              console.log('Using original filename:', filename);
               break;
             }
           }
@@ -587,7 +577,6 @@ export const api = {
       
       // 파일명이 여전히 'download'인 경우, 파일 확장자 추정
       if (filename === 'download') {
-        console.log('Filename still "download", trying to extract from Content-Type');
         const contentType = response.headers['content-type'];
         if (contentType) {
           if (contentType.includes('image/')) {
@@ -602,7 +591,6 @@ export const api = {
         }
       }
       
-      console.log('Final filename:', filename);
       
       link.setAttribute('download', filename);
       document.body.appendChild(link);
@@ -811,7 +799,7 @@ export const api = {
       localStorage.setItem('adminSessionId', response.data.sessionId);
       localStorage.setItem('adminAuthenticated', 'true');
     }
-    
+
     return response.data;
   },
 
@@ -826,9 +814,7 @@ export const api = {
       const response = await axios.get(`${API_BASE_URL}/admin/current`, headers);
       return response.data;
     } catch (error) {
-      // 인증 실패 시 localStorage 정리
-      localStorage.removeItem('adminSessionId');
-      localStorage.removeItem('adminAuthenticated');
+      // 에러는 상위에서 처리하도록 throw만 함
       throw error;
     }
   },

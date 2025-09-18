@@ -54,6 +54,14 @@ const AdminLogin = () => {
         // 관리자 정보 설정
         setAdminInfo(response.admin);
         setAdminAuth({ isAuthenticated: true, isLoading: false });
+        
+        // localStorage에 인증 상태 저장 (이중 보장)
+        localStorage.setItem('adminAuthenticated', 'true');
+        if (response.sessionId) {
+          localStorage.setItem('adminSessionId', response.sessionId);
+        }
+        
+        
         navigate('/');
       } else {
         setError(response.message || '로그인에 실패했습니다.');

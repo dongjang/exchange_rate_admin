@@ -70,6 +70,7 @@ public class AdminAuthController {
                 Map<String, Object> response = new HashMap<>();
                 response.put("success", true);
                 response.put("admin", admin);
+                response.put("sessionId", adminSessionId); // sessionId를 응답에 포함
                 response.put("message", "로그인 성공");
                 return ResponseEntity.ok(response);
             } else {
