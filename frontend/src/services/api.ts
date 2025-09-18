@@ -3,7 +3,9 @@ import axios from 'axios';
 import type { Country } from '../store/countryStore';
 import type { MyBankAccount } from '../store/myBankAccountStore';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
+// Vercel 환경에서는 상대 경로 사용 (프록시를 통해)
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+  (import.meta.env.PROD ? '/api' : 'http://localhost:8080/api');
 
 // 전역 로딩 상태 관리
 let loadingCount = 0;
