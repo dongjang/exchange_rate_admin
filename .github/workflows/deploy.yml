@@ -3,7 +3,7 @@ name: Deploy to EC2
 on:
   push:
     branches: [ master ]
-  workflow_dispatch:
+  workflow_dispatch:  # 수동 실행 가능
 
 jobs:
   deploy:
@@ -22,39 +22,32 @@ jobs:
 
     - name: Deploy application
       run: |
-        ssh -i ~/.ssh/id_rsa \
-            -o ConnectTimeout=60 \
-            -o ServerAliveInterval=30 \
-            -o ServerAliveCountMax=3 \
-            -o StrictHostKeyChecking=no \
-            -o UserKnownHostsFile=/dev/null \
-            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-          
-          echo "=== 배포 시작 ==="
-          
-          # 실행 중인 프로세스 종료
-          if pgrep -f exProject > /dev/null; then
-            echo "실행 중인 프로세스 발견, 종료 중..."
-            pkill -f exProject
-            sleep 2
-          else
-            echo "실행 중인 프로세스 없음"
-          fi
+        ssh -i ~/.ssh/id_rsa -o ConnectTimeout=60 -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
+echo "=== 배포 시작 ==="
 
-          # 코드 가져오기
-          if [ -d "exchange_rate_admin" ]; then
-            cd exchange_rate_admin
-            git pull origin master
-          else
-            git clone https://github.com/${{ github.repository }}.git exchange_rate_admin
-            cd exchange_rate_admin
-          fi
+# 실행 중인 애플리케이션 종료
+if pgrep -f exProject > /dev/null; then
+  echo "실행 중인 프로세스 발견, 종료 중..."
+  pkill -f exProject
+  sleep 2
+else
+  echo "실행 중인 프로세스 없음"
+fi
 
-          # 빌드
-          ./gradlew clean build -x test
+# 코드 가져오기
+if [ -d "exchange_rate_admin" ]; then
+  cd exchange_rate_admin
+  git pull origin master
+else
+  git clone https://github.com/${{ github.repository }}.git exchange_rate_admin
+  cd exchange_rate_admin
+fi
 
-          # 환경 변수 설정
-          cat > ~/.env << EOL
+# 빌드
+./gradlew clean build -x test
+
+# 환경 변수 설정
+cat > ~/.env << EOL
 DB_URL=${{ secrets.DB_URL }}
 DB_USERNAME=${{ secrets.DB_USERNAME }}
 DB_PASSWORD=${{ secrets.DB_PASSWORD }}
@@ -70,17 +63,15 @@ AWS_REGION=${{ secrets.AWS_REGION }}
 SPRING_PROFILES_ACTIVE=prod
 EOL
 
-          # 환경 변수 적용
-          export $(grep -v '^#' ~/.env | xargs)
+export $(grep -v '^#' ~/.env | xargs)
 
-          # 애플리케이션 실행
-          nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar \
-            --spring.profiles.active=prod > app.log 2>&1 &
+# 애플리케이션 실행
+nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod > app.log 2>&1 &
 
-          sleep 15
+sleep 15
 
-          echo "=== 배포 완료 ==="
-          ps aux | grep exProject | grep -v grep || echo "프로세스 없음"
-          netstat -tlnp | grep :8080 || echo "포트 8080이 열려있지 않음"
-          tail -30 app.log
-        EOF
+echo "=== 배포 완료 ==="
+ps aux | grep exProject | grep -v grep || echo "프로세스 없음"
+netstat -tlnp | grep :8080 || echo "포트 8080이 열려있지 않음"
+tail -30 app.log
+EOF
