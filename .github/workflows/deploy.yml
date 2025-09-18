@@ -37,14 +37,16 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           echo "SSH 키 권한 설정 완료"
           
-          echo "=== 호스트 키 스캔 ==="
-          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
-          echo "호스트 키 스캔 완료"
+          echo "=== 호스트 키 스캔 생략 ==="
+          echo "SSH 연결 시 자동으로 호스트 키를 수락하도록 설정됨"
           
           echo "=== SSH 키 확인 ==="
           ls -la ~/.ssh/id_rsa
           head -1 ~/.ssh/id_rsa
           echo "SSH 키 크기: $(wc -c < ~/.ssh/id_rsa) bytes"
+          
+          echo "=== 호스트 연결 테스트 ==="
+          ping -c 3 ${{ secrets.EC2_HOST }} || echo "호스트 연결 실패"
           
           echo "=== SSH 연결 테스트 ==="
           timeout 10 ssh -i ~/.ssh/id_rsa \
@@ -52,14 +54,15 @@ jobs:
               -o StrictHostKeyChecking=no \
               -o UserKnownHostsFile=/dev/null \
               -o BatchMode=yes \
+              -o LogLevel=ERROR \
               ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo 'SSH 연결 성공!'" || {
               echo "SSH 연결 실패. 에러 코드: $?"
               echo "=== SSH 키 첫 줄 확인 ==="
               head -1 ~/.ssh/id_rsa
               echo "=== SSH 키 마지막 줄 확인 ==="
               tail -1 ~/.ssh/id_rsa
-              echo "=== 호스트 연결 테스트 ==="
-              ping -c 3 ${{ secrets.EC2_HOST }} || echo "호스트 연결 실패"
+              echo "=== SSH 키 형식 검증 ==="
+              ssh-keygen -l -f ~/.ssh/id_rsa || echo "SSH 키 형식 오류"
               exit 1
           }
 
