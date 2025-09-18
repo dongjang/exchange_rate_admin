@@ -3,7 +3,7 @@ import axios from 'axios';
 import type { Country } from '../store/countryStore';
 import type { MyBankAccount } from '../store/myBankAccountStore';
 
-const API_BASE_URL = 'http://localhost:8080/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api';
 
 // 전역 로딩 상태 관리
 let loadingCount = 0;
@@ -805,6 +805,13 @@ export const api = {
       headers: { 'Content-Type': 'application/json' },
       withCredentials: true
     });
+    
+    // 로그인 성공 시 세션 ID와 인증 상태를 localStorage에 저장
+    if (response.data && response.data.sessionId) {
+      localStorage.setItem('adminSessionId', response.data.sessionId);
+      localStorage.setItem('adminAuthenticated', 'true');
+    }
+    
     return response.data;
   },
 
@@ -814,14 +821,23 @@ export const api = {
     if (adminSessionId) {
       headers.headers = { 'X-Admin-Session-Id': adminSessionId };
     }
-    const response = await axios.get(`${API_BASE_URL}/admin/current`, headers);
-    return response.data;
+    
+    try {
+      const response = await axios.get(`${API_BASE_URL}/admin/current`, headers);
+      return response.data;
+    } catch (error) {
+      // 인증 실패 시 localStorage 정리
+      localStorage.removeItem('adminSessionId');
+      localStorage.removeItem('adminAuthenticated');
+      throw error;
+    }
   },
 
   async adminLogout(): Promise<any> {
     const response = await axios.post(`${API_BASE_URL}/admin/logout`, {}, { withCredentials: true });
-    // 로그아웃 시 localStorage에서 admin 세션 ID 제거
+    // 로그아웃 시 localStorage에서 admin 세션 정보 제거
     localStorage.removeItem('adminSessionId');
+    localStorage.removeItem('adminAuthenticated');
     return response.data;
   },
 }; 
