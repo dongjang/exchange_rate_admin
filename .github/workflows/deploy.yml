@@ -51,7 +51,7 @@ jobs:
           
           # 환경변수 파일 생성 (더 안전한 방식)
           cat > ~/.env << 'ENV_EOF'
-          DB_URL=${{ secrets.DB_URL }}
+          DB_URL=jdbc:mysql://exchange-rate.cx4u82sc0s99.ap-northeast-2.rds.amazonaws.com:3306/exchange_rate?useSSL=false&allowPublicKeyRetrieval=true
           DB_USERNAME=${{ secrets.DB_USERNAME }}
           DB_PASSWORD=${{ secrets.DB_PASSWORD }}
           REDIS_HOST=${{ secrets.REDIS_HOST }}
