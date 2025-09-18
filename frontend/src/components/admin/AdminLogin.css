@@ -129,6 +129,7 @@
   margin-bottom: 1.5rem;
   font-size: 0.9rem;
   text-align: center;
+  white-space: pre-line;
 }
 
 .admin-login-btn {

@@ -48,8 +48,9 @@ function AppContent() {
       console.error('관리자 인증 확인 실패:', error);
       setAdminAuthState({ isAuthenticated: false, isLoading: false });
       setAdminInfoState(null);
-      // 에러 시 localStorage에서 제거
+      // 에러 시 localStorage에서 모든 인증 정보 제거
       localStorage.removeItem('adminAuthenticated');
+      localStorage.removeItem('adminSessionId');
     }
   };
 
@@ -62,9 +63,9 @@ function AppContent() {
   }, []);
 
   useEffect(() => { 
-    // 모든 페이지에서 관리자 인증 확인
-    // 새로고침 시에도 인증 상태를 확인하도록 수정
-    if (!adminAuth.isAuthenticated) {
+    // localStorage에 인증 정보가 있을 때만 인증 확인
+    const isStoredAuth = localStorage.getItem('adminAuthenticated') === 'true';
+    if (!adminAuth.isAuthenticated && isStoredAuth) {
       checkAdminAuth();
     }
   }, [location.pathname, adminAuth.isAuthenticated]);

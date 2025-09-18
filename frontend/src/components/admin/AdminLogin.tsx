@@ -59,7 +59,7 @@ const AdminLogin = () => {
         setError(response.message || '로그인에 실패했습니다.');
       }
     } catch (err: any) {
-      setError(err.response?.data?.message || '로그인에 실패했습니다.아이디와 비밀번호를 확인해 주세요.');
+      setError(err.response?.data?.message || '로그인에 실패했습니다.\n아이디와 비밀번호를 확인해 주세요.');
     } finally {
       setLoading(false);
     }
