@@ -29,52 +29,51 @@ jobs:
               -o StrictHostKeyChecking=no \
               -o UserKnownHostsFile=/dev/null \
               ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
-            
-            echo "=== 배포 시작 ==="
+    echo "=== 배포 시작 ==="
 
-            if pgrep -f exProject > /dev/null; then
-              echo "실행 중인 프로세스 발견, 종료 중..."
-              pkill -f exProject
-              sleep 2
-            else
-              echo "실행 중인 프로세스 없음"
-            fi
+    if pgrep -f exProject > /dev/null; then
+        echo "실행 중인 프로세스 발견, 종료 중..."
+        pkill -f exProject
+        sleep 2
+    else
+        echo "실행 중인 프로세스 없음"
+    fi
 
-            if [ -d "exchange_rate_admin" ]; then
-              cd exchange_rate_admin
-              git pull origin master
-            else
-              git clone https://github.com/${{ github.repository }}.git exchange_rate_admin
-              cd exchange_rate_admin
-            fi
+    if [ -d "exchange_rate_admin" ]; then
+        cd exchange_rate_admin
+        git pull origin master
+    else
+        git clone https://github.com/${{ github.repository }}.git exchange_rate_admin
+        cd exchange_rate_admin
+    fi
 
-            ./gradlew clean build -x test
+    ./gradlew clean build -x test
 
-            echo "DB_URL=${{ secrets.DB_URL }}" > ~/.env
-            echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> ~/.env
-            echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> ~/.env
-            echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> ~/.env
-            echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> ~/.env
-            echo "GMAIL_USERNAME=${{ secrets.GMAIL_USERNAME }}" >> ~/.env
-            echo "GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}" >> ~/.env
-            echo "EXCHANGE_API_KEY=${{ secrets.EXCHANGE_API_KEY }}" >> ~/.env
-            echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> ~/.env
-            echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> ~/.env
-            echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> ~/.env
-            echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> ~/.env
-            echo "SPRING_PROFILES_ACTIVE=prod" >> ~/.env
+    echo "DB_URL=${{ secrets.DB_URL }}" > ~/.env
+    echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> ~/.env
+    echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> ~/.env
+    echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> ~/.env
+    echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> ~/.env
+    echo "GMAIL_USERNAME=${{ secrets.GMAIL_USERNAME }}" >> ~/.env
+    echo "GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}" >> ~/.env
+    echo "EXCHANGE_API_KEY=${{ secrets.EXCHANGE_API_KEY }}" >> ~/.env
+    echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> ~/.env
+    echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> ~/.env
+    echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> ~/.env
+    echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> ~/.env
+    echo "SPRING_PROFILES_ACTIVE=prod" >> ~/.env
 
-            set -a
-            source ~/.env
-            set +a
+    set -a
+    source ~/.env
+    set +a
 
-            nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar \
-              --spring.profiles.active=prod > app.log 2>&1 &
+    nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar \
+      --spring.profiles.active=prod > app.log 2>&1 &
 
-            sleep 15
+    sleep 15
 
-            echo "=== 배포 완료 ==="
-            ps aux | grep exProject | grep -v grep || echo "프로세스 없음"
-            netstat -tlnp | grep :8080 || echo "포트 8080이 열려있지 않음"
-            tail -30 app.log
+    echo "=== 배포 완료 ==="
+    ps aux | grep exProject | grep -v grep || echo "프로세스 없음"
+    netstat -tlnp | grep :8080 || echo "포트 8080이 열려있지 않음"
+    tail -30 app.log
 EOF
