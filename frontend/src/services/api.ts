@@ -3,21 +3,10 @@ import axios from 'axios';
 import type { Country } from '../store/countryStore';
 import type { MyBankAccount } from '../store/myBankAccountStore';
 
-// Vercel 환경에서는 상대 경로 사용 (프록시를 통해)
-const API_BASE_URL = (() => {
-  // 1. 환경 변수에 값이 있으면 그대로 사용
-  if (import.meta.env.VITE_API_BASE_URL) {
-    return import.meta.env.VITE_API_BASE_URL;
-  }
-
-  // 2. Vercel 배포 환경이면 /api 사용 (vercel.json rewrites 통해 프록시)
-  if (window.location.hostname.includes('vercel.app')) {
-    return '/api';
-  }
-
-  // 3. 그 외(로컬 개발 환경)는 localhost
-  return 'http://localhost:8080/api';
-})();
+  // Vercel 환경에서는 /api 프록시를 통해 EC2 API 호출
+const API_BASE_URL =
+import.meta.env.VITE_API_BASE_URL || 
+(window.location.hostname.includes('vercel.app') ? '/api' : 'http://localhost:8080/api');
 
 // 전역 로딩 상태 관리
 let loadingCount = 0;
