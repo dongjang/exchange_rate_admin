@@ -11,6 +11,7 @@ export default defineConfig({
   },
   build: {
     cssCodeSplit: false,
+    cssMinify: false,
     rollupOptions: {
       output: {
         manualChunks: undefined,
