@@ -49,23 +49,39 @@ jobs:
           
           ./gradlew clean build -x test
           
-          echo "DB_URL=${{ secrets.DB_URL }}" > ~/.env
-          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> ~/.env
-          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> ~/.env
-          echo "REDIS_HOST=${{ secrets.REDIS_HOST }}" >> ~/.env
-          echo "REDIS_PORT=${{ secrets.REDIS_PORT }}" >> ~/.env
-          echo "GMAIL_USERNAME=${{ secrets.GMAIL_USERNAME }}" >> ~/.env
-          echo "GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}" >> ~/.env
-          echo "EXCHANGE_API_KEY=${{ secrets.EXCHANGE_API_KEY }}" >> ~/.env
-          echo "S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}" >> ~/.env
-          echo "AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}" >> ~/.env
-          echo "AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}" >> ~/.env
-          echo "AWS_REGION=${{ secrets.AWS_REGION }}" >> ~/.env
-          echo "SPRING_PROFILES_ACTIVE=prod" >> ~/.env
+          # 환경변수 파일 생성 (더 안전한 방식)
+          cat > ~/.env << 'ENV_EOF'
+          DB_URL=${{ secrets.DB_URL }}
+          DB_USERNAME=${{ secrets.DB_USERNAME }}
+          DB_PASSWORD=${{ secrets.DB_PASSWORD }}
+          REDIS_HOST=${{ secrets.REDIS_HOST }}
+          REDIS_PORT=${{ secrets.REDIS_PORT }}
+          GMAIL_USERNAME=${{ secrets.GMAIL_USERNAME }}
+          GMAIL_APP_PASSWORD=${{ secrets.GMAIL_APP_PASSWORD }}
+          EXCHANGE_API_KEY=${{ secrets.EXCHANGE_API_KEY }}
+          S3_BUCKET_NAME=${{ secrets.S3_BUCKET_NAME }}
+          AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION=${{ secrets.AWS_REGION }}
+          SPRING_PROFILES_ACTIVE=prod
+          ENV_EOF
           
+          # 환경변수 파일 내용 확인
+          echo "=== 환경변수 파일 내용 ==="
+          cat ~/.env
+          
+          # 환경변수 로드 및 확인
           set -a
           source ~/.env
           set +a
+          
+          echo "=== 환경변수 로드 확인 ==="
+          echo "DB_URL: $DB_URL"
+          echo "DB_USERNAME: $DB_USERNAME"
+          echo "DB_PASSWORD: [HIDDEN]"
+          echo "REDIS_HOST: $REDIS_HOST"
+          echo "REDIS_PORT: $REDIS_PORT"
+          echo "SPRING_PROFILES_ACTIVE: $SPRING_PROFILES_ACTIVE"
           
           nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod > app.log 2>&1 &
           
