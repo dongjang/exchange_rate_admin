@@ -133,7 +133,8 @@ public class SecurityConfig {
                     "http://localhost:5173",
                     "http://localhost:3000",
                     "http://127.0.0.1:5173",
-                    "https://exchange-rate-admin.vercel.app"
+                    "https://exchange-rate-admin.vercel.app",
+                    "http://43.200.254.119:8080"
                 };
             case "staging":
                 return new String[]{""};
