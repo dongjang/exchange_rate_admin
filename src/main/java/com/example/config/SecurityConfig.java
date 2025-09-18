@@ -131,8 +131,9 @@ public class SecurityConfig {
                 // Vercel과 로컬 개발 모두 허용
                 return new String[]{
                     "http://localhost:5173",
-                    "https://exchange-rate-admin.vercel.app",
-                    "https://*.vercel.app"
+                    "http://localhost:3000",
+                    "http://127.0.0.1:5173",
+                    "https://exchange-rate-admin.vercel.app"
                 };
             case "staging":
                 return new String[]{""};
