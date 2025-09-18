@@ -127,12 +127,8 @@ public class SecurityConfig {
         
         switch (profile) {
             case "prod":
-                // 환경변수에서 허용할 origin 목록 가져오기
-                String allowedOrigins = env.getProperty("cors.allowed.origins");
-                if (allowedOrigins == null || allowedOrigins.trim().isEmpty()) {
-                    throw new IllegalStateException("CORS_ALLOWED_ORIGINS 환경변수가 설정되지 않았습니다.");
-                }
-                return allowedOrigins.split(",");
+                // 임시로 모든 origin 허용 (테스트용)
+                return new String[]{"*"};
             case "staging":
                 return new String[]{""};
             default:
