@@ -127,7 +127,7 @@ public class SecurityConfig {
         
         switch (profile) {
             case "prod":
-                return new String[]{""};
+                return new String[]{"http://localhost:5173", "https://*.vercel.app"};  // Vite 개발용 + Vercel 허용
             case "staging":
                 return new String[]{""};
             default:
