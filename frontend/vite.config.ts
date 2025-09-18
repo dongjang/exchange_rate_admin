@@ -8,5 +8,13 @@ export default defineConfig({
     hmr: {
       overlay: false
     }
+  },
+  build: {
+    cssCodeSplit: false,
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
   }
 })
