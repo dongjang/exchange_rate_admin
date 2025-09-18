@@ -108,8 +108,9 @@ public class SecurityConfig {
         String[] allowedOrigins = getCorsAllowedOrigins();
         configuration.setAllowedOrigins(Arrays.asList(allowedOrigins));
         
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setExposedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
         
@@ -127,12 +128,20 @@ public class SecurityConfig {
         
         switch (profile) {
             case "prod":
-                // 임시로 모든 origin 허용 (테스트용)
-                return new String[]{"*"};
+                // Vercel과 로컬 개발 모두 허용
+                return new String[]{
+                    "http://localhost:5173",
+                    "https://exchange-rate-admin.vercel.app",
+                    "https://*.vercel.app"
+                };
             case "staging":
                 return new String[]{""};
             default:
-                return new String[]{"http://localhost:5173"};
+                return new String[]{
+                    "http://localhost:5173",
+                    "http://localhost:3000",
+                    "http://127.0.0.1:5173"
+                };
         }
     }
 } 
