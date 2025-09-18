@@ -6,7 +6,7 @@ import type { MyBankAccount } from '../store/myBankAccountStore';
   // Vercel 환경에서는 /api 프록시를 통해 EC2 API 호출
 const API_BASE_URL =
 import.meta.env.VITE_API_BASE_URL || 
-(window.location.hostname.includes('vercel.app') ? '/api' : 'http://localhost:8080/api');
+(window.location.hostname.includes('vercel.app') ? '' : 'http://localhost:8080/api');
 
 // 전역 로딩 상태 관리
 let loadingCount = 0;
