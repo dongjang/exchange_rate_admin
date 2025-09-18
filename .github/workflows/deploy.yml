@@ -25,10 +25,21 @@ jobs:
             exit 1
           fi
           
+          echo "=== SSH 디렉토리 생성 ==="
           mkdir -p ~/.ssh
+          echo "SSH 디렉토리 생성 완료"
+          
+          echo "=== SSH 키 파일 생성 ==="
           echo "${{ secrets.EC2_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          echo "SSH 키 파일 생성 완료"
+          
+          echo "=== SSH 키 권한 설정 ==="
           chmod 600 ~/.ssh/id_rsa
+          echo "SSH 키 권한 설정 완료"
+          
+          echo "=== 호스트 키 스캔 ==="
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+          echo "호스트 키 스캔 완료"
           
           echo "=== SSH 키 확인 ==="
           ls -la ~/.ssh/id_rsa
@@ -36,16 +47,19 @@ jobs:
           echo "SSH 키 크기: $(wc -c < ~/.ssh/id_rsa) bytes"
           
           echo "=== SSH 연결 테스트 ==="
-          ssh -i ~/.ssh/id_rsa \
-              -o ConnectTimeout=10 \
+          timeout 10 ssh -i ~/.ssh/id_rsa \
+              -o ConnectTimeout=5 \
               -o StrictHostKeyChecking=no \
               -o UserKnownHostsFile=/dev/null \
               -o BatchMode=yes \
-              -o LogLevel=DEBUG3 \
               ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo 'SSH 연결 성공!'" || {
               echo "SSH 연결 실패. 에러 코드: $?"
-              echo "=== SSH 키 내용 확인 ==="
-              cat ~/.ssh/id_rsa
+              echo "=== SSH 키 첫 줄 확인 ==="
+              head -1 ~/.ssh/id_rsa
+              echo "=== SSH 키 마지막 줄 확인 ==="
+              tail -1 ~/.ssh/id_rsa
+              echo "=== 호스트 연결 테스트 ==="
+              ping -c 3 ${{ secrets.EC2_HOST }} || echo "호스트 연결 실패"
               exit 1
           }
 
