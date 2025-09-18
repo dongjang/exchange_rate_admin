@@ -32,19 +32,19 @@ jobs:
 echo "=== 배포 시작 ==="
 
 if pgrep -f exProject > /dev/null; then
-echo "실행 중인 프로세스 발견, 종료 중..."
-pkill -f exProject
-sleep 2
+  echo "실행 중인 프로세스 발견, 종료 중..."
+  pkill -f exProject
+  sleep 2
 else
-echo "실행 중인 프로세스 없음"
+  echo "실행 중인 프로세스 없음"
 fi
 
 if [ -d "exchange_rate_admin" ]; then
-cd exchange_rate_admin
-git pull origin master
+  cd exchange_rate_admin
+  git pull origin master
 else
-git clone https://github.com/${{ github.repository }}.git exchange_rate_admin
-cd exchange_rate_admin
+  git clone https://github.com/${{ github.repository }}.git exchange_rate_admin
+  cd exchange_rate_admin
 fi
 
 ./gradlew clean build -x test
