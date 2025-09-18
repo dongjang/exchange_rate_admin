@@ -594,7 +594,6 @@ export const api = {
         }
       }
       
-      
       link.setAttribute('download', filename);
       document.body.appendChild(link);
       link.click();
