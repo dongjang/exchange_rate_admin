@@ -41,8 +41,13 @@ jobs:
               -o StrictHostKeyChecking=no \
               -o UserKnownHostsFile=/dev/null \
               -o BatchMode=yes \
-              -v \
-              ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo 'SSH 연결 성공!'"
+              -o LogLevel=DEBUG3 \
+              ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo 'SSH 연결 성공!'" || {
+              echo "SSH 연결 실패. 에러 코드: $?"
+              echo "=== SSH 키 내용 확인 ==="
+              cat ~/.ssh/id_rsa
+              exit 1
+          }
 
       - name: Deploy application
         run: |
