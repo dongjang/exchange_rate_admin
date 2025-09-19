@@ -6,16 +6,16 @@ spring:
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
     hikari:
-      maximum-pool-size: 10
-      minimum-idle: 5
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
+      maximum-pool-size: 3  # 무료 티어에 맞게 줄임
+      minimum-idle: 1
+      connection-timeout: 20000  # 타임아웃 줄임
+      idle-timeout: 300000
+      max-lifetime: 900000
 
   jpa:
     hibernate:
       ddl-auto: update  # 테이블 자동 생성/업데이트
-    show-sql: true  # 디버깅을 위해 SQL 로그 활성화
+    show-sql: false  # 무료 티어에서 성능 최적화
     properties:
       hibernate:
         format_sql: false
@@ -34,10 +34,10 @@ spring:
       # password: # AWS ElastiCache는 기본적으로 비밀번호 없음
       lettuce:
         pool:
-          max-active: 8
-          max-idle: 4
-          min-idle: 2
-          max-wait: -1ms
+          max-active: 3  # 무료 티어에 맞게 줄임
+          max-idle: 2
+          min-idle: 1
+          max-wait: 5000ms
 
   servlet:
     multipart:
@@ -64,9 +64,10 @@ spring:
           debug: false  # 운영환경에서는 false
 
   cache:
-    type: redis
+    type: simple  # 무료 티어에서는 메모리 캐시 사용
+    # type: redis  # Redis 사용 시 주석 해제
     redis:
-      time-to-live: 3600000  # 1시간
+      time-to-live: 1800000  # 30분으로 단축
       cache-null-values: false
 
 # 파일 업로드 설정 (S3 연동)
