@@ -124,26 +124,18 @@ public class SecurityConfig {
      * 환경별 CORS 허용 origin 설정
      */
     private String[] getCorsAllowedOrigins() {
-        String profile = env.getActiveProfiles().length > 0 ? env.getActiveProfiles()[0] : "dev";
+        String corsOrigins = env.getProperty("cors.allowed.origins");
         
-        switch (profile) {
-            case "prod":
-                // Vercel과 로컬 개발 모두 허용
-                return new String[]{
-                    "http://localhost:5173",
-                    "http://localhost:3000",
-                    "http://127.0.0.1:5173",
-                    "https://exchange-rate-admin.vercel.app",
-                    "http://43.200.254.119:8080"
-                };
-            case "staging":
-                return new String[]{""};
-            default:
-                return new String[]{
-                    "http://localhost:5173",
-                    "http://localhost:3000",
-                    "http://127.0.0.1:5173"
-                };
+        if (corsOrigins != null && !corsOrigins.isEmpty()) {
+            // 환경 변수에서 설정된 경우 (쉼표로 구분된 값들을 배열로 변환)
+            return corsOrigins.split(",");
         }
+        
+        // 환경 변수가 없는 경우 기본값 (개발 환경)
+        return new String[]{
+            "http://localhost:5173",
+            "http://localhost:3000",
+            "http://127.0.0.1:5173"
+        };
     }
 } 
