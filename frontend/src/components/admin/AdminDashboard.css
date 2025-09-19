@@ -1005,4 +1005,38 @@
     align-items: flex-start;
     gap: 0.25rem;
   }
+}
+
+/* No Data Message Styles */
+.no-data-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  text-align: center;
+  background-color: #f8f9fa;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+  min-height: 120px;
+}
+
+.no-data-icon {
+  font-size: 2.5rem;
+  margin-bottom: 0.75rem;
+  opacity: 0.6;
+}
+
+.no-data-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+.no-data-subtitle {
+  font-size: 0.9rem;
+  color: #6c757d;
+  line-height: 1.4;
+  max-width: 280px;
 } 
