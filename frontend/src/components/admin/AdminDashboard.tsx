@@ -276,13 +276,21 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ admin }) => {
               <div className="chart-section">
                 <h4>관심 환율 TOP 5</h4>
                 <div className="top-currencies">
-                  {favoriteCurrencyTop5.map((item: any, index: number) => (
-                    <div key={index} className="currency-item">
-                      <span className="currency-rank">{index + 1}</span>
-                      <span className="currency-code">{item.favoriteContents}</span>
-                      <span className="currency-count">{item.cnt}개</span>
+                  {favoriteCurrencyTop5.length > 0 ? (
+                    favoriteCurrencyTop5.map((item: any, index: number) => (
+                      <div key={index} className="currency-item">
+                        <span className="currency-rank">{index + 1}</span>
+                        <span className="currency-code">{item.favoriteContents}</span>
+                        <span className="currency-count">{item.cnt}개</span>
+                      </div>
+                    ))
+                  ) : (
+                    <div className="no-data-message">
+                      <div className="no-data-icon">📊</div>
+                      <div className="no-data-title">관심 환율이 없습니다</div>
+                      <div className="no-data-subtitle">새로운 관심 환율이 등록되면 여기에 표시됩니다</div>
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
             </div>
