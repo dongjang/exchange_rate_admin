@@ -58,7 +58,11 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
     
     try {
       // Base64 API를 사용하여 파일 데이터 가져오기
-      const response = await fetch(`http://localhost:8080/api/files/${file.id}/base64`, {
+      const API_BASE_URL =
+      import.meta.env.VITE_API_BASE_URL || 
+      (window.location.hostname.includes('vercel.app') ? '' : 'http://localhost:8080/api');
+
+      const response = await fetch(`${API_BASE_URL}/files/${file.id}/base64`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
