@@ -236,7 +236,7 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
     <div style={{
       background: '#fff',
       borderRadius: '0',
-      padding: isMobile ? '2rem 1rem' : '2rem',
+      padding: isMobile ? '1rem 0.5rem' : '2rem',
       marginBottom: '0',
       border: '1px solid #e2e8f0',
       boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
@@ -596,8 +596,6 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
               background: '#fff',
               border: '1px solid #e2e8f0',
               overflow: 'hidden',
-              maxWidth: isMobile ? '280px' : '320px',
-              width: isMobile ? '280px' : '320px'
             }}>
               <Calendar
                 value={startDate}
@@ -681,8 +679,6 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
               background: '#fff',
               border: '1px solid #e2e8f0',
               overflow: 'hidden',
-              maxWidth: isMobile ? '280px' : '320px',
-              width: isMobile ? '280px' : '320px'
             }}>
               <Calendar
                 value={endDate}
