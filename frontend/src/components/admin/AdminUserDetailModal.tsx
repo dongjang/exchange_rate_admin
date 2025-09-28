@@ -79,7 +79,7 @@ const AdminUserDetailModal: React.FC<AdminUserDetailModalProps> = ({
           customClass: {
             popup: 'swal-custom-popup',
             title: 'swal-custom-title',
-            content: 'swal-custom-content'
+            htmlContainer: 'swal-custom-content'
           }
         });
         onUserUpdated();
@@ -94,7 +94,7 @@ const AdminUserDetailModal: React.FC<AdminUserDetailModalProps> = ({
           customClass: {
             popup: 'swal-custom-popup',
             title: 'swal-custom-title',
-            content: 'swal-custom-content'
+            htmlContainer: 'swal-custom-content'
           }
         });
       }
