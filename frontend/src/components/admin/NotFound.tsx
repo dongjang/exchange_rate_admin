@@ -42,7 +42,6 @@ const NotFound = () => {
       justifyContent: 'center',
       minHeight: '100vh',
       textAlign: 'center',
-      padding: '2rem',
       width: '100%'
     }}>
       <div style={{
@@ -59,7 +58,9 @@ const NotFound = () => {
         fontWeight: '600',
         color: '#1f2937',
         marginBottom: '1rem'
-      }}>
+      }}
+      className='not-found-h1'
+      >
         페이지를 찾을 수 없습니다
       </h1>
       
@@ -68,7 +69,9 @@ const NotFound = () => {
         color: '#6b7280',
         marginBottom: '2rem',
         maxWidth: '500px'
-      }}>
+      }}
+      className='not-found-text'
+      >
         요청하신 페이지가 존재하지 않거나 이동되었을 수 있습니다.
         <br />
         URL을 다시 확인해주세요.
@@ -98,6 +101,7 @@ const NotFound = () => {
           }}
           onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#e5e7eb'}
           onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
+          className='not-found-button'
         >
           <FaArrowLeft />
           이전 페이지
@@ -121,6 +125,7 @@ const NotFound = () => {
           }}
           onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
           onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#3b82f6'}
+          className='not-found-button'
         >
           <FaHome />
           홈으로 이동

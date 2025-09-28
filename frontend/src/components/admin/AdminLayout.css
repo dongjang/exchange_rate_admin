@@ -630,3 +630,17 @@
     font-size: 0.9rem !important;
   }
 }
+
+@media (max-width: 450px) { 
+  .not-found-h1{
+    font-size: 1.7rem !important;
+  }
+
+  .not-found-text{
+    font-size: 0.9rem !important;
+  }
+
+  .not-found-button{
+    font-size: 0.9rem !important;
+  }
+}
