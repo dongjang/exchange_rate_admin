@@ -168,7 +168,7 @@ const DefaultRemittanceLimitModal: React.FC<DefaultRemittanceLimitModalProps> = 
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 9999,
-        padding: '16px'
+        padding: window.innerWidth <= 768 ? '8px' : '16px'
       }}
     >
       <div 
@@ -176,12 +176,12 @@ const DefaultRemittanceLimitModal: React.FC<DefaultRemittanceLimitModalProps> = 
           position: 'relative', 
           zIndex: 10000,
           backgroundColor: 'white',
-          borderRadius: '16px',
+          borderRadius: window.innerWidth <= 768 ? '12px' : '16px',
           boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
           width: '100%',
-          maxWidth: '896px',
-          margin: '0 16px',
-          maxHeight: '90vh',
+          maxWidth: window.innerWidth <= 768 ? '100%' : '896px',
+          margin: window.innerWidth <= 768 ? '0' : '0 16px',
+          maxHeight: window.innerWidth <= 768 ? '95vh' : '90vh',
           overflow: 'auto'
         }}
       >
@@ -190,33 +190,54 @@ const DefaultRemittanceLimitModal: React.FC<DefaultRemittanceLimitModalProps> = 
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          padding: '32px',
+          padding: window.innerWidth <= 768 ? '20px' : '32px',
           borderBottom: '1px solid #f3f4f6',
           background: 'linear-gradient(135deg, #eff6ff 0%, #e0e7ff 100%)',
-          borderRadius: '16px 16px 0 0'
+          borderRadius: window.innerWidth <= 768 ? '12px 12px 0 0' : '16px 16px 0 0'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: window.innerWidth <= 768 ? '8px' : '12px',
+            flex: 1,
+            minWidth: 0
+          }}>
             <div style={{
-              width: '40px',
-              height: '40px',
+              width: window.innerWidth <= 768 ? '32px' : '40px',
+              height: window.innerWidth <= 768 ? '32px' : '40px',
               backgroundColor: '#dbeafe',
               borderRadius: '50%',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              flexShrink: 0
             }}>
-              <FaSave style={{ color: '#3b82f6', fontSize: '18px' }} />
+              <FaSave style={{ 
+                color: '#3b82f6', 
+                fontSize: window.innerWidth <= 768 ? '14px' : '18px' 
+              }} />
             </div>
-            <div>
-              <h2 style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827', margin: '0' }}>기본 한도 설정</h2>
-              <p style={{ fontSize: '14px', color: '#6b7280', margin: '4px 0 0 0' }}>시스템 전체의 기본 송금 한도를 설정합니다</p>
+            <div style={{ minWidth: 0, flex: 1 }}>
+              <h2 style={{ 
+                fontSize: window.innerWidth <= 768 ? '18px' : '24px', 
+                fontWeight: 'bold', 
+                color: '#111827', 
+                margin: '0',
+                lineHeight: 1.2
+              }}>기본 한도 설정</h2>
+              <p style={{ 
+                fontSize: window.innerWidth <= 768 ? '12px' : '14px', 
+                color: '#6b7280', 
+                margin: '4px 0 0 0',
+                lineHeight: 1.3
+              }}>시스템 전체의 기본 송금 한도를 설정합니다</p>
             </div>
           </div>
           <button
             onClick={onClose}
             style={{
-              width: '32px',
-              height: '32px',
+              width: window.innerWidth <= 768 ? '28px' : '32px',
+              height: window.innerWidth <= 768 ? '28px' : '32px',
               backgroundColor: '#f3f4f6',
               borderRadius: '50%',
               display: 'flex',
@@ -225,7 +246,8 @@ const DefaultRemittanceLimitModal: React.FC<DefaultRemittanceLimitModalProps> = 
               color: '#6b7280',
               border: 'none',
               cursor: 'pointer',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              flexShrink: 0
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = '#e5e7eb';
@@ -236,19 +258,19 @@ const DefaultRemittanceLimitModal: React.FC<DefaultRemittanceLimitModalProps> = 
               e.currentTarget.style.color = '#6b7280';
             }}
           >
-            <FaTimes style={{ fontSize: '14px' }} />
+            <FaTimes style={{ fontSize: window.innerWidth <= 768 ? '12px' : '14px' }} />
           </button>
         </div>
 
         {/* 내용 */}
-        <div style={{ padding: '32px' }}>
+        <div style={{ padding: window.innerWidth <= 768 ? '20px' : '32px' }}>
           {/* 한도 입력 섹션 */}
-          <div style={{ marginBottom: '32px' }}>
+          <div style={{ marginBottom: window.innerWidth <= 768 ? '24px' : '32px' }}>
             <h3 style={{
-              fontSize: '18px',
+              fontSize: window.innerWidth <= 768 ? '16px' : '18px',
               fontWeight: '600',
               color: '#111827',
-              marginBottom: '24px',
+              marginBottom: window.innerWidth <= 768 ? '16px' : '24px',
               display: 'flex',
               alignItems: 'center'
             }}>
@@ -257,13 +279,22 @@ const DefaultRemittanceLimitModal: React.FC<DefaultRemittanceLimitModalProps> = 
                 height: '8px',
                 backgroundColor: '#3b82f6',
                 borderRadius: '50%',
-                marginRight: '12px'
+                marginRight: '12px',
+                flexShrink: 0
               }}></div>
               한도 설정
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' }}>
+            <div style={{ 
+              display: 'grid', 
+              gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : 'repeat(auto-fit, minmax(250px, 1fr))', 
+              gap: window.innerWidth <= 768 ? '16px' : '24px' 
+            }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <label style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>
+                <label style={{ 
+                  fontSize: window.innerWidth <= 768 ? '13px' : '14px', 
+                  fontWeight: '500', 
+                  color: '#374151' 
+                }}>
                   일일 한도 <span style={{ color: '#ef4444' }}>*</span>
                 </label>
                 <div style={{ position: 'relative' }}>
@@ -275,11 +306,11 @@ const DefaultRemittanceLimitModal: React.FC<DefaultRemittanceLimitModalProps> = 
                     placeholder="1,000,000"
                     style={{
                       width: '100%',
-                      padding: '16px',
-                      paddingRight: '48px',
+                      padding: window.innerWidth <= 768 ? '12px' : '16px',
+                      paddingRight: window.innerWidth <= 768 ? '40px' : '48px',
                       border: '2px solid #e5e7eb',
-                      borderRadius: '16px',
-                      fontSize: '18px',
+                      borderRadius: window.innerWidth <= 768 ? '12px' : '16px',
+                      fontSize: window.innerWidth <= 768 ? '16px' : '18px',
                       fontWeight: '500',
                       backgroundColor: '#f9fafb',
                       transition: 'all 0.2s ease'
@@ -297,18 +328,22 @@ const DefaultRemittanceLimitModal: React.FC<DefaultRemittanceLimitModalProps> = 
                   />
                   <div style={{
                     position: 'absolute',
-                    right: '12px',
+                    right: window.innerWidth <= 768 ? '8px' : '12px',
                     top: '50%',
                     transform: 'translateY(-50%)',
                     color: '#9ca3af',
-                    fontSize: '14px'
+                    fontSize: window.innerWidth <= 768 ? '12px' : '14px'
                   }}>
                     원
                   </div>
                 </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <label style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>
+                <label style={{ 
+                  fontSize: window.innerWidth <= 768 ? '13px' : '14px', 
+                  fontWeight: '500', 
+                  color: '#374151' 
+                }}>
                   월 한도 <span style={{ color: '#ef4444' }}>*</span>
                 </label>
                 <div style={{ position: 'relative' }}>
@@ -320,11 +355,11 @@ const DefaultRemittanceLimitModal: React.FC<DefaultRemittanceLimitModalProps> = 
                     placeholder="5,000,000"
                     style={{
                       width: '100%',
-                      padding: '16px',
-                      paddingRight: '48px',
+                      padding: window.innerWidth <= 768 ? '12px' : '16px',
+                      paddingRight: window.innerWidth <= 768 ? '40px' : '48px',
                       border: '2px solid #e5e7eb',
-                      borderRadius: '16px',
-                      fontSize: '18px',
+                      borderRadius: window.innerWidth <= 768 ? '12px' : '16px',
+                      fontSize: window.innerWidth <= 768 ? '16px' : '18px',
                       fontWeight: '500',
                       backgroundColor: '#f9fafb',
                       transition: 'all 0.2s ease'
@@ -342,18 +377,22 @@ const DefaultRemittanceLimitModal: React.FC<DefaultRemittanceLimitModalProps> = 
                   />
                   <div style={{
                     position: 'absolute',
-                    right: '12px',
+                    right: window.innerWidth <= 768 ? '8px' : '12px',
                     top: '50%',
                     transform: 'translateY(-50%)',
                     color: '#9ca3af',
-                    fontSize: '14px'
+                    fontSize: window.innerWidth <= 768 ? '12px' : '14px'
                   }}>
                     원
                   </div>
                 </div>
               </div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <label style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>
+                <label style={{ 
+                  fontSize: window.innerWidth <= 768 ? '13px' : '14px', 
+                  fontWeight: '500', 
+                  color: '#374151' 
+                }}>
                   1회 한도 <span style={{ color: '#ef4444' }}>*</span>
                 </label>
                 <div style={{ position: 'relative' }}>
@@ -365,11 +404,11 @@ const DefaultRemittanceLimitModal: React.FC<DefaultRemittanceLimitModalProps> = 
                     placeholder="500,000"
                     style={{
                       width: '100%',
-                      padding: '16px',
-                      paddingRight: '48px',
+                      padding: window.innerWidth <= 768 ? '12px' : '16px',
+                      paddingRight: window.innerWidth <= 768 ? '40px' : '48px',
                       border: '2px solid #e5e7eb',
-                      borderRadius: '16px',
-                      fontSize: '18px',
+                      borderRadius: window.innerWidth <= 768 ? '12px' : '16px',
+                      fontSize: window.innerWidth <= 768 ? '16px' : '18px',
                       fontWeight: '500',
                       backgroundColor: '#f9fafb',
                       transition: 'all 0.2s ease'
@@ -387,11 +426,11 @@ const DefaultRemittanceLimitModal: React.FC<DefaultRemittanceLimitModalProps> = 
                   />
                   <div style={{
                     position: 'absolute',
-                    right: '12px',
+                    right: window.innerWidth <= 768 ? '8px' : '12px',
                     top: '50%',
                     transform: 'translateY(-50%)',
                     color: '#9ca3af',
-                    fontSize: '14px'
+                    fontSize: window.innerWidth <= 768 ? '12px' : '14px'
                   }}>
                     원
                   </div>
@@ -401,12 +440,12 @@ const DefaultRemittanceLimitModal: React.FC<DefaultRemittanceLimitModalProps> = 
           </div>
           
           {/* 설명 입력 섹션 */}
-          <div style={{ marginBottom: '32px' }}>
+          <div style={{ marginBottom: window.innerWidth <= 768 ? '24px' : '32px' }}>
             <h3 style={{
-              fontSize: '18px',
+              fontSize: window.innerWidth <= 768 ? '16px' : '18px',
               fontWeight: '600',
               color: '#111827',
-              marginBottom: '24px',
+              marginBottom: window.innerWidth <= 768 ? '16px' : '24px',
               display: 'flex',
               alignItems: 'center'
             }}>
@@ -415,7 +454,8 @@ const DefaultRemittanceLimitModal: React.FC<DefaultRemittanceLimitModalProps> = 
                 height: '8px',
                 backgroundColor: '#10b981',
                 borderRadius: '50%',
-                marginRight: '12px'
+                marginRight: '12px',
+                flexShrink: 0
               }}></div>
               설정 설명
             </h3>
@@ -424,13 +464,13 @@ const DefaultRemittanceLimitModal: React.FC<DefaultRemittanceLimitModalProps> = 
               value={formData.description}
               onChange={handleInputChange}
               placeholder="예: 2024년 신규 사용자 기본 한도 설정"
-              rows={4}
+              rows={window.innerWidth <= 768 ? 3 : 4}
               style={{
                 width: '100%',
-                padding: '16px',
+                padding: window.innerWidth <= 768 ? '12px' : '16px',
                 border: '2px solid #e5e7eb',
-                borderRadius: '16px',
-                fontSize: '16px',
+                borderRadius: window.innerWidth <= 768 ? '12px' : '16px',
+                fontSize: window.innerWidth <= 768 ? '14px' : '16px',
                 backgroundColor: '#f9fafb',
                 transition: 'all 0.2s ease',
                 resize: 'none',
@@ -453,26 +493,42 @@ const DefaultRemittanceLimitModal: React.FC<DefaultRemittanceLimitModalProps> = 
           <div style={{
             backgroundColor: '#eff6ff',
             border: '1px solid #dbeafe',
-            borderRadius: '12px',
-            padding: '16px',
-            marginBottom: '24px'
+            borderRadius: window.innerWidth <= 768 ? '8px' : '12px',
+            padding: window.innerWidth <= 768 ? '12px' : '16px',
+            marginBottom: window.innerWidth <= 768 ? '20px' : '24px'
           }}>
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: window.innerWidth <= 768 ? '8px' : '12px' }}>
               <div style={{
-                width: '20px',
-                height: '20px',
+                width: window.innerWidth <= 768 ? '16px' : '20px',
+                height: window.innerWidth <= 768 ? '16px' : '20px',
                 backgroundColor: '#3b82f6',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                marginTop: '2px'
+                marginTop: '2px',
+                flexShrink: 0
               }}>
-                <div style={{ width: '8px', height: '8px', backgroundColor: 'white', borderRadius: '50%' }}></div>
+                <div style={{ 
+                  width: window.innerWidth <= 768 ? '6px' : '8px', 
+                  height: window.innerWidth <= 768 ? '6px' : '8px', 
+                  backgroundColor: 'white', 
+                  borderRadius: '50%' 
+                }}></div>
               </div>
-              <div style={{ flex: '1' }}>
-                <h4 style={{ fontSize: '14px', fontWeight: '600', color: '#1e40af', margin: '0 0 4px 0' }}>설정 안내</h4>
-                <p style={{ fontSize: '14px', color: '#1d4ed8', lineHeight: '1.6', margin: '0' }}>
+              <div style={{ flex: '1', minWidth: 0 }}>
+                <h4 style={{ 
+                  fontSize: window.innerWidth <= 768 ? '13px' : '14px', 
+                  fontWeight: '600', 
+                  color: '#1e40af', 
+                  margin: '0 0 4px 0' 
+                }}>설정 안내</h4>
+                <p style={{ 
+                  fontSize: window.innerWidth <= 768 ? '12px' : '14px', 
+                  color: '#1d4ed8', 
+                  lineHeight: '1.6', 
+                  margin: '0' 
+                }}>
                   설정한 기본 한도는 새로운 사용자에게 자동으로 적용되며, 기존 사용자의 한도는 변경되지 않습니다.
                 </p>
               </div>
@@ -484,23 +540,26 @@ const DefaultRemittanceLimitModal: React.FC<DefaultRemittanceLimitModalProps> = 
         <div style={{
           display: 'flex',
           justifyContent: 'flex-end',
-          gap: '16px',
-          padding: '32px',
+          gap: window.innerWidth <= 768 ? '12px' : '16px',
+          padding: window.innerWidth <= 768 ? '20px' : '32px',
           borderTop: '1px solid #f3f4f6',
           backgroundColor: '#f9fafb',
-          borderRadius: '0 0 16px 16px'
+          borderRadius: window.innerWidth <= 768 ? '0 0 12px 12px' : '0 0 16px 16px',
+          flexDirection: window.innerWidth <= 768 ? 'column' : 'row'
         }}>
           <button
             onClick={onClose}
             style={{
-              padding: '16px 32px',
+              padding: window.innerWidth <= 768 ? '12px 24px' : '16px 32px',
               color: '#374151',
               backgroundColor: 'white',
               border: '2px solid #e5e7eb',
-              borderRadius: '16px',
+              borderRadius: window.innerWidth <= 768 ? '12px' : '16px',
               fontWeight: '500',
               transition: 'all 0.2s ease',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              fontSize: window.innerWidth <= 768 ? '14px' : '16px',
+              width: window.innerWidth <= 768 ? '100%' : 'auto'
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = '#f9fafb';
@@ -519,10 +578,10 @@ const DefaultRemittanceLimitModal: React.FC<DefaultRemittanceLimitModalProps> = 
             onClick={handleSubmit}
             disabled={loading}
             style={{
-              padding: '16px 32px',
+              padding: window.innerWidth <= 768 ? '12px 24px' : '16px 32px',
               background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
               color: 'white',
-              borderRadius: '16px',
+              borderRadius: window.innerWidth <= 768 ? '12px' : '16px',
               fontWeight: '500',
               boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
               transition: 'all 0.2s ease',
@@ -530,7 +589,10 @@ const DefaultRemittanceLimitModal: React.FC<DefaultRemittanceLimitModalProps> = 
               cursor: loading ? 'not-allowed' : 'pointer',
               opacity: loading ? 0.5 : 1,
               display: 'flex',
-              alignItems: 'center'
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontSize: window.innerWidth <= 768 ? '14px' : '16px',
+              width: window.innerWidth <= 768 ? '100%' : 'auto'
             }}
             onMouseEnter={(e) => {
               if (!loading) {

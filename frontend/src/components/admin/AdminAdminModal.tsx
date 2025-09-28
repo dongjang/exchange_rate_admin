@@ -317,7 +317,19 @@ function AdminAdminModal({ isOpen, onClose, adminId, onAdminUpdated }: AdminAdmi
     >
       <div
         className="admin-modal-card"
-        style={{ background: '#fff', borderRadius: '16px', boxShadow: '0 4px 24px rgba(30,41,59,0.13)', minWidth: 400, maxWidth: 500, width: '100%', padding: '2.2rem 2rem 1.5rem 2rem', position: 'relative' }}
+        style={{ 
+          background: '#fff', 
+          borderRadius: window.innerWidth <= 768 ? '12px' : '16px', 
+          boxShadow: '0 4px 24px rgba(30,41,59,0.13)', 
+          minWidth: window.innerWidth <= 768 ? 'auto' : 400, 
+          maxWidth: window.innerWidth <= 768 ? 'calc(100vw - 20px)' : 500, 
+          width: window.innerWidth <= 768 ? 'calc(100vw - 20px)' : '100%', 
+          padding: window.innerWidth <= 768 ? '1.5rem 1rem' : '2.2rem 2rem 1.5rem 2rem', 
+          position: 'relative',
+          margin: window.innerWidth <= 768 ? '10px' : '0',
+          maxHeight: window.innerWidth <= 768 ? 'calc(100vh - 20px)' : '90vh',
+          overflow: 'auto'
+        }}
       >
         <button className="close-button admin-modal-close-fancy admin-modal-close-float" onClick={handleClose} aria-label="닫기">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#64748b" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
@@ -326,8 +338,18 @@ function AdminAdminModal({ isOpen, onClose, adminId, onAdminUpdated }: AdminAdmi
           </svg>
         </button>
 
-        <div className="admin-modal-header-fancy" style={{ justifyContent: 'center', borderBottom: 'none', background: 'none', padding: '0 0 10px 0' }}>
-          <h2 className="admin-modal-title" style={{ color: '#222', fontWeight: 700 }}>
+        <div className="admin-modal-header-fancy" style={{ 
+          justifyContent: 'center', 
+          borderBottom: 'none', 
+          background: 'none', 
+          padding: window.innerWidth <= 768 ? '0 0 16px 0' : '0 0 10px 0',
+          marginBottom: window.innerWidth <= 768 ? '8px' : '0'
+        }}>
+          <h2 className="admin-modal-title" style={{ 
+            color: '#222', 
+            fontWeight: 700,
+            fontSize: window.innerWidth <= 768 ? '18px' : '24px'
+          }}>
             {isEditMode ? '관리자 상세' : '관리자 등록'}
           </h2>
         </div>
@@ -336,7 +358,11 @@ function AdminAdminModal({ isOpen, onClose, adminId, onAdminUpdated }: AdminAdmi
         <form onSubmit={handleSubmit} className="admin-form admin-modal-form-fancy">
           <div className="form-group">
             <label htmlFor="adminId">관리자 아이디 *</label>
-            <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ 
+              display: 'flex', 
+              gap: window.innerWidth <= 768 ? '6px' : '8px',
+              flexDirection: window.innerWidth <= 768 ? 'column' : 'row'
+            }}>
               <input
                 type="text"
                 id="adminId"
@@ -348,7 +374,11 @@ function AdminAdminModal({ isOpen, onClose, adminId, onAdminUpdated }: AdminAdmi
                 disabled={isEditMode} // 수정 시에는 아이디 변경 불가
                 className="admin-modal-input"
                 autoComplete='off'
-                style={{ flex: 1 }}
+                style={{ 
+                  flex: 1,
+                  fontSize: window.innerWidth <= 768 ? '14px' : '16px',
+                  padding: window.innerWidth <= 768 ? '10px 12px' : '8px 12px'
+                }}
                 maxLength={20}
               />
                              {!isEditMode && (
@@ -357,14 +387,15 @@ function AdminAdminModal({ isOpen, onClose, adminId, onAdminUpdated }: AdminAdmi
                    onClick={handleIdCheck}
                    disabled={idCheckLoading || !formData.adminId || !formData.adminId.trim()}
                    style={{
-                     padding: '8px 16px',
+                     padding: window.innerWidth <= 768 ? '10px 16px' : '8px 16px',
                      backgroundColor: idCheckLoading || !formData.adminId || !formData.adminId.trim() ? '#9ca3af' : '#3b82f6',
                      color: 'white',
                      border: 'none',
                      borderRadius: '6px',
                      cursor: idCheckLoading || !formData.adminId || !formData.adminId.trim() ? 'not-allowed' : 'pointer',
-                     fontSize: '12px',
-                     whiteSpace: 'nowrap'
+                     fontSize: window.innerWidth <= 768 ? '13px' : '12px',
+                     whiteSpace: 'nowrap',
+                     width: window.innerWidth <= 768 ? '100%' : 'auto'
                    }}
                  >
                    {idCheckLoading ? '확인중...' : '중복확인'}
@@ -400,21 +431,27 @@ function AdminAdminModal({ isOpen, onClose, adminId, onAdminUpdated }: AdminAdmi
               maxLength={10}
             />
                          {formData.password && (
-               <div style={{ marginTop: '8px', fontSize: '12px' }}>
+               <div style={{ 
+                 marginTop: '8px', 
+                 fontSize: window.innerWidth <= 768 ? '11px' : '12px',
+                 display: window.innerWidth <= 768 ? 'grid' : 'block',
+                 gridTemplateColumns: window.innerWidth <= 768 ? '1fr 1fr' : '1fr',
+                 gap: window.innerWidth <= 768 ? '4px' : '0'
+               }}>
                  <div style={{ color: passwordValidation.length ? '#10b981' : '#ef4444' }}>
-                   ✓ 8~10자 길이 {passwordValidation.length ? '✓' : '✗'}
+                   ✓ 8~10자 {passwordValidation.length ? '✓' : '✗'}
                  </div>
                  <div style={{ color: passwordValidation.hasNumber ? '#10b981' : '#ef4444' }}>
-                   ✓ 숫자 포함 {passwordValidation.hasNumber ? '✓' : '✗'}
+                   ✓ 숫자 {passwordValidation.hasNumber ? '✓' : '✗'}
                  </div>
                  <div style={{ color: passwordValidation.hasSpecial ? '#10b981' : '#ef4444' }}>
-                   ✓ 특수문자 포함 {passwordValidation.hasSpecial ? '✓' : '✗'}
+                   ✓ 특수문자 {passwordValidation.hasSpecial ? '✓' : '✗'}
                  </div>
                  <div style={{ color: passwordValidation.hasUpper ? '#10b981' : '#ef4444' }}>
-                   ✓ 대문자 포함 {passwordValidation.hasUpper ? '✓' : '✗'}
+                   ✓ 대문자 {passwordValidation.hasUpper ? '✓' : '✗'}
                  </div>
                  <div style={{ color: passwordValidation.hasLower ? '#10b981' : '#ef4444' }}>
-                   ✓ 소문자 포함 {passwordValidation.hasLower ? '✓' : '✗'}
+                   ✓ 소문자 {passwordValidation.hasLower ? '✓' : '✗'}
                  </div>
                </div>
              )}
@@ -515,22 +552,28 @@ function AdminAdminModal({ isOpen, onClose, adminId, onAdminUpdated }: AdminAdmi
             </div>
           )}
 
-          <div className="form-actions" style={{ display: 'flex', gap: '0.75rem', marginTop: '2rem' }}>
+          <div className="form-actions" style={{ 
+            display: 'flex', 
+            gap: window.innerWidth <= 768 ? '0.5rem' : '0.75rem', 
+            marginTop: window.innerWidth <= 768 ? '1.5rem' : '2rem',
+            flexDirection: window.innerWidth <= 768 ? 'column' : 'row'
+          }}>
             <button
               type="button"
               onClick={handleClose}
               className="cancel-button"
               style={{
                 flex: 1,
-                padding: '0.75rem 1rem',
+                padding: window.innerWidth <= 768 ? '12px 1rem' : '0.75rem 1rem',
                 backgroundColor: '#f3f4f6',
                 color: '#374151',
                 border: 'none',
                 borderRadius: '8px',
-                fontSize: '0.875rem',
+                fontSize: window.innerWidth <= 768 ? '14px' : '0.875rem',
                 fontWeight: '500',
                 cursor: 'pointer',
-                transition: 'background-color 0.2s'
+                transition: 'background-color 0.2s',
+                width: window.innerWidth <= 768 ? '100%' : 'auto'
               }}
               onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#e5e7eb'}
               onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#f3f4f6'}
@@ -543,16 +586,17 @@ function AdminAdminModal({ isOpen, onClose, adminId, onAdminUpdated }: AdminAdmi
               className="submit-button"
               style={{
                 flex: 1,
-                padding: '0.75rem 1rem',
+                padding: window.innerWidth <= 768 ? '12px 1rem' : '0.75rem 1rem',
                 backgroundColor: '#3b82f6',
                 color: '#fff',
                 border: 'none',
                 borderRadius: '8px',
-                fontSize: '0.875rem',
+                fontSize: window.innerWidth <= 768 ? '14px' : '0.875rem',
                 fontWeight: '500',
                 cursor: loading ? 'not-allowed' : 'pointer',
                 opacity: loading ? 0.6 : 1,
-                transition: 'background-color 0.2s'
+                transition: 'background-color 0.2s',
+                width: window.innerWidth <= 768 ? '100%' : 'auto'
               }}
               onMouseOver={(e) => !loading && (e.currentTarget.style.backgroundColor = '#2563eb')}
               onMouseOut={(e) => !loading && (e.currentTarget.style.backgroundColor = '#3b82f6')}

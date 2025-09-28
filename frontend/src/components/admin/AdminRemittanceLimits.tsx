@@ -490,8 +490,19 @@ const AdminRemittanceLimits: React.FC = () => {
                 <button
                   onClick={() => handleViewFiles(row)}
                   className="btn btn-secondary btn-sm"
+                  style={{
+                    padding: window.innerWidth <= 768 ? '6px 10px' : '8px 16px',
+                    fontSize: window.innerWidth <= 768 ? '12px' : '14px',
+                    minWidth: window.innerWidth <= 768 ? '60px' : '80px',
+                    width: window.innerWidth <= 768 ? '60px' : 'auto',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: window.innerWidth <= 768 ? '3px' : '6px'
+                  }}
                 >
-                  <FaEye /> 보기
+                  <FaEye style={{ fontSize: window.innerWidth <= 768 ? '11px' : '14px' }} /> 
+                  보기
                 </button>
               ) : '-'
             )
@@ -504,21 +515,49 @@ const AdminRemittanceLimits: React.FC = () => {
             align: 'center' as const,
             render: (_, row) => (
               row.status === 'PENDING' ? (
-                <div className="action-buttons">
+                <div className="action-buttons" style={{
+                  display: 'flex',
+                  gap: window.innerWidth <= 768 ? '6px' : '8px',
+                  flexDirection: 'row',
+                  justifyContent: 'center',
+                  alignItems: 'center'
+                }}>
                   <button
                     onClick={() => handleRequestAction('approve',row.id, row.userId, row.dailyLimit,row.monthlyLimit, row.singleLimit)}
                     className="btn btn-success btn-sm"
                     disabled={processingRequestId === row.id}
+                    style={{
+                      padding: window.innerWidth <= 768 ? '6px 10px' : '8px 16px',
+                      fontSize: window.innerWidth <= 768 ? '11px' : '14px',
+                      minWidth: window.innerWidth <= 768 ? '55px' : '70px',
+                      width: window.innerWidth <= 768 ? '55px' : 'auto',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: window.innerWidth <= 768 ? '3px' : '4px'
+                    }}
                   >
-                    <FaCheck /> 승인
+                    <FaCheck style={{ fontSize: window.innerWidth <= 768 ? '10px' : '14px' }} /> 
+                    승인
                   </button>
-                                     <button
-                     onClick={() => handleRequestAction('reject',row.id, row.userId, row.dailyLimit, row.monthlyLimit, row.singleLimit)}
-                     className="btn btn-danger btn-sm"
-                     disabled={processingRequestId === row.id}
-                   >
-                     <FaTimes /> 반려
-                   </button>
+                  <button
+                    onClick={() => handleRequestAction('reject',row.id, row.userId, row.dailyLimit, row.monthlyLimit, row.singleLimit)}
+                    className="btn btn-danger btn-sm"
+                    disabled={processingRequestId === row.id}
+                    style={{
+                      padding: window.innerWidth <= 768 ? '6px 10px' : '8px 16px',
+                      fontSize: window.innerWidth <= 768 ? '11px' : '14px',
+                      minWidth: window.innerWidth <= 768 ? '55px' : '70px',
+                      width: window.innerWidth <= 768 ? '55px' : 'auto',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: window.innerWidth <= 768 ? '3px' : '4px'
+                    }}
+                  >
+                    <FaTimes style={{ fontSize: window.innerWidth <= 768 ? '10px' : '14px' }} /> 
+                    반려
+                  </button>
                 </div>
               ) : '-'
             )

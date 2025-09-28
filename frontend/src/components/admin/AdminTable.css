@@ -796,37 +796,61 @@
   }
   
   .results-summary {
-    flex-direction: row;
+    flex-direction: column;
     gap: 12px;
-    align-items: center;
+    align-items: stretch;
     flex-wrap: nowrap;
     justify-content: flex-start;
-    overflow-x: auto;
-    padding: 8px 15px;
+    overflow-x: visible;
+    padding: 12px 15px;
   }
   
   .summary-info {
-    flex-direction: row;
-    gap: 12px;
-    align-items: center;
+    flex-direction: column;
+    gap: 8px;
+    align-items: stretch;
     flex-wrap: nowrap;
     flex-shrink: 0;
+    width: 100%;
+  }
+  
+  .total-count {
+    text-align: right;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 4px;
   }
   
   .page-size-selector,
   .sort-info {
-    width: auto;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
     min-width: auto;
     flex-shrink: 0;
     white-space: nowrap;
   }
   
+  .page-size-selector label,
+  .sort-info label {
+    min-width: 40px;
+    flex-shrink: 0;
+    font-size: 14px;
+    color: #6b7280;
+  }
+  
   .page-size-select,
   .sort-select {
-    width: auto;
-    min-width: 80px;
-    max-width: 120px;
+    flex: 1;
+    min-width: 120px;
+    max-width: none;
     flex-shrink: 0;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: white;
+    font-size: 14px;
   }
   
   .table-list-container {
@@ -909,14 +933,22 @@
   
   .pagination {
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 3px;
     justify-content: center;
+    padding: 16px 8px;
+    max-width: 100%;
+    overflow-x: auto;
   }
   
   .page-btn {
     padding: 6px 8px;
-    font-size: 0.875rem;
-    min-width: 32px;
+    font-size: 0.8rem;
+    min-width: 30px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
   
   .empty-state {
@@ -959,12 +991,20 @@
   
   .pagination {
     gap: 2px;
+    padding: 12px 4px;
+    flex-wrap: wrap;
+    justify-content: center;
   }
   
   .page-btn {
     padding: 4px 6px;
-    font-size: 0.8rem;
-    min-width: 28px;
+    font-size: 0.75rem;
+    min-width: 26px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
   }
 }
 

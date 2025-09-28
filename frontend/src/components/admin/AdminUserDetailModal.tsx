@@ -133,9 +133,9 @@ const AdminUserDetailModal: React.FC<AdminUserDetailModalProps> = ({
     }}>
       <div className="modal-content" style={{
         background: 'linear-gradient(145deg, #ffffff 0%, #f8fafc 50%, #f1f5f9 100%)',
-        borderRadius: '20px',
-        padding: '40px',
-        width: '800px',
+        borderRadius: window.innerWidth <= 768 ? '12px' : '20px',
+        padding: window.innerWidth <= 768 ? '20px' : '40px',
+        width: window.innerWidth <= 768 ? '95vw' : '800px',
         maxWidth: '90vw',
         maxHeight: '90vh',
         overflow: 'auto',
@@ -147,19 +147,23 @@ const AdminUserDetailModal: React.FC<AdminUserDetailModalProps> = ({
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
-          marginBottom: '20px'
+          marginBottom: window.innerWidth <= 768 ? '16px' : '20px'
         }}>
-          <h2 style={{ margin: 0, fontSize: '24px', fontWeight: '600' }}>사용자 상세 정보</h2>
+          <h2 style={{ 
+            margin: 0, 
+            fontSize: window.innerWidth <= 768 ? '18px' : '24px', 
+            fontWeight: '600' 
+          }}>사용자 상세 정보</h2>
           <button
             onClick={onClose}
             style={{
               background: 'none',
               border: 'none',
-              fontSize: '24px',
+              fontSize: window.innerWidth <= 768 ? '20px' : '24px',
               cursor: 'pointer',
               padding: '0',
-              width: '30px',
-              height: '30px',
+              width: window.innerWidth <= 768 ? '28px' : '30px',
+              height: window.innerWidth <= 768 ? '28px' : '30px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
@@ -176,52 +180,140 @@ const AdminUserDetailModal: React.FC<AdminUserDetailModalProps> = ({
           </div>
         ) : user ? (
           <div className="modal-body">
-            <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: '600' }}>기본 정보</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div style={{ marginBottom: window.innerWidth <= 768 ? '16px' : '20px' }}>
+              <h3 style={{ 
+                marginBottom: window.innerWidth <= 768 ? '12px' : '16px', 
+                fontSize: window.innerWidth <= 768 ? '16px' : '18px', 
+                fontWeight: '600' 
+              }}>기본 정보</h3>
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : '1fr 1fr', 
+                gap: window.innerWidth <= 768 ? '12px' : '16px' 
+              }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: '#6b7280' }}>사용자명</label>
-                  <div style={{ padding: '8px 12px', backgroundColor: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '4px', 
+                    fontWeight: '500', 
+                    color: '#6b7280',
+                    fontSize: window.innerWidth <= 768 ? '13px' : '14px'
+                  }}>사용자명</label>
+                  <div style={{ 
+                    padding: window.innerWidth <= 768 ? '10px 12px' : '8px 12px', 
+                    backgroundColor: '#f9fafb', 
+                    borderRadius: '6px', 
+                    border: '1px solid #e5e7eb',
+                    fontSize: window.innerWidth <= 768 ? '14px' : '16px'
+                  }}>
                     {user.name}
                   </div>
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: '#6b7280' }}>이메일</label>
-                  <div style={{ padding: '8px 12px', backgroundColor: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '4px', 
+                    fontWeight: '500', 
+                    color: '#6b7280',
+                    fontSize: window.innerWidth <= 768 ? '13px' : '14px'
+                  }}>이메일</label>
+                  <div style={{ 
+                    padding: window.innerWidth <= 768 ? '10px 12px' : '8px 12px', 
+                    backgroundColor: '#f9fafb', 
+                    borderRadius: '6px', 
+                    border: '1px solid #e5e7eb',
+                    fontSize: window.innerWidth <= 768 ? '14px' : '16px',
+                    wordBreak: 'break-all'
+                  }}>
                     {user.email}
                   </div>
                 </div>
               </div>
             </div>
 
-            <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: '600' }}>송금 한도</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div style={{ marginBottom: window.innerWidth <= 768 ? '16px' : '20px' }}>
+              <h3 style={{ 
+                marginBottom: window.innerWidth <= 768 ? '12px' : '16px', 
+                fontSize: window.innerWidth <= 768 ? '16px' : '18px', 
+                fontWeight: '600' 
+              }}>송금 한도</h3>
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : '1fr 1fr', 
+                gap: window.innerWidth <= 768 ? '12px' : '16px' 
+              }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: '#6b7280' }}>일일 한도</label>
-                  <div style={{ padding: '8px 12px', backgroundColor: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '4px', 
+                    fontWeight: '500', 
+                    color: '#6b7280',
+                    fontSize: window.innerWidth <= 768 ? '13px' : '14px'
+                  }}>일일 한도</label>
+                  <div style={{ 
+                    padding: window.innerWidth <= 768 ? '10px 12px' : '8px 12px', 
+                    backgroundColor: '#f9fafb', 
+                    borderRadius: '6px', 
+                    border: '1px solid #e5e7eb',
+                    fontSize: window.innerWidth <= 768 ? '14px' : '16px'
+                  }}>
                     {user.dailyLimit ? formatCurrency(user.dailyLimit) : '설정되지 않음'}
                   </div>
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: '#6b7280' }}>월 한도</label>
-                  <div style={{ padding: '8px 12px', backgroundColor: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '4px', 
+                    fontWeight: '500', 
+                    color: '#6b7280',
+                    fontSize: window.innerWidth <= 768 ? '13px' : '14px'
+                  }}>월 한도</label>
+                  <div style={{ 
+                    padding: window.innerWidth <= 768 ? '10px 12px' : '8px 12px', 
+                    backgroundColor: '#f9fafb', 
+                    borderRadius: '6px', 
+                    border: '1px solid #e5e7eb',
+                    fontSize: window.innerWidth <= 768 ? '14px' : '16px'
+                  }}>
                     {user.monthlyLimit ? formatCurrency(user.monthlyLimit) : '설정되지 않음'}
                   </div>
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: '#6b7280' }}>1회 한도</label>
-                  <div style={{ padding: '8px 12px', backgroundColor: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '4px', 
+                    fontWeight: '500', 
+                    color: '#6b7280',
+                    fontSize: window.innerWidth <= 768 ? '13px' : '14px'
+                  }}>1회 한도</label>
+                  <div style={{ 
+                    padding: window.innerWidth <= 768 ? '10px 12px' : '8px 12px', 
+                    backgroundColor: '#f9fafb', 
+                    borderRadius: '6px', 
+                    border: '1px solid #e5e7eb',
+                    fontSize: window.innerWidth <= 768 ? '14px' : '16px'
+                  }}>
                     {user.singleLimit ? formatCurrency(user.singleLimit) : '설정되지 않음'}
                   </div>
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: '#6b7280' }}>한도 유형</label>
-                  <div style={{ padding: '8px 12px', backgroundColor: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '4px', 
+                    fontWeight: '500', 
+                    color: '#6b7280',
+                    fontSize: window.innerWidth <= 768 ? '13px' : '14px'
+                  }}>한도 유형</label>
+                  <div style={{ 
+                    padding: window.innerWidth <= 768 ? '10px 12px' : '8px 12px', 
+                    backgroundColor: '#f9fafb', 
+                    borderRadius: '6px', 
+                    border: '1px solid #e5e7eb'
+                  }}>
                     <span style={{
-                      padding: '4px 8px',
+                      padding: window.innerWidth <= 768 ? '6px 10px' : '4px 8px',
                       borderRadius: '4px',
-                      fontSize: '12px',
+                      fontSize: window.innerWidth <= 768 ? '13px' : '12px',
                       fontWeight: '500',
                       backgroundColor: user.limitType === 'C' ? '#fef3c7' : '#dbeafe',
                       color: user.limitType === 'C' ? '#92400e' : '#1e40af'
@@ -233,20 +325,34 @@ const AdminUserDetailModal: React.FC<AdminUserDetailModalProps> = ({
               </div>
             </div>
 
-            <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ marginBottom: '16px', fontSize: '18px', fontWeight: '600' }}>계정 정보</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div style={{ marginBottom: window.innerWidth <= 768 ? '16px' : '20px' }}>
+              <h3 style={{ 
+                marginBottom: window.innerWidth <= 768 ? '12px' : '16px', 
+                fontSize: window.innerWidth <= 768 ? '16px' : '18px', 
+                fontWeight: '600' 
+              }}>계정 정보</h3>
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: window.innerWidth <= 768 ? '1fr' : '1fr 1fr', 
+                gap: window.innerWidth <= 768 ? '12px' : '16px' 
+              }}>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: '#6b7280' }}>상태</label>
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '4px', 
+                    fontWeight: '500', 
+                    color: '#6b7280',
+                    fontSize: window.innerWidth <= 768 ? '13px' : '14px'
+                  }}>상태</label>
                   <select
                     value={status}
                     onChange={(e) => setStatus(e.target.value)}
                     style={{
                       width: '100%',
-                      padding: '8px 12px',
+                      padding: window.innerWidth <= 768 ? '10px 12px' : '8px 12px',
                       border: '1px solid #d1d5db',
                       borderRadius: '6px',
-                      fontSize: '14px',
+                      fontSize: window.innerWidth <= 768 ? '14px' : '14px',
                       backgroundColor: 'white'
                     }}
                   >
@@ -255,14 +361,38 @@ const AdminUserDetailModal: React.FC<AdminUserDetailModalProps> = ({
                   </select>
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: '#6b7280' }}>최근 로그인</label>
-                  <div style={{ padding: '8px 12px', backgroundColor: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '4px', 
+                    fontWeight: '500', 
+                    color: '#6b7280',
+                    fontSize: window.innerWidth <= 768 ? '13px' : '14px'
+                  }}>최근 로그인</label>
+                  <div style={{ 
+                    padding: window.innerWidth <= 768 ? '10px 12px' : '8px 12px', 
+                    backgroundColor: '#f9fafb', 
+                    borderRadius: '6px', 
+                    border: '1px solid #e5e7eb',
+                    fontSize: window.innerWidth <= 768 ? '14px' : '16px'
+                  }}>
                     {user.lastLoginAt ? formatDate(user.lastLoginAt) : '로그인 기록 없음'}
                   </div>
                 </div>
                 <div>
-                  <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', color: '#6b7280' }}>가입일</label>
-                  <div style={{ padding: '8px 12px', backgroundColor: '#f9fafb', borderRadius: '6px', border: '1px solid #e5e7eb' }}>
+                  <label style={{ 
+                    display: 'block', 
+                    marginBottom: '4px', 
+                    fontWeight: '500', 
+                    color: '#6b7280',
+                    fontSize: window.innerWidth <= 768 ? '13px' : '14px'
+                  }}>가입일</label>
+                  <div style={{ 
+                    padding: window.innerWidth <= 768 ? '10px 12px' : '8px 12px', 
+                    backgroundColor: '#f9fafb', 
+                    borderRadius: '6px', 
+                    border: '1px solid #e5e7eb',
+                    fontSize: window.innerWidth <= 768 ? '14px' : '16px'
+                  }}>
                     {formatDate(user.createdAt)}
                   </div>
                 </div>

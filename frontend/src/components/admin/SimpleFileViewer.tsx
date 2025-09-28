@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Document, Page, pdfjs } from 'react-pdf';
 import { api } from '../../services/api';
 
@@ -27,6 +27,11 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  
+  // 최신 상태를 참조하기 위한 ref
+  const isDraggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const dragOffsetRef = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     if (isOpen) {
@@ -46,6 +51,52 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
       }
     }
   }, [isOpen, files]);
+
+  // ref와 state 동기화
+  useEffect(() => {
+    isDraggingRef.current = isDragging;
+  }, [isDragging]);
+
+  useEffect(() => {
+    dragStartRef.current = dragStart;
+  }, [dragStart]);
+
+  useEffect(() => {
+    dragOffsetRef.current = dragOffset;
+  }, [dragOffset]);
+
+  // 터치 이벤트 핸들러 (React 이벤트 사용)
+  const handleTouchStart = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    const touch = e.touches[0];
+    const newDragStart = { 
+      x: touch.clientX - dragOffsetRef.current.x, 
+      y: touch.clientY - dragOffsetRef.current.y 
+    };
+    isDraggingRef.current = true;
+    dragStartRef.current = newDragStart;
+    setIsDragging(true);
+    setDragStart(newDragStart);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (isDraggingRef.current) {
+      e.stopPropagation();
+      const touch = e.touches[0];
+      const newDragOffset = {
+        x: touch.clientX - dragStartRef.current.x,
+        y: touch.clientY - dragStartRef.current.y
+      };
+      dragOffsetRef.current = newDragOffset;
+      setDragOffset(newDragOffset);
+    }
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    e.stopPropagation();
+    isDraggingRef.current = false;
+    setIsDragging(false);
+  };
 
   const handleFileClick = async (file: { id: number; originalName: string; fileSize: number; fileType: string }) => {
     setCurrentFile(file);
@@ -195,6 +246,7 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
     setIsDragging(false);
   };
 
+
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -286,53 +338,68 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      zIndex: 1000
+      zIndex: 1000,
+      padding: window.innerWidth <= 768 ? '10px' : '0'
     }}>
              <div 
          style={{
            background: 'white',
-           borderRadius: '12px',
-           padding: '24px',
+           borderRadius: window.innerWidth <= 768 ? '8px' : '12px',
+           padding: window.innerWidth <= 768 ? '16px' : '24px',
            maxWidth: '95vw',
            maxHeight: '95vh',
-           width: '1200px',
-           height: '90vh',
+           width: window.innerWidth <= 768 ? '100%' : '1200px',
+           height: window.innerWidth <= 768 ? '95vh' : '90vh',
            display: 'flex',
            flexDirection: 'column',
-           gap: '20px'
+           gap: window.innerWidth <= 768 ? '12px' : '20px'
          }}
        >
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ margin: 0, fontSize: '20px', fontWeight: '600' }}>첨부파일 보기</h2>
+          <h2 style={{ 
+            margin: 0, 
+            fontSize: window.innerWidth <= 768 ? '18px' : '20px', 
+            fontWeight: '600' 
+          }}>첨부파일 보기</h2>
           <button
             onClick={onClose}
             style={{
               background: 'none',
               border: 'none',
-              fontSize: '24px',
+              fontSize: window.innerWidth <= 768 ? '20px' : '24px',
               cursor: 'pointer',
-              color: '#6b7280'
+              color: '#6b7280',
+              padding: window.innerWidth <= 768 ? '4px' : '0'
             }}
           >
             ×
           </button>
         </div>
 
-         <div style={{ display: 'flex', gap: '16px', borderBottom: '1px solid #e5e7eb', paddingBottom: '16px' }}>
+         <div style={{ 
+           display: 'flex', 
+           gap: window.innerWidth <= 768 ? '8px' : '16px', 
+           borderBottom: '1px solid #e5e7eb', 
+           paddingBottom: window.innerWidth <= 768 ? '12px' : '16px',
+           flexWrap: window.innerWidth <= 768 ? 'wrap' : 'nowrap'
+         }}>
            {files.income && (
              <button
                onClick={() => handleFileClick(files.income!)}
                style={{
-                 padding: '8px 12px',
+                 padding: window.innerWidth <= 768 ? '6px 8px' : '8px 12px',
                  border: '1px solid #d1d5db',
                  borderRadius: '6px',
                  background: currentFile?.id === files.income?.id ? '#3b82f6' : 'white',
                  color: currentFile?.id === files.income?.id ? 'white' : '#374151',
                  cursor: 'pointer',
-                 fontSize: '14px',
+                 fontSize: window.innerWidth <= 768 ? '12px' : '14px',
                  display: 'flex',
                  alignItems: 'center',
-                 gap: '8px'
+                 gap: window.innerWidth <= 768 ? '4px' : '8px',
+                 flex: window.innerWidth <= 768 ? '1' : 'none',
+                 minWidth: window.innerWidth <= 768 ? '0' : 'auto',
+                 whiteSpace: 'nowrap'
                }}
              >
                {getFileIcon(files.income.fileType)} 소득 증빙
@@ -342,16 +409,19 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
              <button
                onClick={() => handleFileClick(files.bankbook!)}
                style={{
-                 padding: '8px 12px',
+                 padding: window.innerWidth <= 768 ? '6px 8px' : '8px 12px',
                  border: '1px solid #d1d5db',
                  borderRadius: '6px',
                  background: currentFile?.id === files.bankbook?.id ? '#3b82f6' : 'white',
                  color: currentFile?.id === files.bankbook?.id ? 'white' : '#374151',
                  cursor: 'pointer',
-                 fontSize: '14px',
+                 fontSize: window.innerWidth <= 768 ? '12px' : '14px',
                  display: 'flex',
                  alignItems: 'center',
-                 gap: '8px'
+                 gap: window.innerWidth <= 768 ? '4px' : '8px',
+                 flex: window.innerWidth <= 768 ? '1' : 'none',
+                 minWidth: window.innerWidth <= 768 ? '0' : 'auto',
+                 whiteSpace: 'nowrap'
                }}
              >
                {getFileIcon(files.bankbook.fileType)} 통장 사본
@@ -361,16 +431,19 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
              <button
                onClick={() => handleFileClick(files.business!)}
                style={{
-                 padding: '8px 12px',
+                 padding: window.innerWidth <= 768 ? '6px 8px' : '8px 12px',
                  border: '1px solid #d1d5db',
                  borderRadius: '6px',
                  background: currentFile?.id === files.business?.id ? '#3b82f6' : 'white',
                  color: currentFile?.id === files.business?.id ? 'white' : '#374151',
                  cursor: 'pointer',
-                 fontSize: '14px',
+                 fontSize: window.innerWidth <= 768 ? '12px' : '14px',
                  display: 'flex',
                  alignItems: 'center',
-                 gap: '8px'
+                 gap: window.innerWidth <= 768 ? '4px' : '8px',
+                 flex: window.innerWidth <= 768 ? '1' : 'none',
+                 minWidth: window.innerWidth <= 768 ? '0' : 'auto',
+                 whiteSpace: 'nowrap'
                }}
              >
                {getFileIcon(files.business.fileType)} 사업자 등록증
@@ -379,29 +452,46 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
          </div>
 
         {currentFile && (
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '16px' }}>
-            <div>
-              <p style={{ margin: '0 0 4px 0', fontSize: '16px', fontWeight: '600' }}>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: window.innerWidth <= 768 ? 'flex-start' : 'center', 
+            paddingBottom: window.innerWidth <= 768 ? '12px' : '16px',
+            flexDirection: window.innerWidth <= 768 ? 'column' : 'row',
+            gap: window.innerWidth <= 768 ? '8px' : '0'
+          }}>
+            <div style={{ flex: window.innerWidth <= 768 ? '1' : 'none' }}>
+              <p style={{ 
+                margin: '0 0 4px 0', 
+                fontSize: window.innerWidth <= 768 ? '14px' : '16px', 
+                fontWeight: '600',
+                wordBreak: 'break-all'
+              }}>
                 {currentFile.originalName}
               </p>
-              <p style={{ margin: 0, fontSize: '14px', color: '#6b7280' }}>
+              <p style={{ 
+                margin: 0, 
+                fontSize: window.innerWidth <= 768 ? '12px' : '14px', 
+                color: '#6b7280' 
+              }}>
                 크기: {formatFileSize(currentFile.fileSize)}
               </p>
             </div>
             <button
               onClick={() => api.downloadFile(currentFile.id)}
               style={{
-                padding: '8px 16px',
+                padding: window.innerWidth <= 768 ? '6px 12px' : '8px 16px',
                 border: '1px solid #3b82f6',
                 borderRadius: '4px',
                 background: 'white',
                 color: '#3b82f6',
                 cursor: 'pointer',
-                fontSize: '14px',
+                fontSize: window.innerWidth <= 768 ? '12px' : '14px',
                 fontWeight: '500',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: window.innerWidth <= 768 ? '4px' : '8px',
+                alignSelf: window.innerWidth <= 768 ? 'flex-start' : 'auto'
               }}
             >
               📥 다운로드
@@ -410,7 +500,14 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
         )}
 
                  <div 
-           style={{ flex: 1, border: '1px solid #e5e7eb', borderRadius: '8px', overflow: 'hidden', minHeight: '600px', position: 'relative' }}
+           style={{ 
+             flex: 1, 
+             border: '1px solid #e5e7eb', 
+             borderRadius: '8px', 
+             overflow: 'hidden', 
+             minHeight: window.innerWidth <= 768 ? '400px' : '600px', 
+             position: 'relative' 
+           }}
          >
           {viewMode === 'loading' && (
             <div style={{
@@ -505,50 +602,57 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                      {/* 사용법 안내 */}
                      <div style={{
                        textAlign: 'center',
-                       fontSize: '12px',
+                       fontSize: window.innerWidth <= 768 ? '10px' : '12px',
                        color: '#6b7280',
-                       fontStyle: 'italic'
+                       fontStyle: 'italic',
+                       padding: window.innerWidth <= 768 ? '4px' : '0'
                      }}>
-                       💡 마우스 휠로 확대/축소, 드래그로 이동 가능
+                       💡 {window.innerWidth <= 768 ? '터치로 확대/축소, 드래그로 이동' : '마우스 휠로 확대/축소, 드래그로 이동 가능'}
                      </div>
                      {/* 줌 컨트롤 버튼들 */}
                      <div style={{ 
                        display: 'flex', 
                        justifyContent: 'center', 
                        alignItems: 'center', 
-                       gap: '12px'
+                       gap: window.innerWidth <= 768 ? '8px' : '12px',
+                       flexWrap: window.innerWidth <= 768 ? 'wrap' : 'nowrap'
                      }}>
 
                     <button
                       onClick={handleZoomOut}
                       disabled={imageScale <= 0.5}
                       style={{
-                        padding: '6px 12px',
+                        padding: window.innerWidth <= 768 ? '4px 8px' : '6px 12px',
                         border: '1px solid #d1d5db',
                         borderRadius: '4px',
                         background: 'white',
                         color: imageScale <= 0.5 ? '#9ca3af' : '#374151',
                         cursor: imageScale <= 0.5 ? 'not-allowed' : 'pointer',
-                        fontSize: '12px',
+                        fontSize: window.innerWidth <= 768 ? '10px' : '12px',
                         fontWeight: '500'
                       }}
                     >
                       🔍-
                     </button>
-                    <span style={{ fontSize: '14px', color: '#6b7280', minWidth: '60px', textAlign: 'center' }}>
+                    <span style={{ 
+                      fontSize: window.innerWidth <= 768 ? '12px' : '14px', 
+                      color: '#6b7280', 
+                      minWidth: window.innerWidth <= 768 ? '50px' : '60px', 
+                      textAlign: 'center' 
+                    }}>
                       {Math.round(imageScale * 100)}%
                     </span>
                     <button
                       onClick={handleZoomIn}
-                                             disabled={imageScale >= 2.0}
+                      disabled={imageScale >= 2.0}
                       style={{
-                        padding: '6px 12px',
+                        padding: window.innerWidth <= 768 ? '4px 8px' : '6px 12px',
                         border: '1px solid #d1d5db',
                         borderRadius: '4px',
                         background: 'white',
-                                                 color: imageScale >= 2.0 ? '#9ca3af' : '#374151',
-                         cursor: imageScale >= 2.0 ? 'not-allowed' : 'pointer',
-                        fontSize: '12px',
+                        color: imageScale >= 2.0 ? '#9ca3af' : '#374151',
+                        cursor: imageScale >= 2.0 ? 'not-allowed' : 'pointer',
+                        fontSize: window.innerWidth <= 768 ? '10px' : '12px',
                         fontWeight: '500'
                       }}
                     >
@@ -557,13 +661,13 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                     <button
                       onClick={handleZoomReset}
                       style={{
-                        padding: '6px 12px',
+                        padding: window.innerWidth <= 768 ? '4px 8px' : '6px 12px',
                         border: '1px solid #d1d5db',
                         borderRadius: '4px',
                         background: 'white',
                         color: '#374151',
                         cursor: 'pointer',
-                        fontSize: '12px',
+                        fontSize: window.innerWidth <= 768 ? '10px' : '12px',
                         fontWeight: '500'
                       }}
                                          >
@@ -581,14 +685,20 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                         alignItems: 'center', 
                         justifyContent: 'center', 
                         overflow: 'hidden', 
-                        padding: '20px',
-                                                cursor: isDragging ? 'grabbing' : 'grab',
-                        userSelect: 'none'
+                        padding: window.innerWidth <= 768 ? '10px' : '20px',
+                        cursor: isDragging ? 'grabbing' : 'grab',
+                        userSelect: 'none',
+                        touchAction: 'none',
+                        WebkitUserSelect: 'none',
+                        WebkitTouchCallout: 'none'
                       }}
                       onMouseDown={handleMouseDown}
                       onMouseMove={handleMouseMove}
                       onMouseUp={handleMouseUp}
                       onMouseLeave={handleMouseLeave}
+                      onTouchStart={handleTouchStart}
+                      onTouchMove={handleTouchMove}
+                      onTouchEnd={handleTouchEnd}
                     >
                                            <img
                         src={currentFile.base64Data ? `data:${currentFile.fileType};base64,${currentFile.base64Data}` : `/api/files/${currentFile.id}?t=${Date.now()}`}
@@ -616,57 +726,64 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                   <div style={{ 
                     display: 'flex', 
                     flexDirection: 'column',
-                    gap: '8px',
-                    padding: '12px',
+                    gap: window.innerWidth <= 768 ? '6px' : '8px',
+                    padding: window.innerWidth <= 768 ? '8px' : '12px',
                     borderBottom: '1px solid #e5e7eb',
                     backgroundColor: '#f9fafb'
                   }}>
                     {/* 사용법 안내 */}
                     <div style={{
                       textAlign: 'center',
-                      fontSize: '12px',
+                      fontSize: window.innerWidth <= 768 ? '10px' : '12px',
                       color: '#6b7280',
-                      fontStyle: 'italic'
+                      fontStyle: 'italic',
+                      padding: window.innerWidth <= 768 ? '2px' : '0'
                     }}>
-                      💡 마우스 휠로 확대/축소, 드래그로 이동 가능
+                      💡 {window.innerWidth <= 768 ? '터치로 확대/축소, 드래그로 이동' : '마우스 휠로 확대/축소, 드래그로 이동 가능'}
                     </div>
                     {/* 줌 컨트롤 버튼들 */}
                     <div style={{ 
                       display: 'flex', 
                       justifyContent: 'center', 
                       alignItems: 'center', 
-                      gap: '12px'
+                      gap: window.innerWidth <= 768 ? '6px' : '12px',
+                      flexWrap: window.innerWidth <= 768 ? 'wrap' : 'nowrap'
                     }}>
                       <button
                       onClick={handleZoomOut}
                       disabled={pdfScale <= 0.5}
                       style={{
-                        padding: '6px 12px',
+                        padding: window.innerWidth <= 768 ? '4px 8px' : '6px 12px',
                         border: '1px solid #d1d5db',
                         borderRadius: '4px',
                         background: 'white',
                         color: pdfScale <= 0.5 ? '#9ca3af' : '#374151',
                         cursor: pdfScale <= 0.5 ? 'not-allowed' : 'pointer',
-                        fontSize: '12px',
+                        fontSize: window.innerWidth <= 768 ? '10px' : '12px',
                         fontWeight: '500'
                       }}
                     >
                       🔍-
                     </button>
-                    <span style={{ fontSize: '14px', color: '#6b7280', minWidth: '60px', textAlign: 'center' }}>
+                    <span style={{ 
+                      fontSize: window.innerWidth <= 768 ? '12px' : '14px', 
+                      color: '#6b7280', 
+                      minWidth: window.innerWidth <= 768 ? '50px' : '60px', 
+                      textAlign: 'center' 
+                    }}>
                       {Math.round(pdfScale * 100)}%
                     </span>
                     <button
                       onClick={handleZoomIn}
                       disabled={pdfScale >= 3.0}
                       style={{
-                        padding: '6px 12px',
+                        padding: window.innerWidth <= 768 ? '4px 8px' : '6px 12px',
                         border: '1px solid #d1d5db',
                         borderRadius: '4px',
                         background: 'white',
                         color: pdfScale >= 3.0 ? '#9ca3af' : '#374151',
                         cursor: pdfScale >= 3.0 ? 'not-allowed' : 'pointer',
-                        fontSize: '12px',
+                        fontSize: window.innerWidth <= 768 ? '10px' : '12px',
                         fontWeight: '500'
                       }}
                     >
@@ -675,13 +792,13 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                     <button
                       onClick={handleZoomReset}
                       style={{
-                        padding: '6px 12px',
+                        padding: window.innerWidth <= 768 ? '4px 8px' : '6px 12px',
                         border: '1px solid #d1d5db',
                         borderRadius: '4px',
                         background: 'white',
                         color: '#374151',
                         cursor: 'pointer',
-                        fontSize: '12px',
+                        fontSize: window.innerWidth <= 768 ? '10px' : '12px',
                         fontWeight: '500'
                       }}
                     >
@@ -699,14 +816,20 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                         justifyContent: 'center', 
                         alignItems: 'center', 
                         overflow: 'hidden', 
-                        padding: '20px',
-                                                cursor: isDragging ? 'grabbing' : 'grab',
-                        userSelect: 'none'
+                        padding: window.innerWidth <= 768 ? '10px' : '20px',
+                        cursor: isDragging ? 'grabbing' : 'grab',
+                        userSelect: 'none',
+                        touchAction: 'none',
+                        WebkitUserSelect: 'none',
+                        WebkitTouchCallout: 'none'
                       }}
                       onMouseDown={handleMouseDown}
                       onMouseMove={handleMouseMove}
                       onMouseUp={handleMouseUp}
                       onMouseLeave={handleMouseLeave}
+                      onTouchStart={handleTouchStart}
+                      onTouchMove={handleTouchMove}
+                      onTouchEnd={handleTouchEnd}
                     >
                      <Document
                        file={currentFile.base64Data ? `data:${currentFile.fileType};base64,${currentFile.base64Data}` : `/api/files/${currentFile.id}`}
@@ -730,14 +853,17 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                          <div style={{ 
                            border: '1px solid #e5e7eb', 
                            borderRadius: '4px', 
-                           padding: '8px', 
+                           padding: window.innerWidth <= 768 ? '4px' : '8px', 
                            backgroundColor: 'white',
                            transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)`,
                            transition: pdfScale === 1.0 ? 'transform 0.2s ease' : 'none'
                          }}>
                            <Page
                              pageNumber={pageNumber}
-                             width={Math.min(800 * pdfScale, window.innerWidth - 100)}
+                             width={Math.min(
+                               window.innerWidth <= 768 ? 600 * pdfScale : 800 * pdfScale, 
+                               window.innerWidth - (window.innerWidth <= 768 ? 40 : 100)
+                             )}
                              scale={pdfScale}
                              renderTextLayer={false}
                              renderAnnotationLayer={false}
@@ -753,30 +879,39 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                       display: 'flex', 
                       justifyContent: 'center', 
                       alignItems: 'center', 
-                      gap: '16px', 
-                      padding: '16px',
+                      gap: window.innerWidth <= 768 ? '8px' : '16px', 
+                      padding: window.innerWidth <= 768 ? '12px' : '16px',
                       borderTop: '1px solid #e5e7eb',
-                      backgroundColor: '#f9fafb'
+                      backgroundColor: '#f9fafb',
+                      flexWrap: window.innerWidth <= 768 ? 'wrap' : 'nowrap'
                     }}>
                       <button
                         onClick={() => setPageNumber(Math.max(1, pageNumber - 1))}
                         disabled={pageNumber <= 1}
                         style={{
-                          padding: '8px 16px',
+                          padding: window.innerWidth <= 768 ? '6px 12px' : '8px 16px',
                           border: '1px solid #d1d5db',
                           borderRadius: '6px',
                           background: 'white',
                           color: pageNumber <= 1 ? '#9ca3af' : '#374151',
                           cursor: pageNumber <= 1 ? 'not-allowed' : 'pointer',
-                          fontSize: '14px',
+                          fontSize: window.innerWidth <= 768 ? '12px' : '14px',
                           fontWeight: '500'
                         }}
                       >
                         ◀ 이전
                       </button>
                       
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '14px', color: '#6b7280' }}>
+                      <div style={{ 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        gap: window.innerWidth <= 768 ? '4px' : '8px',
+                        flexWrap: window.innerWidth <= 768 ? 'wrap' : 'nowrap'
+                      }}>
+                        <span style={{ 
+                          fontSize: window.innerWidth <= 768 ? '12px' : '14px', 
+                          color: '#6b7280' 
+                        }}>
                           페이지
                         </span>
                         <input
@@ -787,11 +922,11 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                           min={1}
                           max={numPages}
                           style={{
-                            width: '60px',
-                            padding: '6px 8px',
+                            width: window.innerWidth <= 768 ? '50px' : '60px',
+                            padding: window.innerWidth <= 768 ? '4px 6px' : '6px 8px',
                             border: '1px solid #d1d5db',
                             borderRadius: '4px',
-                            fontSize: '14px',
+                            fontSize: window.innerWidth <= 768 ? '12px' : '14px',
                             textAlign: 'center'
                           }}
                           placeholder={pageNumber.toString()}
@@ -799,19 +934,22 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                         <button
                           onClick={handlePageInputSubmit}
                           style={{
-                            padding: '6px 12px',
+                            padding: window.innerWidth <= 768 ? '4px 8px' : '6px 12px',
                             border: '1px solid #3b82f6',
                             borderRadius: '4px',
                             background: '#3b82f6',
                             color: 'white',
                             cursor: 'pointer',
-                            fontSize: '12px',
+                            fontSize: window.innerWidth <= 768 ? '10px' : '12px',
                             fontWeight: '500'
                           }}
                         >
                           이동
                         </button>
-                        <span style={{ fontSize: '14px', color: '#6b7280' }}>
+                        <span style={{ 
+                          fontSize: window.innerWidth <= 768 ? '12px' : '14px', 
+                          color: '#6b7280' 
+                        }}>
                           / {numPages}
                         </span>
                       </div>
@@ -820,13 +958,13 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                         onClick={() => setPageNumber(Math.min(numPages, pageNumber + 1))}
                         disabled={pageNumber >= numPages}
                         style={{
-                          padding: '8px 16px',
+                          padding: window.innerWidth <= 768 ? '6px 12px' : '8px 16px',
                           border: '1px solid #d1d5db',
                           borderRadius: '6px',
                           background: 'white',
                           color: pageNumber >= numPages ? '#9ca3af' : '#374151',
                           cursor: pageNumber >= numPages ? 'not-allowed' : 'pointer',
-                          fontSize: '14px',
+                          fontSize: window.innerWidth <= 768 ? '12px' : '14px',
                           fontWeight: '500'
                         }}
                       >
