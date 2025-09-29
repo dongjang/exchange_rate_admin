@@ -64,17 +64,18 @@ spring:
           debug: false  # 운영환경에서는 false
 
   cache:
-    type: redis  # Redis 캐시 사용
-    # type: simple  # 메모리 캐시 (Redis 없이 사용 시)
-    redis:
-      time-to-live: 1800000  # 30분으로 단축
-      cache-null-values: false
+    type: simple  # 메모리 캐시 (Redis 없이 사용)
+    # type: redis  # Redis 캐시 사용 시 주석 해제
+    # redis:
+    #   time-to-live: 1800000  # 30분으로 단축
+    #   cache-null-values: false
 
   session:
-    store-type: redis  # Redis 세션 저장
+    store-type: none  # 메모리 세션 저장 (Redis 없이 사용)
     timeout: 30m  # 세션 타임아웃 30분
-    redis:
-      namespace: spring:session  # 세션 네임스페이스
+    # store-type: redis  # Redis 세션 저장 시 주석 해제
+    # redis:
+    #   namespace: spring:session  # 세션 네임스페이스
 
 # 파일 업로드 설정 (S3 연동)
 file:

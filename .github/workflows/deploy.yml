@@ -127,8 +127,6 @@ jobs:
           echo "DB_URL: $DB_URL"
           echo "DB_USERNAME: $DB_USERNAME"
           echo "DB_PASSWORD: [HIDDEN]"
-          echo "REDIS_HOST: $REDIS_HOST"
-          echo "REDIS_PORT: $REDIS_PORT"
           echo "SPRING_PROFILES_ACTIVE: $SPRING_PROFILES_ACTIVE"
           
           nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod > app.log 2>&1 &
