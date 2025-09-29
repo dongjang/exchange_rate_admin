@@ -556,7 +556,6 @@ function AdminAdminModal({ isOpen, onClose, adminId, onAdminUpdated }: AdminAdmi
             display: 'flex', 
             gap: window.innerWidth <= 768 ? '0.5rem' : '0.75rem', 
             marginTop: window.innerWidth <= 768 ? '1.5rem' : '2rem',
-            flexDirection: window.innerWidth <= 768 ? 'column' : 'row'
           }}>
             <button
               type="button"

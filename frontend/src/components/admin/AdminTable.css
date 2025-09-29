@@ -421,6 +421,8 @@
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   max-width: 100%;
+  /* 스크롤 영역에서 행 배경색이 제대로 적용되도록 설정 */
+  position: relative;
 }
 
 /* 스크롤 영역의 배경색을 테이블과 동일하게 설정 */
@@ -500,8 +502,8 @@
 
 .table-list-header {
   display: flex;
-  background: #f9fafb;
-  border-bottom: 2px solid #e5e7eb;
+  background: #f9fafb !important;
+  border-bottom: 2px solid #e5e7eb !important;
   font-weight: 600;
   color: #374151;
   font-size: 14px;
@@ -512,10 +514,32 @@
   z-index: 10;
 }
 
+/* 스크롤 영역에서도 헤더 배경색과 테두리가 제대로 적용되도록 강제 */
+.table-list-container .table-list-header {
+  background: #f9fafb !important;
+  border-bottom: 2px solid #e5e7eb !important;
+}
+
+.table-list-container .table-list-header .table-header-cell {
+  background: #f9fafb !important;
+  border-right: 1px solid #e5e7eb !important;
+}
+
+/* 더 구체적인 선택자로 스크롤 영역 강제 적용 */
+.admin-table .table-list-container .table-list-header {
+  background: #f9fafb !important;
+  border-bottom: 2px solid #e5e7eb !important;
+}
+
+.admin-table .table-list-container .table-list-header .table-header-cell {
+  background: #f9fafb !important;
+  border-right: 1px solid #e5e7eb !important;
+}
+
 .table-header-cell {
   padding: 16px 12px;
   text-align: left;
-  border-right: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb !important;
   flex-shrink: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -525,10 +549,11 @@
   width: auto;
   min-width: auto;
   max-width: none;
+  background: inherit !important;
 }
 
 .table-header-cell:last-child {
-  border-right: none;
+  border-right: none !important;
 }
 
 .table-list-row {
@@ -541,15 +566,23 @@
 }
 
 .table-list-row:hover {
-  background: #f9fafb;
+  background: #f9fafb !important;
+}
+
+.table-list-row:nth-child(odd) {
+  background: white !important;
 }
 
 .table-list-row:nth-child(even) {
-  background: #fafafa;
+  background: #fafafa !important;
+}
+
+.table-list-row:nth-child(odd):hover {
+  background: #f9fafb !important;
 }
 
 .table-list-row:nth-child(even):hover {
-  background: #f0f0f0;
+  background: #f0f0f0 !important;
 }
 
 .table-cell {
@@ -571,10 +604,12 @@
   width: auto;
   min-width: auto;
   max-width: none;
+  /* 스크롤 영역에서도 행 배경색이 제대로 적용되도록 설정 */
+  background: inherit;
 }
 
 .table-cell:last-child {
-  border-right: none;
+  border-right: none !important;
 }
 
 /* Status Badge Styles */
@@ -860,27 +895,33 @@
 
 .table-list-header {
   display: flex;
-  background: #f9fafb;
-  border-bottom: 1px solid #e5e7eb;
+  background: #f9fafb !important;
+  border-bottom: 1px solid #e5e7eb !important;
   font-weight: 600;
   color: #374151;
   font-size: 14px;
   width: 100%;
-  min-width: 100%;
+  min-width: max-content;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
+
+/* JavaScript에서 모든 스타일을 처리하므로 반응형 CSS 제거 */
 
 .table-header-cell {
   padding: 16px 12px;
   text-align: left;
-  border-right: 1px solid #e5e7eb;
+  border-right: 1px solid #e5e7eb !important;
   flex-shrink: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  background: inherit !important;
 }
 
 .table-header-cell:last-child {
-  border-right: none;
+  border-right: none !important;
 }
 
 .table-list-row {
@@ -909,7 +950,7 @@
 }
 
 .table-cell:last-child {
-  border-right: none;
+  border-right: none !important;
 }
   
   .table-list-header,
@@ -973,21 +1014,46 @@
   
   .table-header-cell,
   .table-cell {
-    border-right: none;
-    border-bottom: 1px solid #e5e7eb;
+    border-right: 1px solid #e5e7eb;
+    border-bottom: none;
     padding: 12px 8px;
+    flex-shrink: 0;
+    min-width: fit-content;
   }
   
   .table-header-cell:last-child,
   .table-cell:last-child {
-    border-bottom: none;
+    border-right: none;
   }
   
   .table-header-cell {
     background-color: #f8fafc;
     font-weight: 600;
     color: #374151;
+    background: inherit !important;
+    border-right: 1px solid #e5e7eb !important;
   }
+  
+  .table-list-header {
+    background: #f9fafb !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+  
+  /* 480px 이하에서도 헤더 배경색과 테두리 강제 적용 */
+  .table-list-container .table-list-header {
+    background: #f9fafb !important;
+    border-bottom: 1px solid #e5e7eb !important;
+  }
+  
+  .table-list-container .table-list-header .table-header-cell {
+    background: #f9fafb !important;
+    border-right: 1px solid #e5e7eb !important;
+  }
+  
+  /* JavaScript에서 모든 스타일을 처리하므로 반응형 CSS 제거 */
   
   .pagination {
     gap: 2px;

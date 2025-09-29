@@ -136,6 +136,7 @@ const AdminUserDetailModal: React.FC<AdminUserDetailModalProps> = ({
         borderRadius: window.innerWidth <= 768 ? '12px' : '20px',
         padding: window.innerWidth <= 768 ? '20px' : '40px',
         width: window.innerWidth <= 768 ? '95vw' : '800px',
+        minWidth: window.innerWidth <= 768 ? '320px' : '600px',
         maxWidth: '90vw',
         maxHeight: '90vh',
         overflow: 'auto',
@@ -401,23 +402,26 @@ const AdminUserDetailModal: React.FC<AdminUserDetailModalProps> = ({
 
             <div className="modal-footer" style={{
               display: 'flex',
-              justifyContent: 'flex-end',
-              gap: '12px',
+              justifyContent: window.innerWidth <= 768 ? 'center' : 'flex-end',
+              gap: window.innerWidth <= 768 ? '10px' : '12px',
               marginTop: '24px',
               paddingTop: '20px',
-              borderTop: '1px solid #e5e7eb'
+              borderTop: '1px solid #e5e7eb',
+              flexWrap: 'nowrap'
             }}>
               <button
                 onClick={onClose}
                 style={{
-                  padding: '10px 20px',
+                  padding: window.innerWidth <= 768 ? '10px 20px' : '10px 20px',
                   border: '1px solid #d1d5db',
                   borderRadius: '6px',
                   backgroundColor: 'white',
                   color: '#374151',
                   cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500'
+                  fontSize: window.innerWidth <= 768 ? '14px' : '14px',
+                  fontWeight: '500',
+                  flexShrink: 0,
+                  whiteSpace: 'nowrap'
                 }}
               >
                 취소
@@ -425,14 +429,16 @@ const AdminUserDetailModal: React.FC<AdminUserDetailModalProps> = ({
               <button
                 onClick={handleStatusUpdate}
                 style={{
-                  padding: '10px 20px',
+                  padding: window.innerWidth <= 768 ? '10px 20px' : '10px 20px',
                   border: 'none',
                   borderRadius: '6px',
                   backgroundColor: '#3b82f6',
                   color: 'white',
                   cursor: 'pointer',
-                  fontSize: '14px',
-                  fontWeight: '500'
+                  fontSize: window.innerWidth <= 768 ? '14px' : '14px',
+                  fontWeight: '500',
+                  flexShrink: 0,
+                  whiteSpace: 'nowrap'
                 }}
               >
                 상태 업데이트

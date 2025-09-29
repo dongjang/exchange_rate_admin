@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import './AdminTable.css';
 
 export interface AdminTableColumn {
@@ -60,6 +60,86 @@ const AdminTable: React.FC<AdminTableProps> = ({
   tableLayout = 'responsive',
   enableHorizontalScroll = true
 }) => {
+  const tableContainerRef = useRef<HTMLDivElement>(null);
+
+  // 스크롤 이벤트 처리 함수
+  const handleScroll = () => {
+    const container = tableContainerRef.current;
+    if (!container) return;
+
+    const header = container.querySelector('.table-list-header') as HTMLElement;
+    const headerCells = container.querySelectorAll('.table-header-cell') as NodeListOf<HTMLElement>;
+    const dataCells = container.querySelectorAll('.table-cell') as NodeListOf<HTMLElement>;
+
+    // 화면 크기 확인
+    const isMobile = window.innerWidth <= 768;
+    const isSmallMobile = window.innerWidth <= 480;
+
+    // 헤더 스타일 강제 적용
+    if (header) {
+      header.style.setProperty('background', '#f9fafb', 'important');
+      
+      // 반응형에 따라 다른 border-bottom 적용
+      if (isSmallMobile || isMobile) {
+        header.style.setProperty('border-bottom', '1px solid #e5e7eb', 'important');
+      } else {
+        header.style.setProperty('border-bottom', '2px solid #e5e7eb', 'important');
+      }
+      
+      // 더 강력한 방법으로 border-bottom 강제 적용
+      header.style.borderBottom = isSmallMobile || isMobile ? '1px solid #e5e7eb' : '2px solid #e5e7eb';
+      header.style.background = '#f9fafb';
+    }
+
+    // 헤더 셀 스타일 강제 적용
+    headerCells.forEach((cell, index) => {
+      cell.style.setProperty('background', '#f9fafb', 'important');
+      cell.style.setProperty('border-right', '1px solid #e5e7eb', 'important');
+      
+      // 더 강력한 방법으로 스타일 적용
+      cell.style.background = '#f9fafb';
+      
+      // 마지막 컬럼의 border-right 제거
+      if (index === headerCells.length - 1) {
+        cell.style.setProperty('border-right', 'none', 'important');
+        cell.style.borderRight = 'none';
+      } else {
+        cell.style.borderRight = '1px solid #e5e7eb';
+      }
+    });
+
+    // 데이터 셀의 마지막 컬럼 border-right 제거
+    dataCells.forEach((cell, index) => {
+      const cellIndex = index % columns.length;
+      if (cellIndex === columns.length - 1) {
+        cell.style.setProperty('border-right', 'none', 'important');
+        cell.style.borderRight = 'none';
+      } else {
+        cell.style.setProperty('border-right', '1px solid #f3f4f6', 'important');
+        cell.style.borderRight = '1px solid #f3f4f6';
+      }
+    });
+  };
+
+  useEffect(() => {
+    const container = tableContainerRef.current;
+    if (!container) return;
+
+    // 초기 스타일 적용
+    handleScroll();
+
+    // 스크롤 이벤트 리스너 추가
+    container.addEventListener('scroll', handleScroll);
+    
+    // 리사이즈 이벤트도 처리
+    window.addEventListener('resize', handleScroll);
+
+    return () => {
+      container.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
+  }, [data, columns]);
+
   // 컬럼 너비를 고정값으로 설정하는 함수
   const getColumnWidth = (column: AdminTableColumn) => {
     // 컬럼별 고정 너비 설정 (더 큰 너비로 조정)
@@ -85,6 +165,8 @@ const AdminTable: React.FC<AdminTableProps> = ({
       case 'attachment':
       case 'fileName':
         return '120px';  // 첨부파일은 더 넓게
+      case 'modalDisplayDate':
+        return '350px';  // 모달 표시 기간은 더 넓게
       default:
         return '200px'; // 기본 너비를 더 크게
     }
@@ -144,7 +226,7 @@ const AdminTable: React.FC<AdminTableProps> = ({
         </div>
 
       {/* 테이블 리스트 */}
-      <div className="table-list-container">
+      <div className="table-list-container" ref={tableContainerRef}>
         {loading ? (
           <div className="loading-state">
             <div className="loading-spinner"></div>
