@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.admin.domain.Admin;
 import com.example.admin.repository.AdminRepository;
+import com.example.common.service.EmailService;
 import com.example.context.SessionContext;
 import com.example.support.domain.Qna;
 import com.example.support.dto.QnaAnswerRequest;
@@ -26,6 +27,7 @@ public class QnaService {
     private final QnaRepository qnaRepository;
     private final QnaMapper qnaMapper;
     private final AdminRepository adminRepository;
+    private final EmailService emailService;
     
     @Transactional(readOnly = true)
     public QnaSearchResult searchAdminQna(QnaSearchRequest request) {
@@ -54,6 +56,26 @@ public class QnaService {
         qna.setAnsweredAt(LocalDateTime.now());
         
         Qna answeredQna = qnaRepository.save(qna);
+        
+        // QNA 답변 이메일 발송
+        try {
+            if (answeredQna.getUser() != null && answeredQna.getUser().getEmail() != null) {
+                emailService.sendQnaAnswerEmail(
+                    answeredQna.getUser().getEmail(),
+                    answeredQna.getUser().getName(),
+                    answeredQna.getTitle(),
+                    answeredQna.getContent(),
+                    answeredQna.getAnswerContent()
+                );
+                System.out.println("QNA 답변 이메일 발송 완료: " + answeredQna.getUser().getEmail());
+            } else {
+                System.out.println("QNA 답변 이메일 발송 건너뜀: 사용자 이메일 정보 없음");
+            }
+        } catch (Exception e) {
+            System.err.println("QNA 답변 이메일 발송 실패: " + e.getMessage());
+            // 이메일 발송 실패해도 답변 등록은 성공으로 처리
+        }
+        
         return convertToResponse(answeredQna);
     }
     
