@@ -17,6 +17,7 @@ services:
       - '--web.enable-lifecycle'
     networks:
       - exchange-rate-network
+      - exadmin-network
 
   # Grafana - 대시보드
   grafana:
@@ -33,6 +34,7 @@ services:
       - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources
     networks:
       - exchange-rate-network
+      - exadmin-network
 
   # Node Exporter - 시스템 메트릭
   node-exporter:
@@ -51,6 +53,7 @@ services:
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
     networks:
       - exchange-rate-network
+      - exadmin-network
 
   # cAdvisor - 컨테이너 메트릭 (선택사항)
   # cadvisor:
@@ -77,3 +80,5 @@ volumes:
 networks:
   exchange-rate-network:
     driver: bridge
+  exadmin-network:
+    external: true
