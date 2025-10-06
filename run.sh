@@ -48,11 +48,18 @@ docker-compose -f docker-compose.monitoring.yml down --remove-orphans
 
 # 포트 충돌 방지를 위한 추가 정리 (이 프로젝트 컨테이너만)
 echo "포트 충돌 방지를 위한 정리 중..."
-docker stop exadmin-redis 2>/dev/null || true
 docker stop exadmin-admin-app 2>/dev/null || true
 docker stop exchange-rate-grafana 2>/dev/null || true
 docker stop exchange-rate-prometheus 2>/dev/null || true
 docker stop exchange-rate-node-exporter 2>/dev/null || true
+
+echo "Redis 서비스 확인 중..."
+# Redis가 실행 중이 아니면 시작
+if ! docker ps | grep -q "shared-redis"; then
+    echo "Redis 서비스 시작 중..."
+    docker-compose -f docker-compose.redis.yml up -d
+    sleep 5
+fi
 
 echo "프로덕션 환경으로 실행 중..."
 docker-compose -f docker-compose.prod.yml up -d --build
