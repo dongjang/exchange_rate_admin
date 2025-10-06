@@ -437,16 +437,19 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                  background: currentFile?.id === files.business?.id ? '#3b82f6' : 'white',
                  color: currentFile?.id === files.business?.id ? 'white' : '#374151',
                  cursor: 'pointer',
-                 fontSize: window.innerWidth <= 768 ? '12px' : '14px',
+                 fontSize: window.innerWidth <= 768 ? '11px' : '14px',
                  display: 'flex',
                  alignItems: 'center',
                  gap: window.innerWidth <= 768 ? '4px' : '8px',
                  flex: window.innerWidth <= 768 ? '1' : 'none',
                  minWidth: window.innerWidth <= 768 ? '0' : 'auto',
-                 whiteSpace: 'nowrap'
+                 whiteSpace: window.innerWidth <= 768 ? 'normal' : 'nowrap',
+                 lineHeight: window.innerWidth <= 768 ? '1.2' : 'normal',
+                 textAlign: window.innerWidth <= 768 ? 'center' : 'left'
                }}
              >
-               {getFileIcon(files.business.fileType)} 사업자 등록증
+               {getFileIcon(files.business.fileType)} 
+               {window.innerWidth <= 768 ? '사업자등록증' : '사업자 등록증'}
              </button>
            )}
          </div>

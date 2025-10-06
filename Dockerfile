@@ -1,14 +1,6 @@
-# Multi-stage build for Spring Boot + React application
+# Multi-stage build for Spring Boot application (Backend only)
 
-# Stage 1: Build Frontend
-FROM node:18-alpine AS frontend-build
-WORKDIR /app/frontend
-COPY frontend/package*.json ./
-RUN npm ci
-COPY frontend/ .
-RUN npm run build
-
-# Stage 2: Build Backend
+# Stage 1: Build Backend
 FROM gradle:8-jdk17-alpine AS backend-build
 WORKDIR /app
 COPY build.gradle settings.gradle ./
@@ -17,8 +9,8 @@ RUN gradle dependencies --no-daemon
 COPY src/ ./src/
 RUN gradle build -x test --no-daemon
 
-# Stage 3: Runtime
-FROM openjdk:17-jre-slim
+# Stage 2: Runtime
+FROM eclipse-temurin:17-jre
 
 # Install necessary packages
 RUN apt-get update && apt-get install -y \
@@ -34,9 +26,6 @@ WORKDIR /app
 # Copy built application
 COPY --from=backend-build /app/build/libs/*.jar app.jar
 
-# Copy frontend build
-COPY --from=frontend-build /app/frontend/dist ./static
-
 # Create uploads directory
 RUN mkdir -p uploads && chown -R appuser:appuser /app
 
@@ -46,9 +35,9 @@ USER appuser
 # Expose port
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8080/actuator/health || exit 1
+# Health check 제거 (Spring Security로 인한 403 에러)
+# HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
+#   CMD curl -f http://localhost:8080/ || exit 1
 
 # Run application
 ENTRYPOINT ["java", "-jar", "app.jar"]

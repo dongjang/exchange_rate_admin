@@ -72,8 +72,8 @@ public class SecurityConfig {
                 .requestMatchers("/health/**").permitAll()
                 // 공개 API
                 .requestMatchers("/api/public/**").permitAll()
-                // 운영 환경에서만 actuator 허용 (개발 환경에서는 비활성화)
-                .requestMatchers("/actuator/**").denyAll()
+                // Actuator 엔드포인트 허용 (모니터링용)
+                .requestMatchers("/actuator/**").permitAll()
                 .anyRequest().denyAll()
             );
         
