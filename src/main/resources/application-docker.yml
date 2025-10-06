@@ -35,6 +35,16 @@ file:
   upload:
     path: uploads
 
+# Actuator 설정 (Prometheus 메트릭 노출)
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: when-authorized
+
 # Docker 환경에서 로깅 레벨 조정
 logging:
   level:

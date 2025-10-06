@@ -46,14 +46,13 @@ echo "기존 컨테이너 정리 중..."
 docker-compose -f docker-compose.prod.yml down --remove-orphans
 docker-compose -f docker-compose.monitoring.yml down --remove-orphans
 
-# 포트 충돌 방지를 위한 추가 정리
+# 포트 충돌 방지를 위한 추가 정리 (이 프로젝트 컨테이너만)
 echo "포트 충돌 방지를 위한 정리 중..."
-docker stop $(docker ps -q --filter "publish=6379") 2>/dev/null || true
-docker stop $(docker ps -q --filter "publish=8080") 2>/dev/null || true
-docker stop $(docker ps -q --filter "publish=8081") 2>/dev/null || true
-docker stop $(docker ps -q --filter "publish=3000") 2>/dev/null || true
-docker stop $(docker ps -q --filter "publish=9090") 2>/dev/null || true
-docker stop $(docker ps -q --filter "publish=9100") 2>/dev/null || true
+docker stop exadmin-redis 2>/dev/null || true
+docker stop exadmin-admin-app 2>/dev/null || true
+docker stop exchange-rate-grafana 2>/dev/null || true
+docker stop exchange-rate-prometheus 2>/dev/null || true
+docker stop exchange-rate-node-exporter 2>/dev/null || true
 
 echo "프로덕션 환경으로 실행 중..."
 docker-compose -f docker-compose.prod.yml up -d --build
@@ -66,7 +65,6 @@ echo "========================================"
 echo "실행 완료!"
 echo
 echo "Admin App: http://43.201.130.137:8080"
-echo "User App:  http://43.201.130.137:8081"
 echo
 echo "모니터링:"
 echo "  Grafana:    http://43.201.130.137:3000"

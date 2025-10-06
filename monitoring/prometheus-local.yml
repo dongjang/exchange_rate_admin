@@ -22,11 +22,10 @@ scrape_configs:
   #   static_configs:
   #     - targets: ['cadvisor:8080']
 
-  # Spring Boot Admin App (EC2에서는 Docker 컨테이너명 사용)
+  # Spring Boot Admin App (로컬에서는 직접 실행하므로 host.docker.internal 사용)
   - job_name: 'admin-app'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['admin-app:8080']
+      - targets: ['host.docker.internal:8080']
     scrape_interval: 15s
     scrape_timeout: 10s
-

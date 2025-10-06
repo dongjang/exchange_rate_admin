@@ -56,10 +56,6 @@ check_env_file() {
         echo "AWS_SECRET_ACCESS_KEY=\"your_secret_key\""
         echo "AWS_REGION=\"ap-northeast-2\""
         echo ""
-        echo "# Google OAuth (User 프로젝트용)"
-        echo "GOOGLE_CLIENT_ID=\"your_google_client_id\""
-        echo "GOOGLE_CLIENT_SECRET=\"your_google_client_secret\""
-        echo ""
         log_info "위 내용을 .env 파일로 저장하세요: nano .env"
         exit 1
     fi
@@ -70,7 +66,7 @@ check_env_file() {
 stop_existing_processes() {
     local app_type=$1
     
-    if [ "$app_type" = "admin" ] || [ "$app_type" = "both" ]; then
+    if [ "$app_type" = "admin" ]; then
         log_info "Admin 애플리케이션 프로세스 확인 중..."
         if pgrep -f "server.port=8080" > /dev/null; then
             log_warning "실행 중인 Admin 프로세스 발견, 종료 중..."
@@ -81,16 +77,6 @@ stop_existing_processes() {
         fi
     fi
     
-    if [ "$app_type" = "user" ] || [ "$app_type" = "both" ]; then
-        log_info "User 애플리케이션 프로세스 확인 중..."
-        if pgrep -f "server.port=8081" > /dev/null; then
-            log_warning "실행 중인 User 프로세스 발견, 종료 중..."
-            pkill -f "server.port=8081"
-            sleep 3
-        else
-            log_info "실행 중인 User 프로세스 없음"
-        fi
-    fi
 }
 
 # Docker 기반 배포
@@ -104,16 +90,8 @@ deploy_with_docker() {
     source .env
     set +a
     
-    if [ "$app_type" = "admin" ]; then
-        log_info "Admin 애플리케이션만 배포..."
-        docker-compose -f docker-compose.prod.yml up -d admin-app
-    elif [ "$app_type" = "user" ]; then
-        log_info "User 애플리케이션만 배포..."
-        docker-compose -f docker-compose.prod.yml up -d user-app
-    else
-        log_info "Admin & User 애플리케이션 배포..."
-        docker-compose -f docker-compose.prod.yml up -d
-    fi
+    log_info "Admin 애플리케이션 배포..."
+    docker-compose -f docker-compose.prod.yml up -d
     
     log_success "Docker 배포 완료!"
     
@@ -137,7 +115,7 @@ deploy_with_jar() {
     source .env
     set +a
     
-    if [ "$app_type" = "admin" ] || [ "$app_type" = "both" ]; then
+    if [ "$app_type" = "admin" ]; then
         log_info "Admin 애플리케이션 시작..."
         nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar \
             --spring.profiles.active=prod \
@@ -145,13 +123,6 @@ deploy_with_jar() {
         log_success "Admin 애플리케이션 시작됨 (PID: $!)"
     fi
     
-    if [ "$app_type" = "user" ] || [ "$app_type" = "both" ]; then
-        log_info "User 애플리케이션 시작..."
-        nohup java -jar build/libs/exProject-0.0.1-SNAPSHOT.jar \
-            --spring.profiles.active=prod \
-            --server.port=8081 > user_app.log 2>&1 &
-        log_success "User 애플리케이션 시작됨 (PID: $!)"
-    fi
     
     # 상태 확인
     sleep 15
@@ -164,7 +135,7 @@ check_application_status() {
     
     log_info "애플리케이션 상태 확인 중..."
     
-    if [ "$app_type" = "admin" ] || [ "$app_type" = "both" ]; then
+    if [ "$app_type" = "admin" ]; then
         if pgrep -f "server.port=8080" > /dev/null; then
             log_success "Admin 애플리케이션 실행 중 (포트 8080)"
         else
@@ -178,19 +149,6 @@ check_application_status() {
         fi
     fi
     
-    if [ "$app_type" = "user" ] || [ "$app_type" = "both" ]; then
-        if pgrep -f "server.port=8081" > /dev/null; then
-            log_success "User 애플리케이션 실행 중 (포트 8081)"
-        else
-            log_error "User 애플리케이션 실행 실패"
-        fi
-        
-        if netstat -tlnp | grep :8081 > /dev/null; then
-            log_success "포트 8081 열림"
-        else
-            log_error "포트 8081이 열려있지 않음"
-        fi
-    fi
 }
 
 # 로그 확인
@@ -200,19 +158,13 @@ show_logs() {
     
     log_info "최근 로그 확인 (최근 $lines 줄)..."
     
-    if [ "$app_type" = "admin" ] || [ "$app_type" = "both" ]; then
+    if [ "$app_type" = "admin" ]; then
         if [ -f "admin_app.log" ]; then
             log_info "=== Admin 애플리케이션 로그 ==="
             tail -$lines admin_app.log
         fi
     fi
     
-    if [ "$app_type" = "user" ] || [ "$app_type" = "both" ]; then
-        if [ -f "user_app.log" ]; then
-            log_info "=== User 애플리케이션 로그 ==="
-            tail -$lines user_app.log
-        fi
-    fi
 }
 
 # 도움말
@@ -227,14 +179,11 @@ show_help() {
     echo "  -h, --help      도움말"
     echo ""
     echo "앱타입:"
-    echo "  admin          Admin 애플리케이션만"
-    echo "  user           User 애플리케이션만"
-    echo "  both           Admin & User 애플리케이션 (기본값)"
+    echo "  admin          Admin 애플리케이션 (기본값)"
     echo ""
     echo "예시:"
-    echo "  $0                    # JAR로 Admin & User 배포"
-    echo "  $0 -d admin           # Docker로 Admin만 배포"
-    echo "  $0 -j user            # JAR로 User만 배포"
+    echo "  $0                    # JAR로 Admin 배포"
+    echo "  $0 -d admin           # Docker로 Admin 배포"
     echo "  $0 -l admin           # Admin 로그 확인"
     echo "  $0 -s                 # 전체 상태 확인"
 }
@@ -242,7 +191,7 @@ show_help() {
 # 메인 함수
 main() {
     local deploy_method="jar"
-    local app_type="both"
+    local app_type="admin"
     local action="deploy"
     
     # 인자 파싱
@@ -268,7 +217,7 @@ main() {
                 show_help
                 exit 0
                 ;;
-            admin|user|both)
+            admin)
                 app_type=$1
                 shift
                 ;;

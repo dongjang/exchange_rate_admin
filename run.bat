@@ -58,7 +58,6 @@ echo ========================================
 echo Execution completed!
 echo.
 echo Admin App: http://43.201.130.137:8080
-echo User App:  http://43.201.130.137:8081
 echo.
 echo Monitoring:
 echo   Grafana:    http://43.201.130.137:3000
