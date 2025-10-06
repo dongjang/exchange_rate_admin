@@ -1,13 +1,20 @@
 #!/bin/bash
 
+# Load environment variables from .env file
+if [ -f .env ]; then
+    echo "Loading environment variables from .env file..."
+    export $(cat .env | grep -v '^#' | xargs)
+else
+    echo "Warning: .env file not found!"
+    echo "Please create .env file with required environment variables."
+    exit 1
+fi
+
 echo "========================================"
 echo "   Exchange Rate Management System"
 echo "   Production Deployment Script"
 echo "========================================"
 echo
-
-# 환경변수 설정 (GitHub Actions 환경변수 사용)
-# GitHub Actions에서 설정된 환경변수들을 Docker에서 사용
 
 # 환경변수 검증
 if [ -z "$DB_URL" ]; then
