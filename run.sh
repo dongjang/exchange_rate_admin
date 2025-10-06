@@ -42,7 +42,18 @@ echo "환경변수 설정 완료!"
 echo
 
 echo "기존 컨테이너 정리 중..."
-docker-compose -f docker-compose.prod.yml down
+# 모든 관련 컨테이너와 네트워크 정리
+docker-compose -f docker-compose.prod.yml down --remove-orphans
+docker-compose -f docker-compose.monitoring.yml down --remove-orphans
+
+# 포트 충돌 방지를 위한 추가 정리
+echo "포트 충돌 방지를 위한 정리 중..."
+docker stop $(docker ps -q --filter "publish=6379") 2>/dev/null || true
+docker stop $(docker ps -q --filter "publish=8080") 2>/dev/null || true
+docker stop $(docker ps -q --filter "publish=8081") 2>/dev/null || true
+docker stop $(docker ps -q --filter "publish=3000") 2>/dev/null || true
+docker stop $(docker ps -q --filter "publish=9090") 2>/dev/null || true
+docker stop $(docker ps -q --filter "publish=9100") 2>/dev/null || true
 
 echo "프로덕션 환경으로 실행 중..."
 docker-compose -f docker-compose.prod.yml up -d --build
