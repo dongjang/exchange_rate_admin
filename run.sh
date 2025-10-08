@@ -54,6 +54,10 @@ docker stop exchange-rate-grafana 2>/dev/null || true
 docker stop exchange-rate-prometheus 2>/dev/null || true
 docker stop exchange-rate-node-exporter 2>/dev/null || true
 docker stop shared-redis 2>/dev/null || true
+docker rm exadmin-admin-app 2>/dev/null || true
+docker rm exchange-rate-grafana 2>/dev/null || true
+docker rm exchange-rate-prometheus 2>/dev/null || true
+docker rm exchange-rate-node-exporter 2>/dev/null || true
 docker rm shared-redis 2>/dev/null || true
 
 echo "Redis 서비스 확인 중..."
