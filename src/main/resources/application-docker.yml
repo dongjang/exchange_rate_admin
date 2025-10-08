@@ -44,6 +44,14 @@ management:
   endpoint:
     health:
       show-details: when-authorized
+  metrics:
+    distribution:
+      percentiles-histogram:
+        "http.server.requests": true
+      percentiles:
+        "http.server.requests": 0.5, 0.95, 0.99
+      slo:
+        "http.server.requests": 50ms, 100ms, 200ms, 500ms, 1s, 2s, 5s
 
 # Docker 환경에서 로깅 레벨 조정
 logging:
