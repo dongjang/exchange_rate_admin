@@ -65,10 +65,10 @@ if ! docker ps | grep -q "shared-redis"; then
 fi
 
 echo "프로덕션 환경으로 실행 중..."
-docker-compose -f docker-compose.prod.yml up -d --build
+docker-compose -f docker-compose.prod.yml up -d --build --remove-orphans
 
 echo "모니터링 도구 실행 중..."
-docker-compose -f docker-compose.monitoring.yml up -d
+docker-compose -f docker-compose.monitoring.yml up -d --remove-orphans
 
 echo
 echo "========================================"
