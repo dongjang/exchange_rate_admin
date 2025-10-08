@@ -56,4 +56,5 @@ networks:
   exadmin-network:
     driver: bridge
   shared-network:
-    external: true
+    name: shared-network
+    driver: bridge
