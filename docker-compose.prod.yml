@@ -38,6 +38,7 @@ services:
       - ./logs:/app/logs
     networks:
       - exadmin-network
+      - shared-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
@@ -54,3 +55,5 @@ volumes:
 networks:
   exadmin-network:
     driver: bridge
+  shared-network:
+    external: true
