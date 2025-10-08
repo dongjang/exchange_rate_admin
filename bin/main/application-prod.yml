@@ -116,6 +116,13 @@ server:
   compression:
     enabled: true
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+  tomcat:
+    threads:
+      max: 20
+      min-spare: 5
+    max-connections: 8192
+    accept-count: 100
+    connection-timeout: 20000
 
 # 관리 엔드포인트 (운영환경에서는 제한적)
 management:
