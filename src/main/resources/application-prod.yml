@@ -144,5 +144,5 @@ management:
       percentiles:
         "http.server.requests": 0.5, 0.95, 0.99
       slo:
-        "http.server.requests": 50ms, 100ms, 200ms, 500ms, 1s, 2s, 5s
+        "http.server.requests": 10ms, 50ms, 100ms, 200ms, 500ms, 1s, 2s, 5s
 

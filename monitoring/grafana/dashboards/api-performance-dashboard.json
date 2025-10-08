@@ -171,13 +171,13 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{uri=~\"/api/admin/.*\"}[5m])) by (le))",
+          "expr": "http_server_requests_seconds_max{uri=~\"/api/admin/.*\"}",
           "interval": "",
           "legendFormat": "95th percentile",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_seconds_bucket{uri=~\"/api/admin/.*\"}[5m])) by (le))",
+          "expr": "http_server_requests_seconds_max{uri=~\"/api/admin/.*\"}",
           "interval": "",
           "legendFormat": "50th percentile",
           "refId": "B"
