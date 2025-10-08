@@ -45,6 +45,7 @@ echo "기존 컨테이너 정리 중..."
 # 모든 관련 컨테이너와 네트워크 정리
 docker-compose -f docker-compose.prod.yml down --remove-orphans
 docker-compose -f docker-compose.monitoring.yml down --remove-orphans
+docker-compose -f docker-compose.redis.yml down --remove-orphans
 
 # 포트 충돌 방지를 위한 추가 정리 (이 프로젝트 컨테이너만)
 echo "포트 충돌 방지를 위한 정리 중..."
@@ -52,6 +53,8 @@ docker stop exadmin-admin-app 2>/dev/null || true
 docker stop exchange-rate-grafana 2>/dev/null || true
 docker stop exchange-rate-prometheus 2>/dev/null || true
 docker stop exchange-rate-node-exporter 2>/dev/null || true
+docker stop shared-redis 2>/dev/null || true
+docker rm shared-redis 2>/dev/null || true
 
 echo "Redis 서비스 확인 중..."
 # Redis가 실행 중이 아니면 시작
