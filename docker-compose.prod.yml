@@ -31,13 +31,10 @@ services:
       AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
       AWS_REGION: ${AWS_REGION}
-    external_links:
-      - shared-redis:redis
     volumes:
       - ./uploads:/app/uploads
       - ./logs:/app/logs
     networks:
-      - exadmin-network
       - shared-network
     restart: unless-stopped
     healthcheck:
@@ -53,8 +50,6 @@ volumes:
   logs:
 
 networks:
-  exadmin-network:
-    driver: bridge
   shared-network:
     name: shared-network
     driver: bridge
