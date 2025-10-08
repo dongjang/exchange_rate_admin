@@ -92,13 +92,13 @@
         {
           "expr": "rate(http_server_requests_seconds_count{status=~\"4..\"}[5m])",
           "interval": "",
-          "legendFormat": "4xx 에러 - {{status}}",
+          "legendFormat": "{{method}} {{uri}} - 4xx 에러 ({{status}})",
           "refId": "A"
         },
         {
           "expr": "rate(http_server_requests_seconds_count{status=~\"5..\"}[5m])",
           "interval": "",
-          "legendFormat": "5xx 에러 - {{status}}",
+          "legendFormat": "{{method}} {{uri}} - 5xx 에러 ({{status}})",
           "refId": "B"
         }
       ],
@@ -177,9 +177,9 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(http_server_requests_seconds_count{status=~\"4..\"}[5m])) by (uri)",
+          "expr": "sum(rate(http_server_requests_seconds_count{status=~\"4..\"}[5m])) by (method,uri)",
           "interval": "",
-          "legendFormat": "{{uri}}",
+          "legendFormat": "{{method}} {{uri}}",
           "refId": "A"
         }
       ],
@@ -258,9 +258,9 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(http_server_requests_seconds_count{status=~\"5..\"}[5m])) by (uri)",
+          "expr": "sum(rate(http_server_requests_seconds_count{status=~\"5..\"}[5m])) by (method,uri)",
           "interval": "",
-          "legendFormat": "{{uri}}",
+          "legendFormat": "{{method}} {{uri}}",
           "refId": "A"
         }
       ],
@@ -339,15 +339,15 @@
       },
       "targets": [
         {
-          "expr": "rate(http_server_requests_seconds_count{status=~\"4..\"}[5m]) / rate(http_server_requests_seconds_count[5m]) * 100",
+          "expr": "sum(rate(http_server_requests_seconds_count{status=~\"4..\"}[5m]) / rate(http_server_requests_seconds_count[5m]) * 100) by (status)",
           "interval": "",
-          "legendFormat": "4xx 에러율",
+          "legendFormat": "{{status}} 에러율",
           "refId": "A"
         },
         {
-          "expr": "rate(http_server_requests_seconds_count{status=~\"5..\"}[5m]) / rate(http_server_requests_seconds_count[5m]) * 100",
+          "expr": "sum(rate(http_server_requests_seconds_count{status=~\"5..\"}[5m]) / rate(http_server_requests_seconds_count[5m]) * 100) by (status)",
           "interval": "",
-          "legendFormat": "5xx 에러율",
+          "legendFormat": "{{status}} 에러율",
           "refId": "B"
         }
       ],

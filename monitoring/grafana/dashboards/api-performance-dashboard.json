@@ -173,13 +173,13 @@
         {
           "expr": "http_server_requests_seconds_max{uri=~\"/api/admin/.*\"}",
           "interval": "",
-          "legendFormat": "95th percentile",
+          "legendFormat": "{{method}} {{uri}} - 95th percentile",
           "refId": "A"
         },
         {
           "expr": "http_server_requests_seconds_max{uri=~\"/api/admin/.*\"}",
           "interval": "",
-          "legendFormat": "50th percentile",
+          "legendFormat": "{{method}} {{uri}} - 50th percentile",
           "refId": "B"
         }
       ],
