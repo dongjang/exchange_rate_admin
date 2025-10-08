@@ -81,4 +81,5 @@ networks:
   exchange-rate-network:
     driver: bridge
   exadmin-network:
-    driver: bridge
+    name: exchange_rate_admin_exadmin-network
+    external: true
