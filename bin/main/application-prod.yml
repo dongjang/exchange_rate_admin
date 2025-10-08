@@ -122,10 +122,11 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,prometheus
+        include: info,metrics,prometheus
   endpoint:
     health:
       show-details: when-authorized
+      enabled: false  # Health Check 완전 비활성화
   health:
     mail:
       enabled: false  # Mail Health Check 비활성화
