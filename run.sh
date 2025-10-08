@@ -43,7 +43,12 @@ echo
 # ============================================
 # 1단계: 완전 정리
 # ============================================
-echo "1단계: 기존 컨테이너 완전 정리 중..."
+echo "1단계: 기존 컨테이너 및 프로세스 완전 정리 중..."
+
+# Java 프로세스 종료 (Docker 외부에서 실행 중인 경우)
+echo "Java 프로세스 종료 중..."
+sudo pkill -9 java 2>/dev/null || true
+sleep 2
 
 # 모든 관련 컨테이너 중지 및 제거
 docker stop exadmin-admin-app exchange-rate-grafana exchange-rate-prometheus exchange-rate-node-exporter shared-redis 2>/dev/null || true

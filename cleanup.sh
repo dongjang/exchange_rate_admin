@@ -22,8 +22,13 @@ docker-compose -f docker-compose.prod.yml down -v --remove-orphans 2>/dev/null |
 docker-compose -f docker-compose.monitoring.yml down -v --remove-orphans 2>/dev/null || true
 docker-compose -f docker-compose.redis.yml down -v --remove-orphans 2>/dev/null || true
 
-# 4. 포트 확인
-echo "4. 포트 사용 확인 중..."
+# 4. Java 프로세스 종료
+echo "4. Java 프로세스 종료 중..."
+sudo pkill -9 java 2>/dev/null || true
+sleep 2
+
+# 5. 포트 확인
+echo "5. 포트 사용 확인 중..."
 echo "8080 포트:"
 sudo lsof -i :8080 2>/dev/null || echo "  사용 안 함 ✓"
 echo "6379 포트:"
