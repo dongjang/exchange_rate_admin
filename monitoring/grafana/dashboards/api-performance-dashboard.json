@@ -90,7 +90,7 @@
       },
       "targets": [
         {
-          "expr": "rate(http_server_requests_count{uri=~\"/api/admin/.*\"}[5m])",
+          "expr": "rate(http_server_requests_seconds_count{uri=~\"/api/admin/.*\"}[5m])",
           "interval": "",
           "legendFormat": "{{method}} {{uri}}",
           "refId": "A"
@@ -171,13 +171,13 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_bucket{uri=~\"/api/admin/.*\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{uri=~\"/api/admin/.*\"}[5m])) by (le))",
           "interval": "",
           "legendFormat": "95th percentile",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_bucket{uri=~\"/api/admin/.*\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_seconds_bucket{uri=~\"/api/admin/.*\"}[5m])) by (le))",
           "interval": "",
           "legendFormat": "50th percentile",
           "refId": "B"
@@ -258,13 +258,13 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(http_server_requests_count{uri=~\"/api/admin/.*\",status=~\"4..\"}[5m])) / sum(rate(http_server_requests_count{uri=~\"/api/admin/.*\"}[5m])) * 100",
+          "expr": "sum(rate(http_server_requests_seconds_count{uri=~\"/api/admin/.*\",status=~\"4..\"}[5m])) / sum(rate(http_server_requests_seconds_count{uri=~\"/api/admin/.*\"}[5m])) * 100",
           "interval": "",
           "legendFormat": "4xx 에러율",
           "refId": "A"
         },
         {
-          "expr": "sum(rate(http_server_requests_count{uri=~\"/api/admin/.*\",status=~\"5..\"}[5m])) / sum(rate(http_server_requests_count{uri=~\"/api/admin/.*\"}[5m])) * 100",
+          "expr": "sum(rate(http_server_requests_seconds_count{uri=~\"/api/admin/.*\",status=~\"5..\"}[5m])) / sum(rate(http_server_requests_seconds_count{uri=~\"/api/admin/.*\"}[5m])) * 100",
           "interval": "",
           "legendFormat": "5xx 에러율",
           "refId": "B"
@@ -345,7 +345,7 @@
       },
       "targets": [
         {
-          "expr": "topk(10, rate(http_server_requests_count{uri=~\"/api/.*\"}[5m]))",
+          "expr": "topk(10, rate(http_server_requests_seconds_count{uri=~\"/api/.*\"}[5m]))",
           "interval": "",
           "legendFormat": "{{method}} {{uri}}",
           "refId": "A"

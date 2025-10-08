@@ -90,13 +90,13 @@
       },
       "targets": [
         {
-          "expr": "rate(http_server_requests_count{uri=~\"/api/admin/login.*\"}[5m])",
+          "expr": "rate(http_server_requests_seconds_count{uri=~\"/api/admin/login.*\"}[5m])",
           "interval": "",
           "legendFormat": "로그인 시도",
           "refId": "A"
         },
         {
-          "expr": "rate(http_server_requests_count{uri=~\"/api/admin/auth.*\"}[5m])",
+          "expr": "rate(http_server_requests_seconds_count{uri=~\"/api/admin/auth.*\"}[5m])",
           "interval": "",
           "legendFormat": "인증 요청",
           "refId": "B"
@@ -177,19 +177,19 @@
       },
       "targets": [
         {
-          "expr": "rate(http_server_requests_count{uri=~\"/api/admin/users.*\"}[5m])",
+          "expr": "rate(http_server_requests_seconds_count{uri=~\"/api/admin/users.*\"}[5m])",
           "interval": "",
           "legendFormat": "사용자 관리",
           "refId": "A"
         },
         {
-          "expr": "rate(http_server_requests_count{uri=~\"/api/admin/remittances.*\"}[5m])",
+          "expr": "rate(http_server_requests_seconds_count{uri=~\"/api/admin/remittances.*\"}[5m])",
           "interval": "",
           "legendFormat": "송금 관리",
           "refId": "B"
         },
         {
-          "expr": "rate(http_server_requests_count{uri=~\"/api/admin/notices.*\"}[5m])",
+          "expr": "rate(http_server_requests_seconds_count{uri=~\"/api/admin/notices.*\"}[5m])",
           "interval": "",
           "legendFormat": "공지사항",
           "refId": "C"
@@ -270,13 +270,13 @@
       },
       "targets": [
         {
-          "expr": "rate(http_server_requests_count{uri=~\"/api/files.*\"}[5m])",
+          "expr": "rate(http_server_requests_seconds_count{uri=~\"/api/files.*\"}[5m])",
           "interval": "",
           "legendFormat": "파일 업로드/다운로드",
           "refId": "A"
         },
         {
-          "expr": "rate(http_server_requests_count{uri=~\"/api/public.*\"}[5m])",
+          "expr": "rate(http_server_requests_seconds_count{uri=~\"/api/public.*\"}[5m])",
           "interval": "",
           "legendFormat": "공개 API",
           "refId": "B"
@@ -357,13 +357,13 @@
       },
       "targets": [
         {
-          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_bucket{uri=~\"/api/admin/.*\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.95, sum(rate(http_server_requests_seconds_bucket{uri=~\"/api/admin/.*\"}[5m])) by (le))",
           "interval": "",
           "legendFormat": "95th percentile",
           "refId": "A"
         },
         {
-          "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_bucket{uri=~\"/api/admin/.*\"}[5m])) by (le))",
+          "expr": "histogram_quantile(0.50, sum(rate(http_server_requests_seconds_bucket{uri=~\"/api/admin/.*\"}[5m])) by (le))",
           "interval": "",
           "legendFormat": "50th percentile",
           "refId": "B"
