@@ -13,6 +13,7 @@ spring:
       max-lifetime: 900000
       register-mbeans: true
       metrics-name: hikaricp
+      pool-name: "ProductionDB-Pool"
 
   jpa:
     hibernate:
@@ -132,13 +133,18 @@ management:
     web:
       exposure:
         include: info,metrics,prometheus
+      base-path: /actuator
   endpoint:
     health:
       show-details: when-authorized
       enabled: false  # Health Check 완전 비활성화
+    prometheus:
+      enabled: true
   health:
     mail:
       enabled: false  # Mail Health Check 비활성화
+  server:
+    port: 8080
   metrics:
     enable:
       hikaricp: true

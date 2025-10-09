@@ -12,6 +12,7 @@ spring:
       max-lifetime: 1800000
       register-mbeans: true
       metrics-name: hikaricp
+      pool-name: "DockerDB-Pool"
   jpa:
     hibernate:
       ddl-auto: update

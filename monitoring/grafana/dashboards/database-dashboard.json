@@ -92,13 +92,13 @@
         {
           "expr": "hikaricp_connections_active",
           "interval": "",
-          "legendFormat": "활성 연결",
+          "legendFormat": "활성 연결 ({{pool}})",
           "refId": "A"
         },
         {
           "expr": "hikaricp_connections_idle",
           "interval": "",
-          "legendFormat": "유휴 연결",
+          "legendFormat": "유휴 연결 ({{pool}})",
           "refId": "B"
         }
       ],
@@ -179,7 +179,7 @@
         {
           "expr": "hikaricp_connections_creation_seconds",
           "interval": "",
-          "legendFormat": "연결 생성 시간",
+          "legendFormat": "연결 생성 시간 ({{pool}})",
           "refId": "A"
         }
       ],
@@ -260,7 +260,7 @@
         {
           "expr": "hikaricp_connections_timeout_total",
           "interval": "",
-          "legendFormat": "연결 타임아웃",
+          "legendFormat": "연결 타임아웃 ({{pool}})",
           "refId": "A"
         }
       ],
@@ -341,7 +341,7 @@
         {
           "expr": "hikaricp_connections_usage_seconds",
           "interval": "",
-          "legendFormat": "연결 사용 시간",
+          "legendFormat": "연결 사용 시간 ({{pool}})",
           "refId": "A"
         }
       ],

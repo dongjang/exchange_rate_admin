@@ -37,7 +37,7 @@
               "tooltip": false,
               "vis": false
             },
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -118,7 +118,7 @@
               "tooltip": false,
               "vis": false
             },
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -205,7 +205,7 @@
               "tooltip": false,
               "vis": false
             },
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -235,7 +235,9 @@
               }
             ]
           },
-          "unit": "percent"
+          "unit": "short",
+          "decimals": 0,
+          "min": 0
         },
         "overrides": []
       },
@@ -258,19 +260,19 @@
       },
       "targets": [
         {
-          "expr": "sum(rate(http_server_requests_seconds_count{uri=~\"/api/admin/.*\",status=~\"4..\"}[5m])) / sum(rate(http_server_requests_seconds_count{uri=~\"/api/admin/.*\"}[5m])) * 100",
+          "expr": "sum(delta(http_server_requests_seconds_count{uri=~\"/api/admin/.*\",status=~\"4..\"}[5m])) > 0",
           "interval": "",
-          "legendFormat": "4xx 에러율",
+          "legendFormat": "4xx 에러 건수",
           "refId": "A"
         },
         {
-          "expr": "sum(rate(http_server_requests_seconds_count{uri=~\"/api/admin/.*\",status=~\"5..\"}[5m])) / sum(rate(http_server_requests_seconds_count{uri=~\"/api/admin/.*\"}[5m])) * 100",
+          "expr": "sum(delta(http_server_requests_seconds_count{uri=~\"/api/admin/.*\",status=~\"5..\"}[5m])) > 0",
           "interval": "",
-          "legendFormat": "5xx 에러율",
+          "legendFormat": "5xx 에러 건수",
           "refId": "B"
         }
       ],
-      "title": "API 에러율",
+      "title": "API 에러 건수",
       "type": "timeseries"
     },
     {
@@ -292,7 +294,7 @@
               "tooltip": false,
               "vis": false
             },
-            "lineInterpolation": "linear",
+            "lineInterpolation": "smooth",
             "lineWidth": 1,
             "pointSize": 5,
             "scaleDistribution": {
@@ -345,7 +347,7 @@
       },
       "targets": [
         {
-          "expr": "topk(10, rate(http_server_requests_seconds_count{uri=~\"/api/.*\"}[5m]))",
+          "expr": "topk(10, rate(http_server_requests_seconds_count{uri=~\"/api/.*\",uri!~\"/actuator/.*\"}[5m]))",
           "interval": "",
           "legendFormat": "{{method}} {{uri}}",
           "refId": "A"

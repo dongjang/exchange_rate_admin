@@ -27,6 +27,12 @@ scrape_configs:
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['admin-app:8080']
-    scrape_interval: 30s
-    scrape_timeout: 15s
+    scrape_interval: 60s
+    scrape_timeout: 30s
+    honor_labels: true
+    metrics_relabeling_configs:
+      - source_labels: [__name__]
+        regex: 'hikaricp_.*'
+        target_label: 'component'
+        replacement: 'database'
 

@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.core.env.Environment;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -74,6 +75,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/public/**").permitAll()
                 // Actuator 엔드포인트 허용 (모니터링용)
                 .requestMatchers("/actuator/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/actuator/prometheus").permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/actuator/**").permitAll()
                 .anyRequest().denyAll()
             );
         
