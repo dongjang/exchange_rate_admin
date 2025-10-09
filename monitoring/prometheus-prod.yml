@@ -21,7 +21,7 @@ scrape_configs:
   - job_name: 'admin-app'
     metrics_path: '/actuator/prometheus'
     static_configs:
-      - targets: ['43.201.130.137:8080']  # 또는 실제 EC2 IP:8080
+      - targets: ['localhost:8080']  # EC2 내부에서 localhost 사용
     scrape_interval: 60s
     scrape_timeout: 30s
     honor_labels: true
