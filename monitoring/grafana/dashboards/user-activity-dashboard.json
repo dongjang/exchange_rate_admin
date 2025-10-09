@@ -91,7 +91,7 @@
       },
       "targets": [
         {
-          "expr": "http_server_requests_seconds_count{uri=\"/api/admin/login\"}",
+          "expr": "delta(http_server_requests_seconds_count{uri=\"/api/admin/login\",outcome=\"SUCCESS\"}[5m]) > 0",
           "interval": "",
           "legendFormat": "로그인",
           "refId": "A"
@@ -103,7 +103,7 @@
           "refId": "B"
         }
       ],
-      "title": "관리자 로그인/로그아웃",
+      "title": "관리자 로그인/로그아웃 시도",
       "type": "timeseries"
     },
     {
