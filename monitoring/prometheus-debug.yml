@@ -1,0 +1,35 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Prometheus 자체 모니터링
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Spring Boot Admin App (디버깅용 - 여러 옵션 시도)
+  - job_name: 'admin-app-localhost'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['localhost:8080']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  - job_name: 'admin-app-host'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8080']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  - job_name: 'admin-app-container'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['admin-app:8080']
+    scrape_interval: 30s
+    scrape_timeout: 10s
