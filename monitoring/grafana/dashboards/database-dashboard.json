@@ -67,7 +67,7 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "none"
         },
         "overrides": []
       },
@@ -90,13 +90,13 @@
       },
       "targets": [
         {
-          "expr": "hikaricp_connections_active",
+          "expr": "hikaricp_connections_active > 0",
           "interval": "",
           "legendFormat": "활성 연결 ({{pool}})",
           "refId": "A"
         },
         {
-          "expr": "hikaricp_connections_idle",
+          "expr": "hikaricp_connections_idle > 0",
           "interval": "",
           "legendFormat": "유휴 연결 ({{pool}})",
           "refId": "B"
@@ -177,10 +177,22 @@
       },
       "targets": [
         {
-          "expr": "hikaricp_connections_creation_seconds",
+          "expr": "hikaricp_connections_creation_seconds_max > 0",
           "interval": "",
-          "legendFormat": "연결 생성 시간 ({{pool}})",
+          "legendFormat": "최대 생성 시간 ({{pool}})",
           "refId": "A"
+        },
+        {
+          "expr": "hikaricp_connections_creation_seconds_sum > 0",
+          "interval": "",
+          "legendFormat": "총 생성 시간 ({{pool}})",
+          "refId": "B"
+        },
+        {
+          "expr": "hikaricp_connections_creation_seconds_count > 0",
+          "interval": "",
+          "legendFormat": "생성 횟수 ({{pool}})",
+          "refId": "C"
         }
       ],
       "title": "데이터베이스 연결 생성 시간",
@@ -258,7 +270,7 @@
       },
       "targets": [
         {
-          "expr": "hikaricp_connections_timeout_total",
+          "expr": "hikaricp_connections_timeout_total > 0",
           "interval": "",
           "legendFormat": "연결 타임아웃 ({{pool}})",
           "refId": "A"
@@ -316,7 +328,17 @@
               }
             ]
           },
-          "unit": "short"
+          "unit": "s",
+          "custom": {
+            "axisLabel": "seconds",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "vis": false
+            }
+          },
+          "min": 0,
+          "decimals": 0
         },
         "overrides": []
       },
@@ -339,10 +361,22 @@
       },
       "targets": [
         {
-          "expr": "hikaricp_connections_usage_seconds",
+          "expr": "hikaricp_connections_usage_seconds_max > 0",
           "interval": "",
-          "legendFormat": "연결 사용 시간 ({{pool}})",
+          "legendFormat": "최대 사용 시간 ({{pool}})",
           "refId": "A"
+        },
+        {
+          "expr": "hikaricp_connections_usage_seconds_sum > 0",
+          "interval": "",
+          "legendFormat": "총 사용 시간 ({{pool}})",
+          "refId": "B"
+        },
+        {
+          "expr": "hikaricp_connections_usage_seconds_count > 0",
+          "interval": "",
+          "legendFormat": "사용 횟수 ({{pool}})",
+          "refId": "C"
         }
       ],
       "title": "데이터베이스 연결 사용 시간",

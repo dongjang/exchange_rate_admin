@@ -90,7 +90,7 @@
       },
       "targets": [
         {
-          "expr": "rate(http_server_requests_seconds_count{uri=~\"/api/admin/.*\"}[5m])",
+          "expr": "rate(http_server_requests_seconds_count{uri=~\"/api/admin/.*\"}[5m]) > 0",
           "interval": "",
           "legendFormat": "{{method}} {{uri}}",
           "refId": "A"
@@ -171,13 +171,13 @@
       },
       "targets": [
         {
-          "expr": "http_server_requests_seconds_max{uri=~\"/api/admin/.*\"}",
+          "expr": "http_server_requests_seconds_max{uri=~\"/api/admin/.*\"} > 0",
           "interval": "",
           "legendFormat": "{{method}} {{uri}} - 95th percentile",
           "refId": "A"
         },
         {
-          "expr": "http_server_requests_seconds_max{uri=~\"/api/admin/.*\"}",
+          "expr": "http_server_requests_seconds_max{uri=~\"/api/admin/.*\"} > 0",
           "interval": "",
           "legendFormat": "{{method}} {{uri}} - 50th percentile",
           "refId": "B"
@@ -347,7 +347,7 @@
       },
       "targets": [
         {
-          "expr": "topk(10, rate(http_server_requests_seconds_count{uri=~\"/api/.*\",uri!~\"/actuator/.*\"}[5m]))",
+          "expr": "topk(10, rate(http_server_requests_seconds_count{uri=~\"/api/.*\",uri!~\"/actuator/.*\"}[5m])) > 0",
           "interval": "",
           "legendFormat": "{{method}} {{uri}}",
           "refId": "A"
