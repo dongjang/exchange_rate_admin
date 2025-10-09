@@ -20,6 +20,7 @@ spring:
       idle-timeout: 600000
       max-lifetime: 1800000
       register-mbeans: true
+      metrics-name: hikaricp
   jpa:
     hibernate:
       ddl-auto: update
