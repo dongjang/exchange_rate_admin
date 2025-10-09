@@ -93,17 +93,17 @@
         {
           "expr": "rate(http_server_requests_seconds_count{uri=~\"/api/admin/login.*\"}[5m]) > 0",
           "interval": "",
-          "legendFormat": "로그인 시도",
+          "legendFormat": "{{method}} {{uri}} - 로그인",
           "refId": "A"
         },
         {
-          "expr": "rate(http_server_requests_seconds_count{uri=~\"/api/admin/auth.*\"}[5m]) > 0",
+          "expr": "rate(http_server_requests_seconds_count{uri=~\"/api/admin/logout.*\"}[5m]) > 0",
           "interval": "",
-          "legendFormat": "인증 요청",
+          "legendFormat": "{{method}} {{uri}} - 로그아웃",
           "refId": "B"
         }
       ],
-      "title": "사용자 인증 활동",
+      "title": "관리자 로그인/로그아웃",
       "type": "timeseries"
     },
     {
