@@ -22,7 +22,7 @@ scrape_configs:
   #   static_configs:
   #     - targets: ['cadvisor:8080']
 
-  # Spring Boot Admin App (EC2에서는 Docker 컨테이너명 사용)
+  # Spring Boot Admin App (Production - Docker 컨테이너명 사용)
   - job_name: 'admin-app'
     metrics_path: '/actuator/prometheus'
     static_configs:
