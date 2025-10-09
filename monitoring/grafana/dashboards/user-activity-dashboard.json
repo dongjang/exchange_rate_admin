@@ -67,8 +67,7 @@
               }
             ]
           },
-          "unit": "reqps",
-          "displayName": "requests/sec"
+          "unit": "short"
         },
         "overrides": []
       },
@@ -91,15 +90,15 @@
       },
       "targets": [
         {
-          "expr": "rate(http_server_requests_seconds_count{uri=~\"/api/admin/login.*\"}[5m]) > 0",
+          "expr": "http_server_requests_seconds_count{uri=\"/api/admin/login\"}",
           "interval": "",
-          "legendFormat": "{{method}} {{uri}} - 로그인",
+          "legendFormat": "로그인",
           "refId": "A"
         },
         {
-          "expr": "rate(http_server_requests_seconds_count{uri=~\"/api/admin/logout.*\"}[5m]) > 0",
+          "expr": "delta(http_server_requests_seconds_count{uri=\"/api/admin/logout\"}[5m]) > 0",
           "interval": "",
-          "legendFormat": "{{method}} {{uri}} - 로그아웃",
+          "legendFormat": "로그아웃",
           "refId": "B"
         }
       ],
