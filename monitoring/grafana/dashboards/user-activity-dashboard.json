@@ -179,23 +179,23 @@
         {
           "expr": "rate(http_server_requests_seconds_count{uri=~\"/api/admin/users.*\"}[5m])",
           "interval": "",
-          "legendFormat": "사용자 관리",
+          "legendFormat": "사용자 관리 {{method}} {{uri}}",
           "refId": "A"
         },
         {
           "expr": "rate(http_server_requests_seconds_count{uri=~\"/api/admin/remittances.*\"}[5m])",
           "interval": "",
-          "legendFormat": "송금 관리",
+          "legendFormat": "송금 관리 {{method}} {{uri}}",
           "refId": "B"
         },
         {
           "expr": "rate(http_server_requests_seconds_count{uri=~\"/api/admin/notices.*\"}[5m])",
           "interval": "",
-          "legendFormat": "공지사항",
+          "legendFormat": "공지사항 {{method}} {{uri}}",
           "refId": "C"
         }
       ],
-      "title": "관리자 기능 사용량",
+      "title": "기능 사용량",
       "type": "timeseries"
     },
     {

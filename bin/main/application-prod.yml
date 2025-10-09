@@ -11,6 +11,8 @@ spring:
       connection-timeout: 20000  # 타임아웃 줄임
       idle-timeout: 300000
       max-lifetime: 900000
+      register-mbeans: true
+      metrics-name: hikaricp
 
   jpa:
     hibernate:
@@ -138,11 +140,17 @@ management:
     mail:
       enabled: false  # Mail Health Check 비활성화
   metrics:
+    enable:
+      hikaricp: true
     distribution:
       percentiles-histogram:
         "http.server.requests": true
+        hikaricp.connections.creation: true
+        hikaricp.connections.usage: true
       percentiles:
         "http.server.requests": 0.5, 0.95, 0.99
+        hikaricp.connections.creation: 0.5, 0.95, 0.99
+        hikaricp.connections.usage: 0.5, 0.95, 0.99
       slo:
         "http.server.requests": 10ms, 50ms, 100ms, 200ms, 500ms, 1s, 2s, 5s
 
