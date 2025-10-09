@@ -260,13 +260,13 @@
       },
       "targets": [
         {
-          "expr": "sum(delta(http_server_requests_seconds_count{uri=~\"/api/admin/.*\",status=~\"4..\"}[5m])) > 0",
+          "expr": "sum(delta(http_server_requests_seconds_count{uri=~\"/api/admin/.*\",status=~\"4..\"}[1m])) > 0",
           "interval": "",
           "legendFormat": "4xx 에러 건수",
           "refId": "A"
         },
         {
-          "expr": "sum(delta(http_server_requests_seconds_count{uri=~\"/api/admin/.*\",status=~\"5..\"}[5m])) > 0",
+          "expr": "sum(delta(http_server_requests_seconds_count{uri=~\"/api/admin/.*\",status=~\"5..\"}[1m])) > 0",
           "interval": "",
           "legendFormat": "5xx 에러 건수",
           "refId": "B"
