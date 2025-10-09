@@ -62,21 +62,19 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Order(3)
+    @Order(0)
     public SecurityFilterChain publicFilterChain(HttpSecurity http) throws Exception {
         http
-            .securityMatcher("/api/public/**", "/health/**", "/actuator/**")
+            .securityMatcher("/actuator/**", "/health/**", "/api/public/**")
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(authz -> authz
+                // Actuator 엔드포인트 허용 (모니터링용) - 최우선
+                .requestMatchers("/actuator/**").permitAll()
                 // 헬스체크
                 .requestMatchers("/health/**").permitAll()
                 // 공개 API
                 .requestMatchers("/api/public/**").permitAll()
-                // Actuator 엔드포인트 허용 (모니터링용)
-                .requestMatchers("/actuator/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/actuator/prometheus").permitAll()
-                .requestMatchers(HttpMethod.OPTIONS, "/actuator/**").permitAll()
                 .anyRequest().denyAll()
             );
         
@@ -84,7 +82,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    @Order(4)
+    @Order(3)
     public SecurityFilterChain defaultFilterChain(HttpSecurity http) throws Exception {
         http
             .securityMatcher("/**")
