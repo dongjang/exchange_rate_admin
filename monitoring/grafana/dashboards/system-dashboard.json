@@ -148,7 +148,7 @@
               }
             ]
           },
-          "unit": "bytes"
+          "unit": "percent"
         },
         "overrides": []
       },
@@ -171,19 +171,13 @@
       },
       "targets": [
         {
-          "expr": "node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes",
+          "expr": "(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100",
           "interval": "",
-          "legendFormat": "사용 중",
+          "legendFormat": "메모리 사용률",
           "refId": "A"
-        },
-        {
-          "expr": "node_memory_MemAvailable_bytes",
-          "interval": "",
-          "legendFormat": "사용 가능",
-          "refId": "B"
         }
       ],
-      "title": "메모리 사용량",
+      "title": "메모리 사용률",
       "type": "timeseries"
     },
     {
@@ -371,6 +365,8 @@
   "uid": "system-dashboard",
   "version": 1
 }
+
+
 
 
 
