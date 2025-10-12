@@ -18,9 +18,9 @@ docker network rm exchange_rate_admin_exchange-rate-network 2>/dev/null || true
 
 # 3. Docker Compose로 완전 정리
 echo "3. Docker Compose 정리 중..."
-docker-compose -f docker-compose.prod.yml down -v --remove-orphans 2>/dev/null || true
-docker-compose -f docker-compose.monitoring.yml down -v --remove-orphans 2>/dev/null || true
-docker-compose -f docker-compose.redis.yml down -v --remove-orphans 2>/dev/null || true
+docker-compose -f docker-compose.prod.yml down --remove-orphans 2>/dev/null || true
+docker-compose -f docker-compose.monitoring.yml down --remove-orphans 2>/dev/null || true
+docker-compose -f docker-compose.redis.yml down --remove-orphans 2>/dev/null || true
 
 # 4. Java 프로세스 종료
 echo "4. Java 프로세스 종료 중..."
