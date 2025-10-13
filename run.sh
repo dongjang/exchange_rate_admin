@@ -46,9 +46,16 @@ echo
 echo "1단계: 기존 컨테이너 및 프로세스 완전 정리 중..."
 
 # Java 프로세스 종료 (Docker 외부에서 실행 중인 경우)
-echo "Java 프로세스 종료 중..."
-sudo pkill -9 java 2>/dev/null || true
-sleep 2
+# 8080 포트를 사용하는 Java 프로세스만 종료 (사용자 쪽 8081, 3001 포트는 제외)
+echo "Admin App Java 프로세스 종료 중..."
+PID_8080=$(sudo lsof -ti:8080 2>/dev/null || true)
+if [ ! -z "$PID_8080" ]; then
+    echo "8080 포트 사용 프로세스 종료 중... (PID: $PID_8080)"
+    sudo kill -9 $PID_8080 2>/dev/null || true
+    sleep 2
+else
+    echo "8080 포트를 사용하는 프로세스가 없습니다."
+fi
 
 # 모든 관련 컨테이너 중지 및 제거
 docker stop exadmin-admin-app exchange-rate-grafana exchange-rate-prometheus exchange-rate-node-exporter shared-redis 2>/dev/null || true
