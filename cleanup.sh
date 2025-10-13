@@ -22,10 +22,16 @@ docker-compose -f docker-compose.prod.yml down --remove-orphans 2>/dev/null || t
 docker-compose -f docker-compose.monitoring.yml down --remove-orphans 2>/dev/null || true
 docker-compose -f docker-compose.redis.yml down --remove-orphans 2>/dev/null || true
 
-# 4. Java 프로세스 종료
-echo "4. Java 프로세스 종료 중..."
-sudo pkill -9 java 2>/dev/null || true
-sleep 2
+# 4. Java 프로세스 종료 (8080 포트만 - user 쪽 8081, 3001 포트는 제외)
+echo "4. Admin App Java 프로세스 종료 중..."
+PID_8080=$(sudo lsof -ti:8080 2>/dev/null || true)
+if [ ! -z "$PID_8080" ]; then
+    echo "   8080 포트 사용 프로세스 종료 중... (PID: $PID_8080)"
+    sudo kill -9 $PID_8080 2>/dev/null || true
+    sleep 2
+else
+    echo "   8080 포트를 사용하는 프로세스가 없습니다."
+fi
 
 # 5. 포트 확인
 echo "5. 포트 사용 확인 중..."
