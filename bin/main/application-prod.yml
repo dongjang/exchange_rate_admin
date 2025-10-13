@@ -1,7 +1,7 @@
 spring:
   datasource:
     # AWS RDS MySQL 연결 정보
-    url: ${DB_URL}
+    url: ${DB_URL}&serverTimezone=Asia/Seoul
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -25,6 +25,7 @@ spring:
         dialect: org.hibernate.dialect.MySQLDialect
         jdbc:
           batch_size: 20
+          time_zone: Asia/Seoul
         order_inserts: true
         order_updates: true
 
