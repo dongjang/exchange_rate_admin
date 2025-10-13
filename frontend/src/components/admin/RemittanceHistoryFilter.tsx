@@ -60,7 +60,7 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
   }, [remittanceCountries, getRemitCountries]);
   const currencyOptions = (remittanceCountries ?? []).map(c => ({ 
     value: c.code, 
-    label: isMobile ? `${c.countryName} - ${c.codeName}` : `${c.countryName} – ${c.codeName} (${c.code})` 
+    label: `${c.countryName} – ${c.codeName} (${c.code})` 
   }));
 
   // 콤마 포맷 함수
@@ -224,13 +224,6 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
     }
   };
 
-  // 관리자 페이지에서 반응형일 때 텍스트 줄이기
-  const getPlaceholderText = (defaultText: string, shortText: string) => {
-    if (isAdminPage && isMobile) {
-      return shortText;
-    }
-    return defaultText;
-  };
 
   return (
     <div style={{
@@ -254,13 +247,13 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
             value={filters.senderName || ''}
             onChange={(e) => handleInputChange('senderName', e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder={getPlaceholderText("보내는 사람", "보내는 사람")}
+            placeholder="보내는 사람"
             style={{
               width: '100%',
               padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 0.75rem',
               border: '1px solid #d1d5db',
               borderRadius: '0.375rem',
-              fontSize: isMobile ? '0.75rem' : '0.875rem',
+              fontSize: isMobile ? '0.63rem' : '0.875rem',
               backgroundColor: '#fff',
               transition: 'border 0.18s, box-shadow 0.18s',
             }}
@@ -285,13 +278,13 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
           value={filters.recipient}
           onChange={(e) => handleInputChange('recipient', e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder={getPlaceholderText("받는 사람", "받는 사람")}
+          placeholder="받는 사람"
           style={{
             width: '100%',
             padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 0.75rem',
             border: '1px solid #d1d5db',
             borderRadius: '0.375rem',
-            fontSize: isMobile ? '0.75rem' : '0.875rem',
+            fontSize: isMobile ? '0.7rem' : '0.875rem',
             backgroundColor: '#fff',
             transition: 'border 0.18s, box-shadow 0.18s',
           }}
@@ -316,7 +309,7 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
           onChange={opt => {
             handleInputChange('currency', opt?.value || '');
           }}
-          placeholder="수취 통화"
+          placeholder={isMobile ? "수취통화" : "수취 통화"}
           isSearchable
           isClearable
           noOptionsMessage={() => '검색 결과가 없습니다.'}
@@ -327,7 +320,7 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
               borderRadius: 8,
               border: state.isFocused ? '1.5px solid #3b82f6' : '1px solid #d1d5db',
               boxShadow: state.isFocused ? '0 2px 8px #3b82f633' : 'none',
-              fontSize: isMobile ? '0.75rem' : '0.95rem',
+              fontSize: isMobile ? '0.5rem' : '0.95rem',
               transition: 'border 0.18s, box-shadow 0.18s, background 0.18s',
               background: '#fff',
               '&:hover': {
@@ -341,7 +334,7 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
               color: state.isSelected ? '#2563eb' : '#222', 
               background: state.isSelected ? '#e0e7ef' : '#fff', 
               fontWeight: state.isSelected ? 700 : 500,
-              fontSize: isMobile ? '0.75rem' : '0.95rem'
+              fontSize: isMobile ? '0.63rem' : '0.95rem'
             }),
             singleValue: base => ({ ...base, fontSize: isMobile ? '0.75rem' : '0.95rem', fontWeight: 500, color: '#1e293b' }),
             placeholder: base => ({ ...base, fontSize: isMobile ? '0.75rem' : '0.95rem', color: '#94a3b8' }),
@@ -378,7 +371,7 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
             }
           }}
         >
-          <option value="">{getPlaceholderText("전체 상태", "전체")}</option>
+          <option value="">상태</option>
           <option value="COMPLETED">완료</option>
           <option value="WAITING">대기</option>
           <option value="FAILED">실패</option>
@@ -398,7 +391,7 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
           value={minAmountInput}
           onChange={e => handleAmountInput('minAmount', e.target.value)}
           onKeyPress={handleKeyPress}
-          placeholder={getPlaceholderText("최소 금액", "최소")}
+          placeholder={"최소 금액"}
           style={{
             width: '100%',
             padding: isMobile ? '0.4rem 0.6rem' : '0.5rem 0.75rem',
@@ -497,7 +490,7 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
               color: '#2563eb',
               border: '1.2px solid #dbeafe',
               borderRadius: '1.1rem',
-              fontSize: isMobile ? '0.75rem' : '0.92rem',
+              fontSize: isMobile ? '0.7rem' : '0.92rem',
               fontWeight: 600,
               letterSpacing: '0.01em',
               cursor: 'pointer',
@@ -559,7 +552,7 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
                 padding: isMobile ? '0.6rem 1rem' : '0.75rem 1.25rem',
                 border: 'none',
                 borderRadius: '12px',
-                fontSize: isMobile ? '0.75rem' : '0.875rem',
+                fontSize: isMobile ? '0.7rem' : '0.875rem',
                 backgroundColor: 'transparent',
                 color: '#1e293b',
                 fontWeight: '500',
@@ -641,7 +634,7 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
                 padding: isMobile ? '0.6rem 1rem' : '0.75rem 1.25rem',
                 border: 'none',
                 borderRadius: '12px',
-                fontSize: isMobile ? '0.75rem' : '0.875rem',
+                fontSize: isMobile ? '0.7rem' : '0.875rem',
                 backgroundColor: 'transparent',
                 color: '#1e293b',
                 fontWeight: '500',
@@ -725,7 +718,7 @@ const RemittanceHistoryFilter: React.FC<RemittanceHistoryFilterProps> = ({
                 color: '#1e293b',
                 border: '2px solid #d1d5db',
                 borderRadius: '0.5rem',
-                fontSize: isMobile ? '0.75rem' : '0.875rem',
+                fontSize: isMobile ? '0.7rem' : '0.875rem',
                 fontWeight: '600',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
