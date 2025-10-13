@@ -5,8 +5,12 @@ services:
     container_name: shared-redis
     ports:
       - "6379:6379"
+    environment:
+      - TZ=Asia/Seoul
     volumes:
       - redis_data:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     networks:
       - shared-network
     restart: unless-stopped

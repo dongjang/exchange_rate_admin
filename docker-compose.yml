@@ -7,8 +7,12 @@ services:
     container_name: exadmin-redis
     ports:
       - "6379:6379"
+    environment:
+      - TZ=Asia/Seoul
     volumes:
       - redis_data:/data
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     networks:
       - exadmin-network
 
@@ -61,9 +65,13 @@ services:
     container_name: exadmin-prometheus
     ports:
       - "9090:9090"
+    environment:
+      - TZ=Asia/Seoul
     volumes:
       - ./monitoring/prometheus-prod.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -81,10 +89,13 @@ services:
     ports:
       - "3000:3000"
     environment:
+      - TZ=Asia/Seoul
       - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
     volumes:
       - grafana_data:/var/lib/grafana
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     networks:
       - exadmin-network
     depends_on:

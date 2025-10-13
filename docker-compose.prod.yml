@@ -6,6 +6,9 @@ services:
     ports:
       - "8080:8080"
     environment:
+      # Timezone
+      TZ: Asia/Seoul
+      
       # Database
       DB_URL: ${DB_URL}
       DB_USERNAME: ${DB_USERNAME}
@@ -34,6 +37,8 @@ services:
     volumes:
       - ~/uploads:/app/uploads
       - ./logs:/app/logs
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
     networks:
       - shared-network
     restart: unless-stopped
