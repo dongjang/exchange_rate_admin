@@ -201,7 +201,7 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
 
   const handleZoomIn = () => {
     setPdfScale(prev => Math.min(prev + 0.2, 3.0));
-    setImageScale(prev => Math.min(prev + 0.2, 2.0));
+    setImageScale(prev => Math.min(prev + 0.2, 3.0)); // 이미지 최대 확대를 300%로 설정
   };
 
   const handleZoomOut = () => {
@@ -284,7 +284,7 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
       const delta = wheelEvent.deltaY > 0 ? -0.1 : 0.1;
       
       if (isImageFile(currentFile.fileType)) {
-        const newImageScale = Math.max(Math.min(imageScale + delta, 2.0), 0.5);
+        const newImageScale = Math.max(Math.min(imageScale + delta, 3.0), 0.5); // 이미지 최대 확대를 300%로 설정
         setImageScale(newImageScale);
         
         // 100% 이하로 축소할 때 위치 초기화
@@ -647,14 +647,14 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                     </span>
                     <button
                       onClick={handleZoomIn}
-                      disabled={imageScale >= 2.0}
+                      disabled={imageScale >= 3.0}
                       style={{
                         padding: window.innerWidth <= 768 ? '4px 8px' : '6px 12px',
                         border: '1px solid #d1d5db',
                         borderRadius: '4px',
                         background: 'white',
-                        color: imageScale >= 2.0 ? '#9ca3af' : '#374151',
-                        cursor: imageScale >= 2.0 ? 'not-allowed' : 'pointer',
+                        color: imageScale >= 3.0 ? '#9ca3af' : '#374151',
+                        cursor: imageScale >= 3.0 ? 'not-allowed' : 'pointer',
                         fontSize: window.innerWidth <= 768 ? '10px' : '12px',
                         fontWeight: '500'
                       }}
@@ -707,13 +707,16 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                         src={currentFile.base64Data ? `data:${currentFile.fileType};base64,${currentFile.base64Data}` : `/api/files/${currentFile.id}?t=${Date.now()}`}
                         alt={currentFile.originalName}
                         style={{ 
-                          maxWidth: `${100 * imageScale}%`, 
-                          maxHeight: `${100 * imageScale}%`, 
+                          maxWidth: '100%',
+                          maxHeight: '100%', 
+                          width: 'auto',
+                          height: 'auto',
                           objectFit: 'contain',
                           display: 'block',
-                          transition: imageScale === 1.0 ? 'max-width 0.2s ease, max-height 0.2s ease' : 'none',
-                          transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)`,
-                          cursor: isDragging ? 'grabbing' : 'grab'
+                          transition: imageScale === 1.0 ? 'transform 0.2s ease' : 'none',
+                          transform: `scale(${imageScale}) translate(${dragOffset.x / imageScale}px, ${dragOffset.y / imageScale}px)`,
+                          cursor: isDragging ? 'grabbing' : 'grab',
+                          transformOrigin: 'center center'
                         }}
                        onLoad={handleImageLoad}
                        onError={handleImageError}
