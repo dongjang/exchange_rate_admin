@@ -40,7 +40,6 @@ services:
       - /etc/localtime:/etc/localtime:ro
     networks:
       - shared-network
-    restart: unless-stopped
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s
