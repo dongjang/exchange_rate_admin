@@ -10,7 +10,6 @@ services:
     volumes:
       - redis_data:/data
       - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
     networks:
       - shared-network
     restart: unless-stopped

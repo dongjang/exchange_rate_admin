@@ -12,7 +12,6 @@ services:
     volumes:
       - redis_data:/data
       - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
     networks:
       - exadmin-network
 
@@ -71,7 +70,6 @@ services:
       - ./monitoring/prometheus-prod.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
       - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -95,7 +93,6 @@ services:
     volumes:
       - grafana_data:/var/lib/grafana
       - /etc/localtime:/etc/localtime:ro
-      - /etc/timezone:/etc/timezone:ro
     networks:
       - exadmin-network
     depends_on:
