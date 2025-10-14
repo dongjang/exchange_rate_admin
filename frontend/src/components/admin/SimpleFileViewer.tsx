@@ -28,6 +28,10 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   
+  // 터치 줌을 위한 상태
+  const [lastTouchDistance, setLastTouchDistance] = useState(0);
+  const [lastTouchTime, setLastTouchTime] = useState(0);
+  
   // 최신 상태를 참조하기 위한 ref
   const isDraggingRef = useRef(false);
   const dragStartRef = useRef({ x: 0, y: 0 });
@@ -65,22 +69,95 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
     dragOffsetRef.current = dragOffset;
   }, [dragOffset]);
 
+  // 두 터치점 사이의 거리 계산
+  const getTouchDistance = (touches: TouchList) => {
+    if (touches.length < 2) return 0;
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  // 터치 줌 핸들러
+  const handleTouchZoom = (distance: number) => {
+    if (lastTouchDistance === 0) {
+      setLastTouchDistance(distance);
+      return;
+    }
+
+    const scaleChange = distance / lastTouchDistance;
+    const currentScale = isImageFile(currentFile?.fileType || '') ? imageScale : pdfScale;
+    const newScale = Math.max(Math.min(currentScale * scaleChange, 4.0), 0.5);
+    
+    if (isImageFile(currentFile?.fileType || '')) {
+      setImageScale(newScale);
+    } else if (isPdfFile(currentFile?.fileType || '')) {
+      setPdfScale(newScale);
+    }
+    
+    setLastTouchDistance(distance);
+  };
+
+  // 더블 탭 줌 핸들러
+  const handleDoubleTap = () => {
+    const currentTime = Date.now();
+    if (currentTime - lastTouchTime < 300) {
+      // 더블 탭 - 200% 또는 100%로 토글
+      const currentScale = isImageFile(currentFile?.fileType || '') ? imageScale : pdfScale;
+      const newScale = currentScale === 1.0 ? 2.0 : 1.0;
+      
+      if (isImageFile(currentFile?.fileType || '')) {
+        setImageScale(newScale);
+      } else if (isPdfFile(currentFile?.fileType || '')) {
+        setPdfScale(newScale);
+      }
+      
+      if (newScale <= 1.0) {
+        setDragOffset({ x: 0, y: 0 });
+      }
+    }
+    setLastTouchTime(currentTime);
+  };
+
   // 터치 이벤트 핸들러 (React 이벤트 사용)
   const handleTouchStart = (e: React.TouchEvent) => {
     e.stopPropagation();
-    const touch = e.touches[0];
-    const newDragStart = { 
-      x: touch.clientX - dragOffsetRef.current.x, 
-      y: touch.clientY - dragOffsetRef.current.y 
-    };
-    isDraggingRef.current = true;
-    dragStartRef.current = newDragStart;
-    setIsDragging(true);
-    setDragStart(newDragStart);
+    
+    if (e.touches.length === 2) {
+      // 두 손가락 터치 - 핀치 줌
+      const distance = getTouchDistance(e.touches);
+      handleTouchZoom(distance);
+      setIsDragging(false);
+      return;
+    }
+    
+    if (e.touches.length === 1) {
+      // 한 손가락 터치 - 드래그 또는 더블 탭
+      handleDoubleTap();
+      
+      const touch = e.touches[0];
+      const newDragStart = { 
+        x: touch.clientX - dragOffsetRef.current.x, 
+        y: touch.clientY - dragOffsetRef.current.y 
+      };
+      isDraggingRef.current = true;
+      dragStartRef.current = newDragStart;
+      setDragStart(newDragStart);
+      setIsDragging(true);
+    }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
-    if (isDraggingRef.current) {
+    if (e.touches.length === 2) {
+      // 두 손가락 터치 - 핀치 줌
+      e.preventDefault();
+      const distance = getTouchDistance(e.touches);
+      handleTouchZoom(distance);
+      setIsDragging(false);
+      return;
+    }
+    
+    if (isDraggingRef.current && e.touches.length === 1) {
+      // 한 손가락 드래그
       e.stopPropagation();
       const touch = e.touches[0];
       const newDragOffset = {
@@ -94,8 +171,23 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
 
   const handleTouchEnd = (e: React.TouchEvent) => {
     e.stopPropagation();
-    isDraggingRef.current = false;
-    setIsDragging(false);
+    
+    if (e.touches.length === 0) {
+      // 모든 터치가 끝남
+      isDraggingRef.current = false;
+      setIsDragging(false);
+      setLastTouchDistance(0);
+    } else if (e.touches.length === 1) {
+      // 두 손가락에서 한 손가락으로 변경
+      const touch = e.touches[0];
+      const newDragStart = { 
+        x: touch.clientX - dragOffsetRef.current.x, 
+        y: touch.clientY - dragOffsetRef.current.y 
+      };
+      dragStartRef.current = newDragStart;
+      setDragStart(newDragStart);
+      setLastTouchDistance(0);
+    }
   };
 
   const handleFileClick = async (file: { id: number; originalName: string; fileSize: number; fileType: string }) => {
@@ -200,8 +292,8 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
   };
 
   const handleZoomIn = () => {
-    setPdfScale(prev => Math.min(prev + 0.2, 3.0));
-    setImageScale(prev => Math.min(prev + 0.2, 3.0)); // 이미지 최대 확대를 300%로 설정
+    setPdfScale(prev => Math.min(prev + 0.2, 4.0));
+    setImageScale(prev => Math.min(prev + 0.2, 4.0)); // 이미지 최대 확대를 400%로 설정
   };
 
   const handleZoomOut = () => {
@@ -262,7 +354,7 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
         setDragOffset({ x: 0, y: 0 });
       }
     } else if (isPdfFile(currentFile?.fileType || '')) {
-      const newPdfScale = Math.max(Math.min(pdfScale + delta, 3.0), 0.5);
+      const newPdfScale = Math.max(Math.min(pdfScale + delta, 4.0), 0.5);
       setPdfScale(newPdfScale);
       
       // 100% 이하로 축소할 때 위치 초기화
@@ -284,15 +376,15 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
       const delta = wheelEvent.deltaY > 0 ? -0.1 : 0.1;
       
       if (isImageFile(currentFile.fileType)) {
-        const newImageScale = Math.max(Math.min(imageScale + delta, 3.0), 0.5); // 이미지 최대 확대를 300%로 설정
+        const newImageScale = Math.max(Math.min(imageScale + delta, 4.0), 0.5); // 이미지 최대 확대를 400%로 설정
         setImageScale(newImageScale);
         
         // 100% 이하로 축소할 때 위치 초기화
         if (newImageScale <= 1.0) {
           setDragOffset({ x: 0, y: 0 });
         }
-      } else if (isPdfFile(currentFile.fileType)) {
-        const newPdfScale = Math.max(Math.min(pdfScale + delta, 3.0), 0.5);
+      } else       if (isPdfFile(currentFile.fileType)) {
+        const newPdfScale = Math.max(Math.min(pdfScale + delta, 4.0), 0.5);
         setPdfScale(newPdfScale);
         
         // 100% 이하로 축소할 때 위치 초기화
@@ -610,7 +702,7 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                        fontStyle: 'italic',
                        padding: window.innerWidth <= 768 ? '4px' : '0'
                      }}>
-                       💡 {window.innerWidth <= 768 ? '터치로 확대/축소, 드래그로 이동' : '마우스 휠로 확대/축소, 드래그로 이동 가능'}
+                       💡 {window.innerWidth <= 768 ? '핀치로 확대/축소, 더블탭으로 2배 줌, 드래그로 이동' : '마우스 휠로 확대/축소, 드래그로 이동 가능'}
                      </div>
                      {/* 줌 컨트롤 버튼들 */}
                      <div style={{ 
@@ -647,14 +739,14 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                     </span>
                     <button
                       onClick={handleZoomIn}
-                      disabled={imageScale >= 3.0}
+                      disabled={imageScale >= 4.0}
                       style={{
                         padding: window.innerWidth <= 768 ? '4px 8px' : '6px 12px',
                         border: '1px solid #d1d5db',
                         borderRadius: '4px',
                         background: 'white',
-                        color: imageScale >= 3.0 ? '#9ca3af' : '#374151',
-                        cursor: imageScale >= 3.0 ? 'not-allowed' : 'pointer',
+                        color: imageScale >= 4.0 ? '#9ca3af' : '#374151',
+                        cursor: imageScale >= 4.0 ? 'not-allowed' : 'pointer',
                         fontSize: window.innerWidth <= 768 ? '10px' : '12px',
                         fontWeight: '500'
                       }}
@@ -745,7 +837,7 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                       fontStyle: 'italic',
                       padding: window.innerWidth <= 768 ? '2px' : '0'
                     }}>
-                      💡 {window.innerWidth <= 768 ? '터치로 확대/축소, 드래그로 이동' : '마우스 휠로 확대/축소, 드래그로 이동 가능'}
+                      💡 {window.innerWidth <= 768 ? '핀치로 확대/축소, 더블탭으로 2배 줌, 드래그로 이동' : '마우스 휠로 확대/축소, 드래그로 이동 가능'}
                     </div>
                     {/* 줌 컨트롤 버튼들 */}
                     <div style={{ 
@@ -781,14 +873,14 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                     </span>
                     <button
                       onClick={handleZoomIn}
-                      disabled={pdfScale >= 3.0}
+                      disabled={pdfScale >= 4.0}
                       style={{
                         padding: window.innerWidth <= 768 ? '4px 8px' : '6px 12px',
                         border: '1px solid #d1d5db',
                         borderRadius: '4px',
                         background: 'white',
-                        color: pdfScale >= 3.0 ? '#9ca3af' : '#374151',
-                        cursor: pdfScale >= 3.0 ? 'not-allowed' : 'pointer',
+                        color: pdfScale >= 4.0 ? '#9ca3af' : '#374151',
+                        cursor: pdfScale >= 4.0 ? 'not-allowed' : 'pointer',
                         fontSize: window.innerWidth <= 768 ? '10px' : '12px',
                         fontWeight: '500'
                       }}
