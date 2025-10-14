@@ -70,7 +70,7 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
   }, [dragOffset]);
 
   // 두 터치점 사이의 거리 계산
-  const getTouchDistance = (touches: TouchList) => {
+  const getTouchDistance = (touches: React.TouchList) => {
     if (touches.length < 2) return 0;
     const dx = touches[0].clientX - touches[1].clientX;
     const dy = touches[0].clientY - touches[1].clientY;
@@ -84,7 +84,8 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
       return;
     }
 
-    const scaleChange = distance / lastTouchDistance;
+    // 줌 민감도 조정 (더 부드럽게)
+    const scaleChange = Math.pow(distance / lastTouchDistance, 0.8);
     const currentScale = isImageFile(currentFile?.fileType || '') ? imageScale : pdfScale;
     const newScale = Math.max(Math.min(currentScale * scaleChange, 4.0), 0.5);
     
@@ -124,6 +125,7 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
     
     if (e.touches.length === 2) {
       // 두 손가락 터치 - 핀치 줌
+      e.preventDefault();
       const distance = getTouchDistance(e.touches);
       handleTouchZoom(distance);
       setIsDragging(false);
@@ -150,6 +152,7 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
     if (e.touches.length === 2) {
       // 두 손가락 터치 - 핀치 줌
       e.preventDefault();
+      e.stopPropagation();
       const distance = getTouchDistance(e.touches);
       handleTouchZoom(distance);
       setIsDragging(false);
@@ -158,6 +161,7 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
     
     if (isDraggingRef.current && e.touches.length === 1) {
       // 한 손가락 드래그
+      e.preventDefault();
       e.stopPropagation();
       const touch = e.touches[0];
       const newDragOffset = {
@@ -919,7 +923,9 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                         userSelect: 'none',
                         touchAction: 'none',
                         WebkitUserSelect: 'none',
-                        WebkitTouchCallout: 'none'
+                        WebkitTouchCallout: 'none',
+                        position: 'relative',
+                        zIndex: 1
                       }}
                       onMouseDown={handleMouseDown}
                       onMouseMove={handleMouseMove}
@@ -956,16 +962,23 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
                            transform: `translate(${dragOffset.x}px, ${dragOffset.y}px)`,
                            transition: pdfScale === 1.0 ? 'transform 0.2s ease' : 'none'
                          }}>
-                           <Page
-                             pageNumber={pageNumber}
-                             width={Math.min(
-                               window.innerWidth <= 768 ? 600 * pdfScale : 800 * pdfScale, 
-                               window.innerWidth - (window.innerWidth <= 768 ? 40 : 100)
-                             )}
-                             scale={pdfScale}
-                             renderTextLayer={false}
-                             renderAnnotationLayer={false}
-                           />
+                           <div
+                             style={{
+                               pointerEvents: 'none', // PDF 내부 터치 이벤트 비활성화
+                               userSelect: 'none'
+                             }}
+                           >
+                             <Page
+                               pageNumber={pageNumber}
+                               width={Math.min(
+                                 window.innerWidth <= 768 ? 600 * pdfScale : 800 * pdfScale, 
+                                 window.innerWidth - (window.innerWidth <= 768 ? 40 : 100)
+                               )}
+                               scale={pdfScale}
+                               renderTextLayer={false}
+                               renderAnnotationLayer={false}
+                             />
+                           </div>
                          </div>
                        )}
                      </Document>
