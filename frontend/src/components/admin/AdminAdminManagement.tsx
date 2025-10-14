@@ -250,7 +250,7 @@ const AdminAdminManagement: React.FC = () => {
             fontSize: '14px',
             fontWeight: '500'
           }}>
-            ⚠️ 등록 및 수정은 최고 관리자만 가능합니다.
+            ⚠️ 관리자 등록 및 수정은 최고 관리자만 가능합니다.
           </div>
         )}
       </div>
