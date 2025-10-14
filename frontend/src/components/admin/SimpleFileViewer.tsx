@@ -31,6 +31,7 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
   // 터치 줌을 위한 상태
   const [lastTouchDistance, setLastTouchDistance] = useState(0);
   const [lastTouchTime, setLastTouchTime] = useState(0);
+  const [isZooming, setIsZooming] = useState(false);
   
   // 최신 상태를 참조하기 위한 ref
   const isDraggingRef = useRef(false);
@@ -48,6 +49,8 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
       setPageNumber(1);
       setPageInputValue('');
       setDragOffset({ x: 0, y: 0 });
+      setLastTouchDistance(0);
+      setIsZooming(false);
       
       // 첫 번째 파일이 있으면 자동으로 로드
       if (firstFile) {
@@ -81,6 +84,7 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
   const handleTouchZoom = (distance: number) => {
     if (lastTouchDistance === 0) {
       setLastTouchDistance(distance);
+      setIsZooming(true);
       return;
     }
 
@@ -129,22 +133,25 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
       const distance = getTouchDistance(e.touches);
       handleTouchZoom(distance);
       setIsDragging(false);
+      setIsZooming(true);
       return;
     }
     
     if (e.touches.length === 1) {
       // 한 손가락 터치 - 드래그 또는 더블 탭
-      handleDoubleTap();
-      
-      const touch = e.touches[0];
-      const newDragStart = { 
-        x: touch.clientX - dragOffsetRef.current.x, 
-        y: touch.clientY - dragOffsetRef.current.y 
-      };
-      isDraggingRef.current = true;
-      dragStartRef.current = newDragStart;
-      setDragStart(newDragStart);
-      setIsDragging(true);
+      if (!isZooming) {
+        handleDoubleTap();
+        
+        const touch = e.touches[0];
+        const newDragStart = { 
+          x: touch.clientX - dragOffsetRef.current.x, 
+          y: touch.clientY - dragOffsetRef.current.y 
+        };
+        isDraggingRef.current = true;
+        dragStartRef.current = newDragStart;
+        setDragStart(newDragStart);
+        setIsDragging(true);
+      }
     }
   };
 
@@ -156,11 +163,12 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
       const distance = getTouchDistance(e.touches);
       handleTouchZoom(distance);
       setIsDragging(false);
+      setIsZooming(true);
       return;
     }
     
-    if (isDraggingRef.current && e.touches.length === 1) {
-      // 한 손가락 드래그
+    if (isDraggingRef.current && e.touches.length === 1 && !isZooming) {
+      // 한 손가락 드래그 (줌 중이 아닐 때만)
       e.preventDefault();
       e.stopPropagation();
       const touch = e.touches[0];
@@ -181,8 +189,9 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
       isDraggingRef.current = false;
       setIsDragging(false);
       setLastTouchDistance(0);
-    } else if (e.touches.length === 1) {
-      // 두 손가락에서 한 손가락으로 변경
+      setIsZooming(false);
+    } else if (e.touches.length === 1 && isZooming) {
+      // 두 손가락에서 한 손가락으로 변경 (줌 중이었을 때)
       const touch = e.touches[0];
       const newDragStart = { 
         x: touch.clientX - dragOffsetRef.current.x, 
@@ -191,6 +200,12 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
       dragStartRef.current = newDragStart;
       setDragStart(newDragStart);
       setLastTouchDistance(0);
+      setIsZooming(false);
+      // 줌에서 드래그로 전환
+      setTimeout(() => {
+        isDraggingRef.current = true;
+        setIsDragging(true);
+      }, 100);
     }
   };
 
@@ -202,6 +217,8 @@ const SimpleFileViewer: React.FC<FileViewerModalProps> = ({ isOpen, onClose, fil
     setPageNumber(1);
     setPageInputValue('');
     setDragOffset({ x: 0, y: 0 });
+    setLastTouchDistance(0);
+    setIsZooming(false);
     
     try {
       // Base64 API를 사용하여 파일 데이터 가져오기
