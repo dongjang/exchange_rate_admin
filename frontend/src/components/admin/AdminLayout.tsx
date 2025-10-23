@@ -43,6 +43,19 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // 현재 경로에 따라 타이틀 변경
+  const getPageTitle = (pathname: string) => {
+    const titleMap: { [key: string]: string } = {
+      '/': '대시보드',
+      '/remittance': '송금 관리', 
+      '/users': '계정 관리',
+      '/countries-banks': '국가/은행 관리',
+      '/notices': '공지사항',
+      '/qna': 'Q&A'
+    };
+    return titleMap[pathname] || '관리자 시스템';
+  };
+
   const handleLogout = async () => {
     const result = await Swal.fire({
       icon: 'question',
@@ -165,7 +178,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
               !sidebarCollapsed ? <FaAngleDoubleLeft /> : <FaAngleDoubleRight />
             )}
           </button>
-          <h1 className="admin-title" onClick={() => navigate('/')} style={{ cursor: 'pointer' }}>대시보드</h1>
+          <h1 className="admin-title" style={{ cursor: 'default' }}>{getPageTitle(location.pathname)}</h1>
         </div>
         
         {/* 데스크톱 헤더 우측 */}
