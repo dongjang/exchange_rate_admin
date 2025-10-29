@@ -105,6 +105,8 @@ logging:
     file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
   file:
     name: /app/logs/application.log
+  # Docker 컨테이너에서 docker logs로 확인하기 위해 콘솔 출력 명시
+  # Spring Boot 기본 동작: file.name 설정 시 파일과 콘솔 모두 출력
 
 # CORS 설정
 cors:

@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.event.EventListener;
+import jakarta.annotation.PostConstruct;
 
 /**
  * 공지사항 상태 관리 스케줄러
@@ -20,12 +21,16 @@ public class NoticeStatusScheduler {
 
     private final NoticeService noticeService;
 
-    /**
-     * 스케줄러 초기화 확인용 (빈 생성 시점 확인)
-     */
     public NoticeStatusScheduler(NoticeService noticeService) {
         this.noticeService = noticeService;
-        log.info("===== NoticeStatusScheduler 빈 생성 완료 =====");
+    }
+
+    /**
+     * 스케줄러 초기화 확인용 (빈 생성 후 초기화 시점 확인)
+     */
+    @PostConstruct
+    public void init() {
+        log.info("===== NoticeStatusScheduler 빈 생성 및 초기화 완료 =====");
     }
 
     /**
