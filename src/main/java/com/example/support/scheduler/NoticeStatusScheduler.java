@@ -1,7 +1,6 @@
 package com.example.support.scheduler;
 
 import com.example.support.service.NoticeService;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -17,10 +16,17 @@ import org.springframework.context.event.EventListener;
  */
 @Slf4j
 @Component
-@RequiredArgsConstructor
 public class NoticeStatusScheduler {
 
     private final NoticeService noticeService;
+
+    /**
+     * 스케줄러 초기화 확인용 (빈 생성 시점 확인)
+     */
+    public NoticeStatusScheduler(NoticeService noticeService) {
+        this.noticeService = noticeService;
+        log.info("===== NoticeStatusScheduler 빈 생성 완료 =====");
+    }
 
     /**
      * 서버가 완전히 시작된 후 최초 1회 실행
@@ -28,6 +34,7 @@ public class NoticeStatusScheduler {
      */
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationReady() {
+        log.info("===== ApplicationReadyEvent 발생: 서버 준비 완료 =====");
         log.info("서버 준비 완료: 만료된 긴급 공지사항 초기 확인 시작");
         updateExpiredUrgentNotices();
     }

@@ -40,6 +40,7 @@ services:
       - /etc/localtime:/etc/localtime:ro
     networks:
       - shared-network
+    restart: "no"  # 자동 재시작 비활성화 - 수동 실행만 가능
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
       interval: 30s

@@ -95,7 +95,9 @@ exchange:
 logging:
   level:
     com.example: INFO
+    com.example.support.scheduler: INFO  # 스케줄러 로그 확인용
     org.springframework: WARN
+    org.springframework.scheduling: INFO  # 스케줄링 관련 로그 확인용
     org.hibernate: WARN
     org.springframework.security: WARN
   pattern:
