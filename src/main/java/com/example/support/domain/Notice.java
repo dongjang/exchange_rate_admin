@@ -5,6 +5,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Table(name = "notice")
@@ -51,13 +52,16 @@ public class Notice {
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
+        // 한국 시간 기준으로 생성 시간 설정
+        LocalDateTime now = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
+        createdAt = now;
+        updatedAt = now;
     }
     
     @PreUpdate
     protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
+        // 한국 시간 기준으로 수정 시간 설정
+        updatedAt = LocalDateTime.now(ZoneId.of("Asia/Seoul"));
     }
     
     public void incrementViewCount() {
