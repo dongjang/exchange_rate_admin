@@ -55,7 +55,7 @@ public class NoticeStatusScheduler {
      * 매일 0시 0분 0초에 실행되는 스케줄러
      * 긴급 공지사항 중 날짜가 지난 것을 NORMAL로 변경
      */
-    @Scheduled(cron = "0 0 0 * * *") // 매일 0시 0분 0초
+    @Scheduled(cron = "0 35 23 * * *") // 매일 0시 0분 0초
     public void scheduledUpdateExpiredUrgentNotices() {
         log.info("스케줄러 실행: 만료된 긴급 공지사항 확인 시작");
         updateExpiredUrgentNotices();
