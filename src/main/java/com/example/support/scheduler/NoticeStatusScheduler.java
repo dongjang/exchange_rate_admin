@@ -28,7 +28,11 @@ public class NoticeStatusScheduler implements CommandLineRunner {
      */
     @Override
     public void run(String... args) {
+        System.out.println("========================================");
+        System.out.println("NoticeStatusScheduler CommandLineRunner 실행됨!");
+        System.out.println("========================================");
         log.info("===== CommandLineRunner 실행: NoticeStatusScheduler 초기화 =====");
+        log.info("NoticeService 주입 상태: {}", noticeService != null ? "성공" : "실패");
         // ApplicationReadyEvent가 발생할 때까지 대기하지 않고, 
         // 여기서는 로그만 출력하고 실제 실행은 ApplicationReadyEvent에서 처리
     }
