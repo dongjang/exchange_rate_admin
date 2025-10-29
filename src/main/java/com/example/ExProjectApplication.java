@@ -7,7 +7,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import jakarta.annotation.PostConstruct;
 import java.util.TimeZone;
 
-@SpringBootApplication(scanBasePackages = "com.example")
+@SpringBootApplication
 @EnableScheduling
 public class ExProjectApplication {
     
