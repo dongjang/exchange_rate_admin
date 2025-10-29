@@ -109,6 +109,15 @@ public class NoticeService {
         return convertToResponse(notice);
     }
 
+        /**
+     * 만료된 긴급 공지사항을 NORMAL로 변경
+     * 스케줄러에서 호출되는 메서드
+     */
+    @Transactional
+    public int updateExpiredUrgentNotices() {
+        return noticeRepository.updateExpiredUrgentNotices();
+    }
+    
     private NoticeResponse convertToResponse(Notice notice) {
         NoticeResponse response = new NoticeResponse();
         response.setId(notice.getId());

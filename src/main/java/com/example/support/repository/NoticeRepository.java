@@ -14,4 +14,11 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
     @Query("UPDATE Notice n SET n.priority = 'NORMAL', n.noticeStartAt = null, n.noticeEndAt = null WHERE n.priority = 'HIGH'")
     void updateHighPriorityToNormal();
     
+    /**
+     * 만료된 긴급 공지사항을 NORMAL로 변경
+     * 현재 시간보다 noticeEndAt이 이전인 긴급 공지사항들을 대상으로 함
+     */
+    @Modifying
+    @Query("UPDATE Notice n SET n.priority = 'NORMAL', n.noticeStartAt = null, n.noticeEndAt = null WHERE n.priority = 'HIGH' AND n.noticeEndAt < CURRENT_TIMESTAMP")
+    int updateExpiredUrgentNotices();    
 }
