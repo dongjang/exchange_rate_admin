@@ -30,7 +30,11 @@ public class NoticeStatusScheduler {
      */
     @PostConstruct
     public void init() {
+        System.out.println("========================================");
+        System.out.println("NoticeStatusScheduler 초기화 시작");
+        System.out.println("========================================");
         log.info("===== NoticeStatusScheduler 빈 생성 및 초기화 완료 =====");
+        log.info("NoticeService 주입 여부: {}", noticeService != null ? "성공" : "실패");
     }
 
     /**
@@ -39,6 +43,9 @@ public class NoticeStatusScheduler {
      */
     @EventListener(ApplicationReadyEvent.class)
     public void onApplicationReady() {
+        System.out.println("========================================");
+        System.out.println("ApplicationReadyEvent 발생!");
+        System.out.println("========================================");
         log.info("===== ApplicationReadyEvent 발생: 서버 준비 완료 =====");
         log.info("서버 준비 완료: 만료된 긴급 공지사항 초기 확인 시작");
         updateExpiredUrgentNotices();
