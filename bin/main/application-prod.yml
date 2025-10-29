@@ -1,4 +1,6 @@
 spring:
+  main:
+    web-application-type: servlet  # 웹 애플리케이션 타입 명시적 설정 (ApplicationReadyEvent 발생을 위해 필요)
   datasource:
     # AWS RDS MySQL 연결 정보
     url: ${DB_URL}&serverTimezone=Asia/Seoul
