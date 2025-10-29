@@ -6,7 +6,7 @@
 
 ### Backend
 [![Java](https://img.shields.io/badge/Java-17-orange.svg)](https://openjdk.java.net/) 
-[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.6-brightgreen.svg)](https://spring.io/projects/spring-boot) 
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.2.6-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![Spring Security](https://img.shields.io/badge/Spring%20Security-OAuth2-green.svg)](https://spring.io/projects/spring-security) 
 [![Spring Data JPA](https://img.shields.io/badge/Spring%20Data%20JPA-3.2.6-brightgreen.svg)](https://spring.io/projects/spring-data-jpa) 
 [![MyBatis](https://img.shields.io/badge/MyBatis-3.0.3-orange.svg)](https://mybatis.org/) 
@@ -14,8 +14,8 @@
 [![Redis](https://img.shields.io/badge/Redis-7-red.svg)](https://redis.io/)
 
 ### DevOps & Monitoring
-[![Docker](https://img.shields.io/badge/Docker-🐳-blue.svg)](https://www.docker.com/) 
-[![AWS](https://img.shields.io/badge/AWS-EC2-orange.svg)](https://aws.amazon.com/) 
+[![Docker](https://img.shields.io/badge/Docker-🐳-blue.svg)](https://www.docker.com/)
+[![AWS](https://img.shields.io/badge/AWS-EC2-orange.svg)](https://aws.amazon.com/)
 [![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-CI/CD-2088FF.svg)](https://github.com/features/actions) 
 [![Prometheus](https://img.shields.io/badge/Prometheus-Monitoring-red.svg)](https://prometheus.io/) 
 [![Grafana](https://img.shields.io/badge/Grafana-Dashboard-orange.svg)](https://grafana.com/)
@@ -24,7 +24,7 @@
 [![React](https://img.shields.io/badge/React-18.0-blue.svg)](https://reactjs.org/) 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue.svg)](https://www.typescriptlang.org/) 
 [![Jotai](https://img.shields.io/badge/Jotai-State%20Management-FFA500.svg)](https://jotai.org/) 
-[![Vite](https://img.shields.io/badge/Vite-7.0-646CFF.svg)](https://vitejs.dev/) 
+[![Vite](https://img.shields.io/badge/Vite-7.0-646CFF.svg)](https://vitejs.dev/)
 [![Node.js](https://img.shields.io/badge/Node.js-18+-green.svg)](https://nodejs.org/)
 
 ---
@@ -53,7 +53,7 @@
 - **💸 송금 관리** - 송금 내역, 송금 한도 관리, 서류 미리보기 (서류 검토, 승인/반려, 자동 이메일)
 - **👥 계정 관리** - 사용자 관리, 관리자 관리, 계정 상태 관리
 - **🌍 국가/은행 관리** - 송금 가능 국가/은행/통화 목록 관리
-- **📢 공지사항 관리** - 공지사항 작성, 수정, 삭제, 우선순위 설정
+- **📢 공지사항 관리** - 공지사항 작성, 수정, 삭제, 우선순위 설정, 만료된 긴급 공지사항 상태 자동 변경 처리
 - **❓ Q&A 관리** - 고객 문의사항 답변, FAQ 관리, 자동 이메일 발송
 - **📊 모니터링** - Prometheus/Grafana 기반 관리자 시스템 모니터링 및 알림
 
@@ -140,7 +140,6 @@ graph
 - **문제**: 전체 비즈니스 로직 AI 구현 요청 → 결과 미흡, 시간 소모
 - **해결**: AI로 초기 틀 구축 후 세부 로직/쿼리 직접 작성
 - **결과**: 개발 효율 향상, 시간 절약
-
 
 ### 👥 사용자/관리자 기능 분리
 - **문제**: 동일 세션에서 로그인/로그아웃 충돌, 권한 관리 복잡
