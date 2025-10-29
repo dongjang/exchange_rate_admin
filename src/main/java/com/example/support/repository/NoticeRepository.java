@@ -18,8 +18,9 @@ public interface NoticeRepository extends JpaRepository<Notice, Long> {
      * 만료된 긴급 공지사항을 NORMAL로 변경
      * 한국 시간(KST) 기준으로 현재 날짜보다 noticeEndAt 날짜가 이전인 긴급 공지사항들을 대상으로 함
      * 네이티브 쿼리이므로 updated_at도 직접 업데이트
+     * CONVERT_TZ를 사용하여 UTC에서 한국 시간(Asia/Seoul)으로 변환
      */
     @Modifying
-    @Query(value = "UPDATE notice n SET n.priority = 'NORMAL', n.notice_start_at = NULL, n.notice_end_at = NULL, n.updated_at = CONVERT_TZ(NOW(), @@session.time_zone, '+09:00') WHERE n.priority = 'HIGH' AND DATE(n.notice_end_at) < DATE(CONVERT_TZ(NOW(), @@session.time_zone, '+09:00'))", nativeQuery = true)
+    @Query(value = "UPDATE notice n SET n.priority = 'NORMAL', n.notice_start_at = NULL, n.notice_end_at = NULL, n.updated_at = CONVERT_TZ(NOW(), 'UTC', 'Asia/Seoul') WHERE n.priority = 'HIGH' AND DATE(n.notice_end_at) < DATE(CONVERT_TZ(NOW(), 'UTC', 'Asia/Seoul'))", nativeQuery = true)
     int updateExpiredUrgentNotices();
 }
