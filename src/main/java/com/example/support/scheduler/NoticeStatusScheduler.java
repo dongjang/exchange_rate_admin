@@ -6,9 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+
 /**
  * 공지사항 상태 관리 스케줄러
- * - 매일 0시 0분 0초에 실행
+ * - 서버 시작 시 최초 1회 실행
+ * - 매일 0시 0분 0초에 정기 실행
  * - 긴급 공지사항 중 날짜가 지난 것을 NORMAL로 변경
  */
 @Slf4j
@@ -19,14 +23,30 @@ public class NoticeStatusScheduler {
     private final NoticeService noticeService;
 
     /**
+     * 서버가 완전히 시작된 후 최초 1회 실행
+     * 만료된 긴급 공지사항을 즉시 처리
+     */
+    @EventListener(ApplicationReadyEvent.class)
+    public void onApplicationReady() {
+        log.info("서버 준비 완료: 만료된 긴급 공지사항 초기 확인 시작");
+        updateExpiredUrgentNotices();
+    }
+
+    /**
      * 매일 0시 0분 0초에 실행되는 스케줄러
      * 긴급 공지사항 중 날짜가 지난 것을 NORMAL로 변경
      */
     @Scheduled(cron = "0 0 0 * * *") // 매일 0시 0분 0초
-    public void updateExpiredUrgentNotices() {
+    public void scheduledUpdateExpiredUrgentNotices() {
+        log.info("스케줄러 실행: 만료된 긴급 공지사항 확인 시작");
+        updateExpiredUrgentNotices();
+    }
+
+    /**
+     * 만료된 긴급 공지사항을 NORMAL로 변경하는 공통 로직
+     */
+    private void updateExpiredUrgentNotices() {
         try {
-            log.info("공지사항 상태 업데이트 스케줄러 시작");
-            
             int updatedCount = noticeService.updateExpiredUrgentNotices();
             
             if (updatedCount > 0) {
