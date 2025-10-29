@@ -93,9 +93,12 @@ fi
 echo
 
 # ============================================
-# 3단계: Admin App 시작
+# 3단계: Admin App 빌드 및 시작
 # ============================================
-echo "3단계: Admin App 시작 중..."
+echo "3단계: Admin App 빌드 중..."
+docker-compose -f docker-compose.prod.yml build --no-cache
+
+echo "3단계-2: Admin App 시작 중..."
 docker-compose -f docker-compose.prod.yml up -d
 
 # Admin App 시작 대기
